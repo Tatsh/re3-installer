@@ -15,3 +15,5 @@ _DIR1_ must be the directory containing data1.cab, data1.hdr, and data2.cab from
 _DIR2_ must be the directory containing the Audio directory from the second disc.
 
 Both arguments must be of the same type.
+
+This project supports Linux and macOS, and possibly BSD. Does not yet support Windows.
