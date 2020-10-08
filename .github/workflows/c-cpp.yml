@@ -1,16 +1,12 @@
 name: C/C++ CI
-
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
 jobs:
-  build:
-
+  build-linux:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: install deps
@@ -19,3 +15,13 @@ jobs:
         sudo apt-get install -y libunshield-dev 
     - name: make
       run: make
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install deps
+        run: |
+          brew update
+          brew install unshield
+      - name: make
+        run: make
