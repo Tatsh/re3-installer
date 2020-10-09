@@ -1,2 +1,4 @@
 *.dSYM
 re3-installer
+build/
+xcuserdata/
