@@ -3,8 +3,16 @@ INCLUDEDIRS ?= -I/opt/local/include
 LDFLAGS ?= -L/opt/local/lib
 XDG ?= -DXDG_ROOT
 
-re3-installer: main.c
-	$(CC) $(CFLAGS) $(INCLUDEDIRS) $(XDG) main.c -o re3-installer $(LDFLAGS) -lunshield
+SRC = $(wildcard *.c) 
+OBJS = $(patsubst %.c, %.o, $(SRC))
+
+all: re3-installer
+
+re3-installer: $(OBJS)
+	$(CC) $(OBJS) -o re3-installer $(LDFLAGS) -lunshield
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(INCLUDEDIRS) $(XDG) $< -o $@
 
 clean:
-	rm -fR re3-installer re3-installer.dSYM/
+	rm -fR *.o re3-installer re3-installer.dSYM/
