@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         status = -1;
       }
       if (status != 0) {
-        fprintf(stderr, "7z failed to extract %s\n.", argv[1]);
+        fprintf(stderr, "7z failed to extract %s\n", argv[1]);
         free(tmpDirEnv);
         free(dir1);
         free(dir2);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
       }
     }
     if (status != 0) {
-      fprintf(stderr, "7z failed to extract %s\n.", argv[2]);
+      fprintf(stderr, "7z failed to extract %s\n", argv[2]);
       free(dir1);
       return 1;
     }
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     }
     if (status != 0) {
       free(outputDir);
-      fprintf(stderr, "cp command failed.\n.");
+      fprintf(stderr, "cp command failed.\n");
       return 1;
     }
   }
