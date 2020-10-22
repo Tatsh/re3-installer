@@ -1,10 +1,3 @@
-//
-//  helpers.h
-//  re3-installer
-//
-//  Created by Tatsh on 2020-10-09.
-//
-
 #ifndef helpers_h
 #define helpers_h
 

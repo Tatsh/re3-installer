@@ -1,10 +1,3 @@
-//
-//  env.h
-//  re3-installer
-//
-//  Created by Tatsh on 2020-10-09.
-//
-
 #ifndef env_h
 #define env_h
 
