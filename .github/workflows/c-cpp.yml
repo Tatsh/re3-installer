@@ -13,15 +13,15 @@ jobs:
       run: |
         sudo apt-get update -y -qq
         sudo apt-get install -y libunshield-dev
-    - run: mkdir build
-    - run: cmake ..
-    - run: make
+    - run: |
+        cmake -S . -B build
+        cmake --build build
   build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: install deps
         run: brew install unshield
-      - run: mkdir build
-      - run: cmake ..
-      - run: make
+      - run: |
+          cmake -S . -B build
+          cmake --build build
