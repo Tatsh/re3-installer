@@ -2,7 +2,7 @@
 
 ## Usage
 
-```
+```shell
 re3-installer ISO1|DIR1 ISO2|DIR2
 ```
 
@@ -19,3 +19,15 @@ To support ISO extraction, `7z` from p7zip must be in `PATH`.
 Both arguments must be of the same type.
 
 This project supports Linux and macOS, and possibly BSD. Does not yet support Windows.
+
+## How to build
+
+**Requirements**: CMake and libunshield in a standard library path (i.e. `/usr/lib64`).
+
+```shell
+cd re3-installer/  # cloned repository
+mkdir build
+cd build
+cmake ..
+make -j
+```
