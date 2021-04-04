@@ -260,5 +260,9 @@ int main(int argc, char *argv[]) {
   free(audioDir);
   free(outputDir);
   free(data1CabPath);
+  if (status == 0) {
+    fprintf(stderr, "Installation finished successfully.\n");
+    fprintf(stderr, "Files have been installed to '%s'.\n", outputDir);
+  }
   return status == 0 ? 0 : 1;
 }
