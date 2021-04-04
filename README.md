@@ -26,8 +26,6 @@ This project supports Linux and macOS, and possibly BSD. Does not yet support Wi
 
 ```shell
 cd re3-installer/  # cloned repository
-mkdir build
-cd build
-cmake ..
-make -j
+cmake -S . -B build
+cmake --build build
 ```
