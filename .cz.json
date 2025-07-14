@@ -1,0 +1,15 @@
+{
+  "commitizen": {
+    "tag_format": "v$version",
+    "version_files": [
+      ".wiswa.jsonnet",
+      "CITATION.cff",
+      "CMakeLists.txt",
+      "README.md",
+      "package.json",
+      "vcpkg.json"
+    ],
+    "version_provider": "npm",
+    "version_scheme": "semver"
+  }
+}

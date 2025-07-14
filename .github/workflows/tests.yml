@@ -1,0 +1,69 @@
+---
+jobs:
+  tests:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: pipx install cpp-coveralls && sudo apt-get install -y lcov libcmocka-dev libunshield-dev
+      - name: Configure
+        run: >-
+          cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build
+          --install-prefix ${{github.workspace}}/build/prefix
+          -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose --config ${{matrix.build-type}}
+      - name: Install
+        run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
+      - name: Run tests
+        run: ctest --test-dir ${{github.workspace}}/build/src
+      - if: ${{ matrix.build-type == 'Debug' }}
+        name: Generate coverage information
+        run: >-
+          geninfo
+          '--include=src/*'
+          -b ${{github.workspace}}
+          -o coverage1.info
+          ${{github.workspace}}/build
+      - if: ${{ matrix.build-type == 'Debug' }}
+        name: 'Coveralls'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: coveralls -i src
+    strategy:
+      matrix:
+        build-type: [Debug, Release]
+  asan-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install tools
+        run: sudo apt-get update -y && sudo apt-get install -y libcmocka-dev libunshield-dev
+      - name: Configure
+        run: >-
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+          -DBUILD_TESTS=ON -DENABLE_ASAN=ON -DENABLE_UBSAN=ON
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Run tests
+        run: ctest --test-dir ${{github.workspace}}/build/src --verbose
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: [Debug, RelWithDebInfo]
+name: Tests
+'on':
+  pull_request:
+    branches:
+      - 'master'
+  push:
+    branches:
+      - 'master'
+permissions:
+  contents: 'read'

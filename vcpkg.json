@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    "libarchive",
+    {
+      "name": "cmocka",
+      "platform": "linux|mingw"
+    }
+  ],
+  "description": "Install GTA III files from ISO or directories for use with re3.",
+  "documentation": "https://re3-installer.readthedocs.org",
+  "homepage": "https://tatsh.github.io/re3-installer/",
+  "license": "MIT",
+  "maintainers": ["Andrew Udvare <audvare@gmail.com>"],
+  "name": "re3-installer",
+  "version": "0.1.0"
+}
