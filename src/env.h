@@ -1,5 +1,5 @@
-#ifndef env_h
-#define env_h
+#ifndef RE3_INSTALLER_ENV_H
+#define RE3_INSTALLER_ENV_H
 
 #ifdef __APPLE__
 #include <crt_externs.h>
@@ -11,4 +11,4 @@ extern char **environ;
 
 char *env(const char *);
 
-#endif /* env_h */
+#endif // RE3_INSTALLER_ENV_H

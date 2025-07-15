@@ -1,6 +1,6 @@
-#ifndef mkdir_p_h
-#define mkdir_p_h
+#ifndef RE3_INSTALLER_MKDIR_P_H
+#define RE3_INSTALLER_MKDIR_P_H
 
 int mkdir_p(const char *);
 
-#endif /* mkdir_p_h */
+#endif // RE3_INSTALLER_MKDIR_P_H

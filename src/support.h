@@ -1,5 +1,5 @@
-#ifndef support_h
-#define support_h
+#ifndef RE3_INSTALLER_SUPPORT_H
+#define RE3_INSTALLER_SUPPORT_H
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -7,4 +7,4 @@
 #define strncasecmp _strnicmp
 #endif
 
-#endif /* support_h */
+#endif // RE3_INSTALLER_SUPPORT_H
