@@ -13,10 +13,12 @@ cpptools
 ctest
 dbuild
 dcmake
+defenses
 denable
 docstrings
 doxyfile
 esbenp
+favor
 gcov
 geninfo
 ggdb
@@ -38,6 +40,7 @@ mdfile
 namedebug
 noconfirmation
 noerrorui
+noncommercially
 pipx
 pycache
 pyyaml
