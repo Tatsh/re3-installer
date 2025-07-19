@@ -17,7 +17,7 @@ local utils = import 'utils.libjsonnet';
     },
   ],
   project_name: 're3-installer',
-  version: '0.1.0',
+  version: '0.2.0',
   description: 'Install GTA III files from ISO or directories for use with re3.',
   keywords: ['gta iii', 're3'],
   want_main: false,
