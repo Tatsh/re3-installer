@@ -137,6 +137,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
     Unshield *unshield = unshield_open(cab_path);
     if (!unshield) {
         fprintf(stderr, "Failed to open %s.\n", cab_path);
+        ret = false;
         goto cleanup;
     }
     for (unsigned long group_index = 0;

@@ -91,14 +91,9 @@ bool validate_args(int argc, char *const argv[]) {
     if (argc < 3) {
         fprintf(stderr, "Usage: %s ISO_OR_DIR1 ISO_OR_DIR2 [INSTALL_DIR]\n\n", argv[0]);
         fprintf(stderr,
-                "ISO_OR_DIR1 must be the first disc as an ISO image or its contents in a "
-                "directory.\n");
-        fprintf(stderr,
-                "ISO_OR_DIR2 must be the second disc as an ISO image or its contents in a "
-                "directory.\n");
-        fprintf(stderr,
-                "ISO_OR_DIR1 must contain data1.cab, data1.hdr, and data2.cab from first disc.\n");
-        fprintf(stderr, "DIR2 must contain the 'Audio' directory from the second disc.\n");
+                "ISO_OR_DIR1 and ISO_OR_DIR2 must both be the appropriate path as an ISO image or "
+                "a path to its contents in a directory.\nISO_OR_DIR2 must contain the 'Audio' "
+                "directory from the second disc.\n");
         return false;
     }
     for (int i = 1; i < 3; i++) {

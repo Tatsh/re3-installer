@@ -86,7 +86,6 @@ cleanup:
             err = true;
         }
     }
-
     free(disc1_out_dir);
     free(disc2_out_dir);
     return err ? 1 : 0;

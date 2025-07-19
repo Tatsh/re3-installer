@@ -18,27 +18,30 @@ Install GTA III files from ISO or directories for use with re3.
 
 ## Usage
 
-```shell
-re3-installer ISO1|DIR1 ISO2|DIR2
+```plain
+re3-installer ISO_OR_DIR1 ISO_OR_DIR2 [INSTALL_DIR]
 ```
 
-_ISO1_ must be the first disc as an ISO image.
+`ISO_OR_DIR1` and `ISO_OR_DIR2` must both be the appropriate disc as an ISO image or a path to its
+contents in a directory.
 
-_ISO2_ must be the second disc as an ISO image.
+`ISO_OR_DIR2` must contain the 'Audio' directory from the second disc.
 
-_DIR1_ must be the directory containing data1.cab, data1.hdr, and data2.cab from the first disc.
+If `INSTALL_DIR` is not specified, the following paths will be used:
 
-_DIR2_ must be the directory containing the Audio directory from the second disc.
+- Linux: `${XDG_DATA_HOME}/re3` with fallback to `~/.local/share/re3`
+- macOS: `~/Library/Application Data/re3`
 
-To support ISO extraction, `7z` from p7zip must be in `PATH`.
-
-Both arguments must be of the same type.
-
-This project supports Linux and macOS, and possibly BSD. Does not yet support Windows.
+This project supports Linux, macOS, and BSD. Windows support is untested.
 
 ## How to build
 
-**Requirements**: CMake and libunshield in a standard library path (i.e. `/usr/lib64`).
+Requirements:
+
+- CMake
+- pkgconfig
+- Unshield
+- libcdio and libiso9660
 
 ```shell
 cd re3-installer/  # cloned repository
