@@ -6,6 +6,7 @@
       "CITATION.cff",
       "CMakeLists.txt",
       "README.md",
+      "man/re3-installer.1",
       "package.json",
       "vcpkg.json"
     ],

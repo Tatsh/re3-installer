@@ -1,0 +1,34 @@
+.TH "RE3-INSTALLER" "1" "July 19, 2025" "0.2.0" "re3-installer"
+.SH NAME
+re3-installer \- Install GTA III files from ISO or directories for use with re3.
+
+.SH SYNOPSIS
+.B re3-installer
+.I ISO_OR_DIR1 ISO_OR_DIR2 [INSTALL_DIR]
+
+.SH DESCRIPTION
+.I ISO_OR_DIR1
+and
+.I ISO_OR_DIR2
+must both be the appropriate disc as an ISO image or a path to its contents in a directory.
+
+.I ISO_OR_DIR2
+must contain the 'Audio' directory from the second disc.
+
+If
+.I INSTALL_DIR
+is not specified, the following paths will be used:
+
+.TP
+.B Linux:
+${XDG_DATA_HOME}/re3 with fallback to ~/.local/share/re3
+
+.TP
+.B macOS:
+~/Library/Application Data/re3
+
+.UNINDENT
+.SH AUTHOR
+Andrew Udvare <audvare@gmail.com>
+.SH COPYRIGHT
+2025
