@@ -12,16 +12,24 @@ jobs:
       - name: install deps
         run: |
           sudo apt-get update -y -qq
-          sudo apt-get install -y libunshield-dev
+          sudo apt-get install -y libunshield-dev libcdio-dev libiso9660-dev
       - run: |
-          cmake -S . -B build
+          cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           cmake --build build
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: [Debug, Release]
   build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: install deps
-        run: brew install unshield
+        run: brew install unshield libcdio
       - run: |
-          cmake -S . -B build
+          cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           cmake --build build
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: [Debug, Release]

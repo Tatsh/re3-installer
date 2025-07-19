@@ -1,3 +1,4 @@
+allowundo
 asan
 autosort
 bindir
@@ -5,9 +6,11 @@ bsky
 buglist
 buildsystems
 bytearray
+cdio
 cmocka
 codeowners
 colorstyle
+copyfile
 coveragerc
 cpptools
 ctest
@@ -30,7 +33,9 @@ htmlcov
 iwyu
 jsonnet
 jsonschema
+libcdio
 libcmocka
+libiso
 libjsonnet
 libname
 libunshield
@@ -41,14 +46,18 @@ namedebug
 noconfirmation
 noerrorui
 noncommercially
+nullptr
 pipx
 pycache
 pyyaml
 qstringbuilder
 reflow
 schemafile
+sendfile
 shfileopstruct
 srcs
+stdbool
+stddef
 strequal
 tatsh
 testlist

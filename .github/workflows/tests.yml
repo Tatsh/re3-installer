@@ -9,7 +9,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        run: pipx install cpp-coveralls && sudo apt-get install -y lcov libcmocka-dev libunshield-dev
+        run: pipx install cpp-coveralls && sudo apt-get install -y lcov libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
       - name: Configure
         run: >-
           cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build
@@ -44,7 +44,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install tools
-        run: sudo apt-get update -y && sudo apt-get install -y libcmocka-dev libunshield-dev
+        run: sudo apt-get update -y && sudo apt-get install -y libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
       - name: Configure
         run: >-
           cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build-type}}

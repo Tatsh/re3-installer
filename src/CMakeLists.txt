@@ -5,14 +5,81 @@ set(LIBRE3_INSTALLER_SOURCES
     extractor.h
     helpers.c
     helpers.h
+    installer.c
+    installer.h
     mkdir_p.c
     mkdir_p.h
     support.h)
-
 add_library(re3i STATIC ${LIBRE3_INSTALLER_SOURCES})
-target_compile_definitions(re3i PRIVATE _POSIX_C_SOURCE _DEFAULT_SOURCE _XOPEN_SOURCE=500)
+target_compile_options(
+  re3i
+  PRIVATE $<$<CONFIG:Debug>:-ggdb
+          -O0
+          -Wall
+          -Wdeprecated-declarations
+          -Wempty-body
+          -Werror
+          -Werror=float-conversion
+          -Werror=implicit-function-declaration
+          -Werror=incompatible-pointer-types
+          -Werror=int-conversion
+          -Werror=return-type
+          -Wmissing-braces
+          -Wmissing-field-initializers
+          -Wno-missing-prototypes
+          -Wno-strict-prototypes
+          -Wno-trigraphs
+          -Wno-unknown-pragmas
+          -Wparentheses
+          -Wpointer-sign
+          -Wshadow
+          -Wswitch
+          -Wuninitialized
+          -Wunknown-pragmas
+          -Wunreachable-code
+          -Wunused-function
+          -Wunused-label
+          -Wunused-parameter
+          -Wunused-value
+          -Wunused-variable
+          -Wwrite-strings>)
+target_include_directories(re3i PRIVATE ${CDIO_INCLUDE_DIRS} ${ISO9660_INCLUDE_DIRS}
+                                        ${UNSHIELD_INCLUDE_DIRS})
 
 add_executable(re3-installer main.c)
-target_link_libraries(re3-installer PRIVATE re3i LibArchive::LibArchive PkgConfig::UNSHIELD)
+target_compile_options(
+  re3-installer
+  PRIVATE $<$<CONFIG:Debug>:-ggdb
+          -O0
+          -Wall
+          -Wdeprecated-declarations
+          -Wempty-body
+          -Werror
+          -Werror=float-conversion
+          -Werror=implicit-function-declaration
+          -Werror=incompatible-pointer-types
+          -Werror=int-conversion
+          -Werror=return-type
+          -Wmissing-braces
+          -Wmissing-field-initializers
+          -Wno-missing-prototypes
+          -Wno-strict-prototypes
+          -Wno-trigraphs
+          -Wno-unknown-pragmas
+          -Wparentheses
+          -Wpointer-sign
+          -Wshadow
+          -Wswitch
+          -Wuninitialized
+          -Wunknown-pragmas
+          -Wunreachable-code
+          -Wunused-function
+          -Wunused-label
+          -Wunused-parameter
+          -Wunused-value
+          -Wunused-variable
+          -Wwrite-strings>)
+target_link_libraries(re3-installer PRIVATE re3i PkgConfig::CDIO PkgConfig::ISO9660
+                                            PkgConfig::UNSHIELD)
 
-install(FILES re3-installer DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS re3-installer)
