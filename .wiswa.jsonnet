@@ -7,7 +7,7 @@ local utils = import 'utils.libjsonnet';
 
   // Shared
   github_username: 'Tatsh',
-  security_policy_supported_versions: { '0.0.x': ':white_check_mark:' },
+  security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   authors: [
     {
       'family-names': 'Udvare',

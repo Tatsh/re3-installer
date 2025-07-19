@@ -9,8 +9,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-07-19
+
+### Added
+
+- Accepts installation path.
+
+### Changed
+
+- Using native functions for all I/O.
+- Switched license to GPL-3 due to use of libcdio.
+- Started Windows support.
+
 ## [0.1.0] - 2021-04-04
 
 First tagged version.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.0...HEAD
