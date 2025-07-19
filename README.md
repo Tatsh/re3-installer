@@ -7,7 +7,7 @@
 [![QA](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml)
 [![Tests](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Tatsh/re3-installer/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/re3-installer?branch=master)
-[![GitHub Pages](https://github.com/Tatsh/re3-installer/actions/workflows/pages.yml/badge.svg)](https://tatsh.github.io/re3-installer/)
+[![GitHub Pages](https://github.com/Tatsh/re3-installer/actions/workflows/pages/pages-build-deployment/badge.svg)](https://tatsh.github.io/re3-installer/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Stargazers](https://img.shields.io/github/stars/Tatsh/re3-installer?logo=github&style=flat)](https://github.com/Tatsh/re3-installer/stargazers)
 

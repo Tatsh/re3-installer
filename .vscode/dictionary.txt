@@ -20,8 +20,11 @@ defenses
 denable
 docstrings
 doxyfile
+endforeach
+endfunction
 esbenp
 favor
+fsanitize
 gcov
 geninfo
 ggdb
@@ -42,6 +45,8 @@ libunshield
 mainpage
 mathjax
 mdfile
+mmnn
+msvc
 namedebug
 noconfirmation
 noerrorui

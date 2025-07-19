@@ -20,7 +20,7 @@ jobs:
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/src
+        run: ctest --test-dir ${{github.workspace}}/build/src/tests
       - if: ${{ matrix.build-type == 'Debug' }}
         name: Generate coverage information
         run: >-
@@ -33,7 +33,7 @@ jobs:
         name: 'Coveralls'
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: coveralls -i src
+        run: coveralls -i src/installer.c -e src/tests
     strategy:
       matrix:
         build-type: [Debug, Release]
@@ -52,7 +52,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --verbose
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/src --verbose
+        run: ctest --test-dir ${{github.workspace}}/build/src/tests --verbose
     strategy:
       fail-fast: false
       matrix:

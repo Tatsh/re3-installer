@@ -8,14 +8,28 @@ project(
   re3-installer
   VERSION 0.1.0
   LANGUAGES C)
+set(CMAKE_C_STANDARD 23)
+
+option(BUILD_TESTS "Build tests." OFF)
+option(ENABLE_ASAN "Enable address sanitiser." OFF)
+option(ENABLE_COVERAGE "Link tests with gcov." OFF)
+option(ENABLE_UBSAN "Enable undefined behaviour sanitiser." OFF)
+if(MSVC)
+  set(TARGET_VERSION
+      0x600
+      CACHE STRING "Target Windows version in 0xMMNN format.")
+else()
+  set(TARGET_VERSION 0x501)
+endif()
 
 include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(CDIO REQUIRED IMPORTED_TARGET libcdio)
 pkg_check_modules(ISO9660 REQUIRED IMPORTED_TARGET libiso9660)
 pkg_check_modules(UNSHIELD REQUIRED IMPORTED_TARGET libunshield)
-
-set(CMAKE_C_STANDARD 23)
+if(BUILD_TESTS)
+  find_package(cmocka REQUIRED)
+endif()
 
 check_type_size(_Bool STDBOOL BUILTIN_TYPES_ONLY LANGUAGE C)
 check_source_compiles(
@@ -29,7 +43,8 @@ int main(void) {
 check_symbol_exists(fts_open "fts.h" FTS_OPEN)
 check_symbol_exists(copyfile "copyfile.h" COPYFILE)
 check_symbol_exists(sendfile "sys/sendfile.h" SENDFILE)
-check_struct_has_member("struct iso9660_stat_t" total_size "cdio/cdio.h" ISO9660_STAT_T_TOTAL_SIZE)
+set(CMAKE_REQUIRED_INCLUDES "${CDIO_INCLUDE_DIRS} ${ISO9660_INCLUDE_DIRS}")
+check_struct_has_member("iso9660_stat_t" total_size "cdio/iso9660.h" ISO9660_STAT_T_TOTAL_SIZE)
 
 add_compile_definitions(
   $<$<BOOL:${C23_NULLPTR}>:HAVE_NULLPTR>

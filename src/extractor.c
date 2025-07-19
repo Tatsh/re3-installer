@@ -18,6 +18,7 @@
 #include "extractor.h"
 #include "helpers.h"
 #include "mkdir_p.h"
+#include "support.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
