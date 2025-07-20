@@ -18,6 +18,7 @@
 #include "extractor.h"
 #include "helpers.h"
 #include "installer.h"
+#include "log.h"
 #include "mkdir_p.h"
 #include "support.h"
 
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
     bool ok = false;
     bool specified_install_dir = argc == 4;
     char *installation_dir = specified_install_dir ? argv[3] : get_installation_dir();
-    fprintf(stderr, "Installation directory: %s\n", installation_dir);
+    log_info("Installation directory: %s\n", installation_dir);
     ok = install_re3_game_data(argv[1], argv[2], installation_dir);
     if (!specified_install_dir) {
         free(installation_dir);

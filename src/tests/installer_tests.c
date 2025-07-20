@@ -121,5 +121,5 @@ int main(void) {
         cmocka_unit_test(test_install_re3_game_data_failed_extract_iso),
         cmocka_unit_test(test_install_re3_game_data_failed_copy_tree),
     };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    return cmocka_run_group_tests(tests, nullptr, nullptr);
 }

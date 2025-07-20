@@ -17,6 +17,7 @@
 #include "env.h"
 #include "extractor.h"
 #include "helpers.h"
+#include "log.h"
 #include "mkdir_p.h"
 #include "support.h"
 
@@ -33,8 +34,9 @@
 static int iso_extract_files(iso9660_t *p_iso,
                              const char *psz_path,
                              const char *psz_extract_dir,
-                             uint8_t i_joliet_level) {
-    FILE *fd = NULL;
+                             uint8_t i_joliet_level,
+                             should_extract_callback_t should_extract) {
+    FILE *fd = nullptr;
     int i_length, r = 1;
     char psz_fullpath[PATH_MAX], *psz_basename;
     const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -45,32 +47,41 @@ static int iso_extract_files(iso9660_t *p_iso,
     size_t i;
     lsn_t lsn;
     int64_t i_file_length;
-    if ((p_iso == NULL) || (psz_path == NULL))
+    if (p_iso == nullptr || psz_path == nullptr) {
         return 1;
+    }
     i_length = snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
-    if (i_length < 0)
+    if (i_length < 0) {
         return 1;
+    }
     psz_basename = &psz_fullpath[i_length];
     p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
     if (!p_entlist) {
-        printf("Could not access %s\n", psz_path);
+        log_error("Could not access %s\n.", psz_path);
         return 1;
     }
     _CDIO_LIST_FOREACH(p_entnode, p_entlist) {
         p_statbuf = (iso9660_stat_t *)_cdio_list_node_data(p_entnode);
         /* Eliminate . and .. entries */
-        if ((strcmp(p_statbuf->filename, ".") == 0) || (strcmp(p_statbuf->filename, "..") == 0))
+        if (strcmp(p_statbuf->filename, ".") == 0 || strcmp(p_statbuf->filename, "..") == 0) {
             continue;
+        }
         iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
+        if (!should_extract(psz_iso_name + 1)) {
+            log_debug("Ignoring file: %s\n", psz_basename);
+            continue;
+        }
         if (p_statbuf->type == _STAT_DIR) {
             mkdir(psz_fullpath, S_IRWXU);
-            if (iso_extract_files(p_iso, psz_iso_name, psz_extract_dir, i_joliet_level))
+            if (iso_extract_files(
+                    p_iso, psz_iso_name, psz_extract_dir, i_joliet_level, should_extract)) {
                 goto out;
+            }
         } else {
-            fprintf(stderr, "Extracting: %s\n", psz_fullpath);
+            log_debug("Extracting: %s\n", psz_iso_name + 1);
             fd = fopen(psz_fullpath, "wb");
-            if (fd == NULL) {
-                fprintf(stderr, "Unable to create file\n");
+            if (fd == nullptr) {
+                log_error("Unable to create file.\n");
                 goto out;
             }
             i_file_length = iso9660_stat_t_total_size(p_statbuf);
@@ -78,32 +89,33 @@ static int iso_extract_files(iso9660_t *p_iso,
                 memset(buf, 0, ISO_BLOCKSIZE);
                 lsn = p_statbuf->lsn + i;
                 if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-                    fprintf(stderr,
-                            "Error reading ISO9660 file %s at LSN %lu\n",
-                            psz_iso_name,
-                            (long unsigned int)lsn);
+                    log_error("Error reading ISO9660 file %s at LSN %lu.\n",
+                              psz_iso_name,
+                              (long unsigned int)lsn);
                     goto out;
                 }
                 fwrite(buf, (size_t)MIN(i_file_length, ISO_BLOCKSIZE), 1, fd);
                 if (ferror(fd)) {
-                    fprintf(stderr, "Error writing file %s: %s\n", psz_iso_name, strerror(errno));
+                    log_error("Error writing file %s: %s\n", psz_iso_name, strerror(errno));
                     goto out;
                 }
                 i_file_length -= ISO_BLOCKSIZE;
             }
             fclose(fd);
-            fd = NULL;
+            fd = nullptr;
         }
     }
     r = 0;
 out:
-    if (fd != NULL)
+    if (fd != nullptr)
         fclose(fd);
     iso9660_filelist_free(p_entlist);
     return r;
 }
 
-bool extract_iso_to_temp(const char *iso_path, char **output_dir) {
+bool extract_iso_to_temp(const char *iso_path,
+                         char **output_dir,
+                         should_extract_callback_t should_extract) {
     bool ret = true;
     char *template = env("TMPDIR");
     if (!strlen(template)) {
@@ -114,17 +126,16 @@ bool extract_iso_to_temp(const char *iso_path, char **output_dir) {
     }
     *output_dir = mkdtemp(template);
     if (!output_dir) {
-        fprintf(stderr, "Failed to create temporary directory.\n");
+        log_error("Failed to create temporary directory.\n");
         return false;
     }
-    fprintf(stderr, "Extracting ISO %s to '%s'.\n", iso_path, *output_dir);
     iso9660_t *iso = iso9660_open_ext(iso_path, ISO_EXTENSION_ALL);
     if (!iso) {
-        fprintf(stderr, "Failed to open ISO file `%s`.\n", iso_path);
+        log_error("Failed to open ISO file `%s`.\n", iso_path);
         return false;
     }
     uint8_t i_joliet_level = iso9660_ifs_get_joliet_level(iso);
-    ret = !iso_extract_files(iso, "", *output_dir, i_joliet_level);
+    ret = !iso_extract_files(iso, "", *output_dir, i_joliet_level, should_extract);
     iso9660_close(iso);
     return ret;
 }
@@ -136,7 +147,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
     unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
     Unshield *unshield = unshield_open(cab_path);
     if (!unshield) {
-        fprintf(stderr, "Failed to open %s.\n", cab_path);
+        log_error("Failed to open %s.\n", cab_path);
         ret = false;
         goto cleanup;
     }
@@ -145,7 +156,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
          group_index++) {
         UnshieldFileGroup *group = unshield_file_group_find(unshield, FILE_GROUPS[group_index]);
         if (!group) {
-            fprintf(stderr, "Could not find %s group.\n", FILE_GROUPS[group_index]);
+            log_error("Could not find %s group.\n", FILE_GROUPS[group_index]);
             ret = false;
             goto cleanup;
         }
@@ -172,7 +183,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 assert(ret2 > 0);
                 if (mkdir_p(target_dir) < 0) {
                     if (errno != EEXIST) {
-                        fprintf(stderr, "Failed to create directory %s: ", target_dir);
+                        log_error("Failed to create directory %s: ", target_dir);
                         ret = false;
                         goto cleanup;
                     }

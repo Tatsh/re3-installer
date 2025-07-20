@@ -3,7 +3,7 @@ set(installer_tests_mocked_functions is_dir_empty is_iso extract_iso_to_temp uns
 foreach(func ${installer_tests_mocked_functions})
   list(APPEND test_flags "-Wl,--wrap,${func}")
 endforeach()
-add_executable(installer_tests ../installer.c installer_tests.c)
+add_executable(installer_tests ../installer.c ../installer.h ../log.c ../log.h installer_tests.c)
 target_link_libraries(installer_tests cmocka)
 add_min_winnt(installer_tests)
 add_asan(installer_tests)

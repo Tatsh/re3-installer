@@ -48,6 +48,8 @@ set(LIBRE3_INSTALLER_SOURCES
     helpers.h
     installer.c
     installer.h
+    log.c
+    log.h
     mkdir_p.c
     mkdir_p.h
     support.h)

@@ -33,7 +33,7 @@ jobs:
         name: 'Coveralls'
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: coveralls -i src/installer.c -e src/tests
+        run: coveralls -i src/installer.c -i src/log.c -i src/log.h -e src/tests
     strategy:
       matrix:
         build-type: [Debug, Release]
