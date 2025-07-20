@@ -1,7 +1,7 @@
 #ifndef RE3_INSTALLER_EXTRACTOR_H
 #define RE3_INSTALLER_EXTRACTOR_H
 
-#include <stdbool.h>
+#include "support.h"
 
 typedef bool (*should_extract_callback_t)(const char *);
 bool extract_iso_to_temp(const char *archive_path,

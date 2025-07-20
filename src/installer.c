@@ -1,16 +1,7 @@
 #include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <assert.h>
-#include <errno.h>
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 #include <libunshield.h>
 
@@ -19,7 +10,6 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
-#include "support.h"
 
 static bool cd1_filter(const char *path) {
     return !strncmp(path, "data", 4);

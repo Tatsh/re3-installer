@@ -1,17 +1,13 @@
 #include <assert.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
-#include <sys/stat.h>
-
-#include <cdio/cdio.h>
 #include <cdio/iso9660.h>
-#include <cdio/logging.h>
 #include <libunshield.h>
 
 #include "env.h"
@@ -19,7 +15,6 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
-#include "support.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

@@ -1,7 +1,7 @@
 #ifndef RE3_INSTALLER_HELPERS_H
 #define RE3_INSTALLER_HELPERS_H
 
-#include <stdbool.h>
+#include "support.h"
 
 bool copy_tree(const char *src, const char *dest);
 bool ends_with_dll(const char *);

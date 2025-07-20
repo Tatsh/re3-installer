@@ -11,7 +11,6 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
-#include "support.h"
 
 bool exists(const char *path) {
     struct stat statbuf;
@@ -251,7 +250,7 @@ bool copy_tree(const char *src, const char *dest) {
         } else if (S_ISREG(statbuf.st_mode)) {
             FILE *src_file = fopen(src_path, "rb");
             if (!src_file) {
-                perror("Failed to open source file");
+                log_error("Failed to open source file.");
                 closedir(dir);
                 return false;
             }
