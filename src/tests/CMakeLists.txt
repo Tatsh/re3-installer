@@ -1,5 +1,5 @@
 set(installer_tests_mocked_functions is_dir_empty is_iso extract_iso_to_temp unshield_extract
-                                     copy_tree remove_tree)
+                                     copy_tree remove_tree exists)
 foreach(func ${installer_tests_mocked_functions})
   list(APPEND test_flags "-Wl,--wrap,${func}")
 endforeach()

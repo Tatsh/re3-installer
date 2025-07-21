@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "mkdir_p.h"
+#include "support.h"
 
 /** From
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */

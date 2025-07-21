@@ -25,12 +25,16 @@
 #include <copyfile.h>
 #endif
 
-#if defined(_WIN32)
+#ifdef _WIN32
+#include <windows.h>
+
 #include <direct.h>
 #include <io.h>
+#include <rpc.h>
 #include <shellapi.h>
-#include <windows.h>
-#define mkdir _mkdir
+#include <shlobj.h>
+#include <wchar.h>
+#define mkdir(p, _) _mkdir(p)
 #define open _open
 #define strncasecmp _strnicmp
 #define stat _stat

@@ -112,6 +112,40 @@ bool extract_iso_to_temp(const char *iso_path,
                          char **output_dir,
                          should_extract_callback_t should_extract) {
     bool ret = true;
+#ifdef _WIN32
+    wchar_t temp_path_w[MAX_PATH];
+    GetTempPathW(MAX_PATH, temp_path_w);
+    wchar_t *output_dir_w = _wtempnam(temp_path_w, L"re3");
+    size_t req_size =
+        (size_t)WideCharToMultiByte(CP_UTF8, 0, output_dir_w, -1, nullptr, 0, nullptr, nullptr);
+    if (req_size == 0) {
+        log_error("Failed to convert wide string to UTF-8 (req_size = 0).\n");
+        return false;
+    }
+    *output_dir = malloc(req_size);
+    memset(*output_dir, 0, req_size);
+    if (!WideCharToMultiByte(
+            CP_UTF8, 0, output_dir_w, -1, *output_dir, req_size, nullptr, nullptr)) {
+        log_error("Failed to convert wide string to UTF-8.\n");
+        return false;
+    }
+    if (!CreateDirectoryW(output_dir_w, nullptr)) {
+        log_error("Failed to create temporary directory: %s\n", *output_dir);
+        // DWORD last_error = GetLastError();
+        // wchar_t lpMsgBuf;
+        // FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+        //                    FORMAT_MESSAGE_IGNORE_INSERTS,
+        //                nullptr,
+        //                last_error,
+        //                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        //                (LPWSTR)&lpMsgBuf,
+        //                0,
+        //                nullptr);
+        // wprintf(L"Error: %ls\n", lpMsgBuf);
+        return false;
+    }
+    free(output_dir_w);
+#else
     char *template = env("TMPDIR");
     if (!strlen(template)) {
         memset(template, 0, PATH_MAX);
@@ -120,10 +154,12 @@ bool extract_iso_to_temp(const char *iso_path,
         strcat(template, "/re3.XXXXXX");
     }
     *output_dir = mkdtemp(template);
+#endif
     if (!output_dir) {
         log_error("Failed to create temporary directory.\n");
         return false;
     }
+    log_debug("Extracting ISO to temporary directory: %s\n", *output_dir);
     iso9660_t *iso = iso9660_open_ext(iso_path, ISO_EXTENSION_ALL);
     if (!iso) {
         log_error("Failed to open ISO file `%s`.\n", iso_path);
@@ -162,13 +198,15 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 if (ends_with_exe(name) || ends_with_dll(name) || ends_with_url(name)) {
                     continue;
                 }
-                char *dir = (char *)unshield_directory_name(
-                    unshield, unshield_file_directory(unshield, (int)i));
+                char *dir = strdup(
+                    unshield_directory_name(unshield, unshield_file_directory(unshield, (int)i)));
+#ifndef _WIN32
                 for (unsigned long j = 0; j < strlen(dir); j++) {
                     if (dir[j] == '\\') {
                         dir[j] = '/';
                     }
                 }
+#endif
                 memset(target_dir, 0, PATH_MAX);
                 if (group_index == 0 && !strcmp(dir, "audio")) { // Keep casing consistent
                     dir[0] = 'A';
@@ -190,6 +228,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);
                 assert(unshield_ret);
                 free(target_path);
+                free(dir);
             }
         }
         free(target_dir);

@@ -4,7 +4,7 @@
 #ifdef __APPLE__
 #include <crt_externs.h>
 #define environ (*_NSGetEnviron())
-#else
+#elif !defined(WIN32) || defined(_MSC_VER)
 extern char **environ;
 #endif
 

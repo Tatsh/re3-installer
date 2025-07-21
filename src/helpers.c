@@ -11,6 +11,7 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
+#include "support.h"
 
 bool exists(const char *path) {
     struct stat statbuf;
@@ -82,7 +83,7 @@ bool is_dir_empty(const char *path) {
     if (!S_ISDIR(statbuf.st_mode)) {
         return false;
     }
-    return statbuf.st_nlink == 2;
+    return statbuf.st_nlink <= 2;
 }
 
 bool validate_args(int argc, char *const argv[]) {
@@ -111,8 +112,10 @@ bool validate_args(int argc, char *const argv[]) {
 
 char *get_installation_dir() {
     char *install_dir = malloc(PATH_MAX);
-    char *home_dir = env("HOME");
+    memset(install_dir, 0, PATH_MAX);
 #ifdef __APPLE__
+    char *home_dir = env("HOME");
+    assert(strlen(home_dir) > 0);
     char path[PATH_MAX];
     sysdir_search_path_enumeration_state state = sysdir_start_search_path_enumeration(
         SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
@@ -125,10 +128,19 @@ char *get_installation_dir() {
         sprintf(install_dir, "%s%s/re3", home_dir, path + 1);
         break;
     }
+#elif defined(_WIN32)
+    char result[MAX_PATH - 5];
+    wchar_t result_w[MAX_PATH - 5];
+    SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, result_w);
+    assert(result_w[0] != L'\0' && wcslen(result_w) < MAX_PATH - 5);
+    int len = WideCharToMultiByte(CP_UTF8, 0, result_w, -1, result, MAX_PATH, nullptr, nullptr);
+    assert(len > 0);
+    sprintf(install_dir, "%s\\re3", result);
 #else
+    char *home_dir = env("HOME");
+    assert(strlen(home_dir) > 0);
     char *xdg_data_home = env("XDG_DATA_HOME");
     if (strlen(xdg_data_home) == 0) {
-        assert(strlen(home_dir) > 0);
         sprintf(install_dir, "%s/.local/share/re3", home_dir);
     } else {
         sprintf(install_dir, "%s/re3", xdg_data_home);
@@ -211,13 +223,46 @@ bool copy_tree(const char *src, const char *dest) {
     }
     fts_close(fts);
 #elif defined(_WIN32)
-    SHFILEOPSTRUCT file_op = {0};
-    file_op.wFunc = FO_COPY;
-    file_op.pFrom = src;
-    file_op.pTo = dest;
+    wchar_t *src_w, *dest_w;
+    size_t src_len = strlen(src);
+    size_t dest_len = strlen(dest);
+    size_t req_size = MultiByteToWideChar(CP_UTF8, 0, src, (int)src_len, nullptr, 0);
+    if (req_size == 0) {
+        log_error("Failed to convert source path to wide string (req_size = 0).\n");
+        return false;
+    }
+    req_size += 2;
+    src_w = malloc(req_size * sizeof(wchar_t));
+    wmemset(src_w, L'\0', req_size * sizeof(wchar_t));
+    if (!MultiByteToWideChar(CP_UTF8, 0, src, (int)src_len, src_w, req_size - 2)) {
+        log_error("Failed to convert source path to wide string.\n");
+        return false;
+    }
+    wcsncat(src_w, L"\\*", 2);
+    req_size = MultiByteToWideChar(CP_UTF8, 0, dest, dest_len, nullptr, 0);
+    if (req_size == 0) {
+        log_error("Failed to convert destination path to wide string (req_size = 0).\n");
+        free(src_w);
+        return false;
+    }
+    dest_w = malloc(req_size * sizeof(wchar_t));
+    wmemset(dest_w, L'\0', req_size * sizeof(wchar_t));
+    if (!MultiByteToWideChar(CP_UTF8, 0, dest, dest_len, dest_w, req_size)) {
+        log_error("Failed to convert destination path to wide string.\n");
+        free(src_w);
+        free(dest_w);
+        return false;
+    }
+    SHFILEOPSTRUCTW file_op = {0};
     file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
-    int ret = SHFileOperation(&file_op);
+    file_op.pFrom = src_w;
+    file_op.pTo = dest_w;
+    file_op.wFunc = FO_COPY;
+    int ret = SHFileOperationW(&file_op);
+    free(src_w);
+    free(dest_w);
     if (ret != 0) {
+        log_error("Failed to copy tree '%s\\*': %d\n", src, ret);
         return false;
     }
 #else
@@ -325,13 +370,19 @@ bool remove_tree(const char *path) {
 
     fts_close(fts);
 #elif defined(_WIN32)
-    SHFILEOPSTRUCT file_op = {0};
+    wchar_t *path_w;
+    size_t path_len = strlen(path);
+    int req_size = MultiByteToWideChar(CP_UTF8, 0, path, path_len, nullptr, 0);
+    path_w = malloc(req_size * sizeof(wchar_t));
+    MultiByteToWideChar(CP_UTF8, 0, path, path_len, path_w, req_size);
+    SHFILEOPSTRUCTW file_op = {0};
     file_op.wFunc = FO_DELETE;
-    file_op.pFrom = path;
-    file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_ALLOWUNDO;
-    int ret = SHFileOperation(&file_op);
+    file_op.pFrom = path_w;
+    file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
+    int ret = SHFileOperationW(&file_op);
+    free(path_w);
     if (ret != 0) {
-        log_error("Failed to remove directory: %s\n", strerror(ret));
+        log_error("Failed to remove directory: %d\n", ret);
         return false;
     }
 #else
@@ -346,7 +397,6 @@ bool remove_tree(const char *path) {
         if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
             continue;
         }
-
         snprintf(full_path, PATH_MAX, "%s/%s", path, entry->d_name);
         if (stat(full_path, &statbuf) < 0) {
             closedir(dir);

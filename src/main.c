@@ -1,7 +1,5 @@
 #include <stdlib.h>
 
-#include <libunshield.h>
-
 #include "env.h"
 #include "extractor.h"
 #include "helpers.h"

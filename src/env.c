@@ -5,6 +5,16 @@
 #include "env.h"
 
 char *env(const char *var_name) {
+#ifdef _WIN32
+    char *value = getenv(var_name);
+    char *result = malloc(PATH_MAX);
+    memset(result, 0, PATH_MAX);
+    if (!value) {
+        return result;
+    }
+    strcpy(result, value);
+    return result;
+#else
     char **p = environ;
     char *value = malloc(PATH_MAX);
     memset(value, 0, PATH_MAX);
@@ -21,4 +31,5 @@ char *env(const char *var_name) {
     }
     free(search);
     return value;
+#endif
 }

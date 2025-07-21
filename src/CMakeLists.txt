@@ -132,8 +132,38 @@ target_compile_options(
           -Wwrite-strings>)
 target_link_libraries(re3-installer PRIVATE re3i PkgConfig::CDIO PkgConfig::ISO9660
                                             PkgConfig::UNSHIELD)
+if(BUILD_STATIC AND NOT MSVC)
+  target_link_libraries(re3-installer PRIVATE ZLIB::ZLIB)
+  target_compile_options(re3-installer PRIVATE -static)
+endif()
 
-install(TARGETS re3-installer)
+install(TARGETS re3-installer RUNTIME)
+install(FILES ../man/re3-installer.1 TYPE MAN)
+# FIXME include license file in zip
+
+# FIXME install path should not have version number
+
+# FIXME may need Visual C++ runtime
+
+# FIXME missing license in installer
+
+# FIXME Set publisher
+
+# FIXME Set 'file description'?
+
+# FIXME Set Product name
+
+# FIXME Set 'file version'?
+
+# FIXME Set Product version
+
+# FIXME Set Copyright
+
+# FIXME Set language
+
+# FIXME No UNIX-style packaging. Just have a single root.
+set(CPACK_GENERATOR "ZIP")
+include(CPack)
 
 if(BUILD_TESTS)
   enable_testing()

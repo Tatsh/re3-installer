@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <libunshield.h>
 
@@ -10,6 +11,7 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
+#include "support.h"
 
 static bool cd1_filter(const char *path) {
     return !strncmp(path, "data", 4);
@@ -27,6 +29,9 @@ bool install_re3_game_data(const char *disc1_path,
     char *disc2_out_dir = nullptr;
     bool iso_mode_disc1 = false;
     bool iso_mode_disc2 = false;
+    if (!exists(installation_dir)) {
+        mkdir(installation_dir, S_IRWXU);
+    }
     if (!is_dir_empty(installation_dir)) {
         log_error("Installation directory '%s' is not empty.\n", installation_dir);
         err = true;

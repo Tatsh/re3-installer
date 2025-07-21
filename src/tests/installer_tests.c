@@ -6,6 +6,11 @@
 
 #include "installer.h"
 
+bool __wrap_exists(const char *path) {
+    check_expected_ptr(path);
+    return mock_type(bool);
+}
+
 bool __wrap_is_dir_empty(const char *path) {
     check_expected_ptr(path);
     return mock_type(bool);
@@ -42,6 +47,9 @@ bool __wrap_remove_tree(const char *path) {
 static void test_install_re3_game_data_success(void **state) {
     (void)state;
 
+    expect_string(__wrap_exists, path, "/installation/dir");
+    will_return(__wrap_exists, false);
+
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
 
@@ -65,6 +73,8 @@ static void test_install_re3_game_data_success(void **state) {
 
 static void test_install_re3_game_data_non_empty_dir(void **state) {
     (void)state;
+    expect_string(__wrap_exists, path, "/installation/dir");
+    will_return(__wrap_exists, true);
 
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, false);
@@ -75,6 +85,8 @@ static void test_install_re3_game_data_non_empty_dir(void **state) {
 
 static void test_install_re3_game_data_failed_extract_iso(void **state) {
     (void)state;
+    expect_string(__wrap_exists, path, "/installation/dir");
+    will_return(__wrap_exists, false);
 
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
@@ -92,6 +104,8 @@ static void test_install_re3_game_data_failed_extract_iso(void **state) {
 
 static void test_install_re3_game_data_failed_copy_tree(void **state) {
     (void)state;
+    expect_string(__wrap_exists, path, "/installation/dir");
+    will_return(__wrap_exists, false);
 
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
