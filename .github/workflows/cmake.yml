@@ -157,7 +157,6 @@ jobs:
         id: latest_tag
         uses: WyriHaximus/github-action-get-previous-tag@v1
       - name: Upload package
-        if: ${{ matrix.build-type == 'Release' }}
         uses: softprops/action-gh-release@v2
         with:
           files: |

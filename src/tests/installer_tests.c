@@ -68,7 +68,7 @@ static void test_install_re3_game_data_success(void **state) {
     will_return(__wrap_copy_tree, true);
 
     bool result = install_re3_game_data("/path/to/disc1", "/path/to/disc2", "/installation/dir");
-    assert_false(result);
+    assert_true(result);
 }
 
 static void test_install_re3_game_data_non_empty_dir(void **state) {
@@ -80,7 +80,7 @@ static void test_install_re3_game_data_non_empty_dir(void **state) {
     will_return(__wrap_is_dir_empty, false);
 
     bool result = install_re3_game_data("/path/to/disc1", "/path/to/disc2", "/installation/dir");
-    assert_true(result);
+    assert_false(result);
 }
 
 static void test_install_re3_game_data_failed_extract_iso(void **state) {
@@ -99,7 +99,7 @@ static void test_install_re3_game_data_failed_extract_iso(void **state) {
     will_return(__wrap_extract_iso_to_temp, false);
 
     bool result = install_re3_game_data("/path/to/disc1", "/path/to/disc2", "/installation/dir");
-    assert_true(result);
+    assert_false(result);
 }
 
 static void test_install_re3_game_data_failed_copy_tree(void **state) {
@@ -125,7 +125,7 @@ static void test_install_re3_game_data_failed_copy_tree(void **state) {
     will_return(__wrap_copy_tree, false);
 
     bool result = install_re3_game_data("/path/to/disc1", "/path/to/disc2", "/installation/dir");
-    assert_true(result);
+    assert_false(result);
 }
 
 int main(void) {

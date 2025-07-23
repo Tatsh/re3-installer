@@ -7,7 +7,11 @@ enum log_level {
     LOG_LEVEL_ERROR,
 };
 
+#ifdef NDEBUG
 enum log_level g_log_level = LOG_LEVEL_INFO;
+#else
+enum log_level g_log_level = LOG_LEVEL_DEBUG;
+#endif
 
 void log_debug(const char *msg, ...) {
     if (g_log_level != LOG_LEVEL_DEBUG) {

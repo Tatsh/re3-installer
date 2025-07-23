@@ -58,38 +58,41 @@ add_min_winnt(re3i)
 add_asan(re3i)
 add_ubsan(re3i)
 add_flags(re3i)
-target_compile_options(
-  re3i
-  PRIVATE $<$<CONFIG:Debug>:-ggdb
-          -O0
-          -Wall
-          -Wdeprecated-declarations
-          -Wempty-body
-          -Werror
-          -Werror=float-conversion
-          -Werror=implicit-function-declaration
-          -Werror=incompatible-pointer-types
-          -Werror=int-conversion
-          -Werror=return-type
-          -Wmissing-braces
-          -Wmissing-field-initializers
-          -Wno-missing-prototypes
-          -Wno-strict-prototypes
-          -Wno-trigraphs
-          -Wno-unknown-pragmas
-          -Wparentheses
-          -Wpointer-sign
-          -Wshadow
-          -Wswitch
-          -Wuninitialized
-          -Wunknown-pragmas
-          -Wunreachable-code
-          -Wunused-function
-          -Wunused-label
-          -Wunused-parameter
-          -Wunused-value
-          -Wunused-variable
-          -Wwrite-strings>)
+if(NOT MSVC)
+  target_compile_options(
+    re3i
+    PRIVATE $<$<CONFIG:Debug>:-ggdb
+            -ftrivial-auto-var-init=zero
+            -O0
+            -Wall
+            -Wdeprecated-declarations
+            -Wempty-body
+            -Werror
+            -Werror=float-conversion
+            -Werror=implicit-function-declaration
+            -Werror=incompatible-pointer-types
+            -Werror=int-conversion
+            -Werror=return-type
+            -Wmissing-braces
+            -Wmissing-field-initializers
+            -Wno-missing-prototypes
+            -Wno-strict-prototypes
+            -Wno-trigraphs
+            -Wno-unknown-pragmas
+            -Wparentheses
+            -Wpointer-sign
+            -Wshadow
+            -Wswitch
+            -Wuninitialized
+            -Wunknown-pragmas
+            -Wunreachable-code
+            -Wunused-function
+            -Wunused-label
+            -Wunused-parameter
+            -Wunused-value
+            -Wunused-variable
+            -Wwrite-strings>)
+endif()
 target_include_directories(re3i PRIVATE ${CDIO_INCLUDE_DIRS} ${ISO9660_INCLUDE_DIRS}
                                         ${UNSHIELD_INCLUDE_DIRS})
 
@@ -98,40 +101,47 @@ add_min_winnt(re3-installer)
 add_asan(re3-installer)
 add_ubsan(re3-installer)
 add_flags(re3-installer)
-target_compile_options(
-  re3-installer
-  PRIVATE $<$<CONFIG:Debug>:-ggdb
-          -O0
-          -Wall
-          -Wdeprecated-declarations
-          -Wempty-body
-          -Werror
-          -Werror=float-conversion
-          -Werror=implicit-function-declaration
-          -Werror=incompatible-pointer-types
-          -Werror=int-conversion
-          -Werror=return-type
-          -Wmissing-braces
-          -Wmissing-field-initializers
-          -Wno-missing-prototypes
-          -Wno-strict-prototypes
-          -Wno-trigraphs
-          -Wno-unknown-pragmas
-          -Wparentheses
-          -Wpointer-sign
-          -Wshadow
-          -Wswitch
-          -Wuninitialized
-          -Wunknown-pragmas
-          -Wunreachable-code
-          -Wunused-function
-          -Wunused-label
-          -Wunused-parameter
-          -Wunused-value
-          -Wunused-variable
-          -Wwrite-strings>)
+if(NOT MSVC)
+  target_compile_options(
+    re3-installer
+    PRIVATE $<$<CONFIG:Debug>:-ggdb
+            -ftrivial-auto-var-init=zero
+            -O0
+            -Wall
+            -Wdeprecated-declarations
+            -Wempty-body
+            -Werror
+            -Werror=float-conversion
+            -Werror=implicit-function-declaration
+            -Werror=incompatible-pointer-types
+            -Werror=int-conversion
+            -Werror=return-type
+            -Wmissing-braces
+            -Wmissing-field-initializers
+            -Wno-missing-prototypes
+            -Wno-strict-prototypes
+            -Wno-trigraphs
+            -Wno-unknown-pragmas
+            -Wparentheses
+            -Wpointer-sign
+            -Wshadow
+            -Wswitch
+            -Wuninitialized
+            -Wunknown-pragmas
+            -Wunreachable-code
+            -Wunused-function
+            -Wunused-label
+            -Wunused-parameter
+            -Wunused-value
+            -Wunused-variable
+            -Wwrite-strings>)
+endif()
 target_link_libraries(re3-installer PRIVATE re3i PkgConfig::CDIO PkgConfig::ISO9660
                                             PkgConfig::UNSHIELD)
+if(WIN32)
+  configure_file("version.rc.in" version.rc @ONLY)
+  target_sources(re3-installer PRIVATE version.rc)
+endif()
 if(BUILD_STATIC AND NOT MSVC)
   target_link_libraries(re3-installer PRIVATE ZLIB::ZLIB)
   target_compile_options(re3-installer PRIVATE -static)
@@ -142,27 +152,19 @@ install(FILES ../man/re3-installer.1 TYPE MAN)
 # FIXME include license file in zip
 
 # FIXME install path should not have version number
-
-# FIXME may need Visual C++ runtime
-
-# FIXME missing license in installer
-
-# FIXME Set publisher
-
-# FIXME Set 'file description'?
-
-# FIXME Set Product name
-
-# FIXME Set 'file version'?
-
-# FIXME Set Product version
-
-# FIXME Set Copyright
-
-# FIXME Set language
-
-# FIXME No UNIX-style packaging. Just have a single root.
 set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_VENDOR Tatsh)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt)
+set(__cpack_system_name ${CMAKE_SYSTEM_NAME})
+if(__cpack_system_name MATCHES "Windows")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(__cpack_system_name win64)
+  else()
+    set(__cpack_system_name win32)
+  endif()
+endif()
+set(CPACK_PACKAGE_FILE_NAME
+    ${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${__cpack_system_name}-${CMAKE_BUILD_TYPE})
 include(CPack)
 
 if(BUILD_TESTS)

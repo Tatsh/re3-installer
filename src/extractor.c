@@ -131,17 +131,6 @@ bool extract_iso_to_temp(const char *iso_path,
     }
     if (!CreateDirectoryW(output_dir_w, nullptr)) {
         log_error("Failed to create temporary directory: %s\n", *output_dir);
-        // DWORD last_error = GetLastError();
-        // wchar_t lpMsgBuf;
-        // FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-        //                    FORMAT_MESSAGE_IGNORE_INSERTS,
-        //                nullptr,
-        //                last_error,
-        //                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        //                (LPWSTR)&lpMsgBuf,
-        //                0,
-        //                nullptr);
-        // wprintf(L"Error: %ls\n", lpMsgBuf);
         return false;
     }
     free(output_dir_w);
@@ -175,7 +164,11 @@ static const char *FILE_GROUPS[] = {"App Executables", "Don't Delete", nullptr};
 
 bool unshield_extract(const char *cab_path, const char *installation_dir) {
     bool ret = true;
+#ifdef NDEBUG
     unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
+#else
+    unshield_set_log_level(UNSHIELD_LOG_LEVEL_LOWEST);
+#endif
     Unshield *unshield = unshield_open(cab_path);
     if (!unshield) {
         log_error("Failed to open %s.\n", cab_path);
@@ -226,7 +219,9 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 ret2 = sprintf(target_path, "%s/%s", target_dir, name);
                 assert(ret > 0);
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);
-                assert(unshield_ret);
+                if (!unshield_ret) {
+                    log_debug("Ignoring error saving file '%s'.\n", target_path);
+                }
                 free(target_path);
                 free(dir);
             }

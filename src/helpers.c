@@ -223,46 +223,32 @@ bool copy_tree(const char *src, const char *dest) {
     }
     fts_close(fts);
 #elif defined(_WIN32)
-    wchar_t *src_w, *dest_w;
-    size_t src_len = strlen(src);
-    size_t dest_len = strlen(dest);
-    size_t req_size = MultiByteToWideChar(CP_UTF8, 0, src, (int)src_len, nullptr, 0);
-    if (req_size == 0) {
-        log_error("Failed to convert source path to wide string (req_size = 0).\n");
-        return false;
-    }
-    req_size += 2;
-    src_w = malloc(req_size * sizeof(wchar_t));
-    wmemset(src_w, L'\0', req_size * sizeof(wchar_t));
-    if (!MultiByteToWideChar(CP_UTF8, 0, src, (int)src_len, src_w, req_size - 2)) {
+    wchar_t src_w[MAX_PATH];
+    wchar_t dest_w[MAX_PATH];
+    if (MultiByteToWideChar(CP_UTF8, 0, src, -1, src_w, MAX_PATH) == 0) {
         log_error("Failed to convert source path to wide string.\n");
         return false;
     }
-    wcsncat(src_w, L"\\*", 2);
-    req_size = MultiByteToWideChar(CP_UTF8, 0, dest, dest_len, nullptr, 0);
-    if (req_size == 0) {
-        log_error("Failed to convert destination path to wide string (req_size = 0).\n");
-        free(src_w);
-        return false;
-    }
-    dest_w = malloc(req_size * sizeof(wchar_t));
-    wmemset(dest_w, L'\0', req_size * sizeof(wchar_t));
-    if (!MultiByteToWideChar(CP_UTF8, 0, dest, dest_len, dest_w, req_size)) {
+    if (MultiByteToWideChar(CP_UTF8, 0, dest, -1, dest_w, MAX_PATH) == 0) {
         log_error("Failed to convert destination path to wide string.\n");
-        free(src_w);
-        free(dest_w);
         return false;
     }
+    size_t src_len = wcslen(src_w);
+    if (src_len + 2 >= MAX_PATH) {
+        log_error("Source path is too long.\n");
+        return false;
+    }
+    wcscat(src_w, L"\\*");
+    size_t dest_len = wcslen(dest_w);
+    src_w[src_len + 2] = L'\0';
+    dest_w[dest_len + 1] = L'\0';
     SHFILEOPSTRUCTW file_op = {0};
-    file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
+    file_op.wFunc = FO_COPY;
     file_op.pFrom = src_w;
     file_op.pTo = dest_w;
-    file_op.wFunc = FO_COPY;
-    int ret = SHFileOperationW(&file_op);
-    free(src_w);
-    free(dest_w);
-    if (ret != 0) {
-        log_error("Failed to copy tree '%s\\*': %d\n", src, ret);
+    file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
+    if (SHFileOperationW(&file_op) != 0) {
+        log_error("Failed to copy directory from '%s' to '%s'.\n", src, dest);
         return false;
     }
 #else
@@ -373,8 +359,10 @@ bool remove_tree(const char *path) {
     wchar_t *path_w;
     size_t path_len = strlen(path);
     int req_size = MultiByteToWideChar(CP_UTF8, 0, path, path_len, nullptr, 0);
-    path_w = malloc(req_size * sizeof(wchar_t));
+    path_w = malloc((req_size + 1) * sizeof(wchar_t));
     MultiByteToWideChar(CP_UTF8, 0, path, path_len, path_w, req_size);
+    path_w[req_size] = L'\0';
+    path_w[req_size + 1] = L'\0';
     SHFILEOPSTRUCTW file_op = {0};
     file_op.wFunc = FO_DELETE;
     file_op.pFrom = path_w;
