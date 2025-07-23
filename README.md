@@ -31,17 +31,18 @@ If `INSTALL_DIR` is not specified, the following paths will be used:
 
 - Linux: `${XDG_DATA_HOME}/re3` with fallback to `~/.local/share/re3`
 - macOS: `~/Library/Application Data/re3`
+- Windows: `%APPDATA%\re3` (typically `%USERPROFILE%\AppData\Roaming\re3`)
 
-This project supports Linux, macOS, and BSD. Windows support is untested.
+This project supports Linux, macOS, and Windows.
 
 ## How to build
 
 Requirements:
 
 - CMake
-- pkgconfig
 - Unshield
-- libcdio and libiso9660
+- libcdio
+- pkgconfig
 
 ```shell
 cd re3-installer/  # cloned repository

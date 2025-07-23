@@ -89,6 +89,7 @@ ucrt
 udvare
 undoc
 unshield
+userprofile
 vcpkg
 wdeprecated
 wempty
