@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-07-24
+
+### Added
+
+- Windows support.
+
 ## [0.2.0] - 2025-07-19
 
 ### Added
@@ -25,4 +31,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 First tagged version.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.1...HEAD
