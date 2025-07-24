@@ -67,6 +67,7 @@ msys
 msystem
 namedebug
 noconfirmation
+noconfirmmkdir
 noerrorui
 noncommercially
 nsis
@@ -83,7 +84,7 @@ rpath
 rpcrt4
 schemafile
 sendfile
-shfileopstructw
+shfileopstruct
 softprops
 srcs
 stdbool

@@ -66,13 +66,15 @@ bool install_re3_game_data(const char *disc1_path,
     // Copy disc 2 Audio
     log_info("Copying audio files from disc 2...\n");
     size_t install_dir_len = strlen(installation_dir);
-    dest_audio_dir = malloc(install_dir_len + 7);
-    memset(dest_audio_dir, 0, install_dir_len + 7);
-    sprintf(dest_audio_dir, "%s/Audio", installation_dir);
+    dest_audio_dir = calloc(install_dir_len + 7, 1);
+    char delim = '/';
+#ifdef _WIN32
+    delim = '\\'; // Shell functions on Windows will not accept forward slashes.
+#endif
+    sprintf(dest_audio_dir, "%s%cAudio", installation_dir, delim);
     size_t disc2_out_dir_len = strlen(iso_mode_disc2 ? disc2_out_dir : disc2_path);
-    src_audio_dir = malloc(disc2_out_dir_len + 7);
-    memset(src_audio_dir, 0, disc2_out_dir_len + 7);
-    sprintf(src_audio_dir, "%s/Audio", iso_mode_disc2 ? disc2_out_dir : disc2_path);
+    src_audio_dir = calloc(disc2_out_dir_len + 7, 1);
+    sprintf(src_audio_dir, "%s%cAudio", iso_mode_disc2 ? disc2_out_dir : disc2_path, delim);
     if (!copy_tree(src_audio_dir, dest_audio_dir)) {
         log_error("Failed to copy audio files from '%s' to '%s'.\n", src_audio_dir, dest_audio_dir);
         err = true;

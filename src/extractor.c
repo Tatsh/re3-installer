@@ -33,7 +33,7 @@ static int iso_extract_files(iso9660_t *p_iso,
                              should_extract_callback_t should_extract) {
     FILE *fd = nullptr;
     int i_length, r = 1;
-    char psz_fullpath[PATH_MAX], *psz_basename;
+    char psz_fullpath[PATH_MAX] = {0}, *psz_basename;
     const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
     unsigned char buf[ISO_BLOCKSIZE];
     CdioListNode_t *p_entnode;
@@ -113,8 +113,8 @@ bool extract_iso_to_temp(const char *iso_path,
                          should_extract_callback_t should_extract) {
     bool ret = true;
 #ifdef _WIN32
-    wchar_t temp_path_w[MAX_PATH];
-    GetTempPathW(MAX_PATH, temp_path_w);
+    wchar_t temp_path_w[MAX_PATH] = {0};
+    GetTempPath(MAX_PATH, temp_path_w);
     wchar_t *output_dir_w = _wtempnam(temp_path_w, L"re3");
     size_t req_size =
         (size_t)WideCharToMultiByte(CP_UTF8, 0, output_dir_w, -1, nullptr, 0, nullptr, nullptr);
@@ -122,14 +122,13 @@ bool extract_iso_to_temp(const char *iso_path,
         log_error("Failed to convert wide string to UTF-8 (req_size = 0).\n");
         return false;
     }
-    *output_dir = malloc(req_size);
-    memset(*output_dir, 0, req_size);
+    *output_dir = calloc(req_size, 1);
     if (!WideCharToMultiByte(
             CP_UTF8, 0, output_dir_w, -1, *output_dir, req_size, nullptr, nullptr)) {
         log_error("Failed to convert wide string to UTF-8.\n");
         return false;
     }
-    if (!CreateDirectoryW(output_dir_w, nullptr)) {
+    if (!CreateDirectory(output_dir_w, nullptr)) {
         log_error("Failed to create temporary directory: %s\n", *output_dir);
         return false;
     }
@@ -184,7 +183,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
             ret = false;
             goto cleanup;
         }
-        char *target_dir = malloc(PATH_MAX);
+        char *target_dir = calloc(PATH_MAX, 1);
         for (unsigned long i = group->first_file; i <= group->last_file; i++) {
             if (unshield_file_is_valid(unshield, (int)i)) {
                 const char *name = unshield_file_name(unshield, (int)i);
@@ -214,8 +213,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                         goto cleanup;
                     }
                 }
-                char *target_path = malloc(PATH_MAX);
-                memset(target_path, 0, PATH_MAX);
+                char *target_path = calloc(PATH_MAX, 1);
                 ret2 = sprintf(target_path, "%s/%s", target_dir, name);
                 assert(ret > 0);
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);

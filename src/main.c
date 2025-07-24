@@ -15,10 +15,17 @@ int main(int argc, char *argv[]) {
     bool ok = false;
     bool specified_install_dir = argc == 4;
     char *installation_dir = specified_install_dir ? argv[3] : get_installation_dir();
+#ifdef _WIN32
+    if (specified_install_dir) {
+        installation_dir = _fullpath(nullptr, argv[3], MAX_PATH);
+    }
+#endif
     log_info("Installation directory: %s\n", installation_dir);
     ok = install_re3_game_data(argv[1], argv[2], installation_dir);
+#ifndef _WIN32
     if (!specified_install_dir) {
         free(installation_dir);
     }
+#endif
     return ok ? 0 : 1;
 }

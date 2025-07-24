@@ -7,8 +7,7 @@
 char *env(const char *var_name) {
 #ifdef _WIN32
     char *value = getenv(var_name);
-    char *result = malloc(PATH_MAX);
-    memset(result, 0, PATH_MAX);
+    char *result = calloc(PATH_MAX, 1);
     if (!value) {
         return result;
     }
@@ -16,11 +15,9 @@ char *env(const char *var_name) {
     return result;
 #else
     char **p = environ;
-    char *value = malloc(PATH_MAX);
-    memset(value, 0, PATH_MAX);
+    char *value = calloc(PATH_MAX, 1);
     size_t var_name_len = strlen(var_name);
-    char *search = malloc(var_name_len + 2);
-    memset(search, 0, var_name_len + 2);
+    char *search = calloc(var_name_len + 2, 1);
     strcpy(search, var_name);
     strcat(search, "=");
     for (; *p; p++) {

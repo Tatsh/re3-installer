@@ -111,8 +111,7 @@ bool validate_args(int argc, char *const argv[]) {
 }
 
 char *get_installation_dir() {
-    char *install_dir = malloc(PATH_MAX);
-    memset(install_dir, 0, PATH_MAX);
+    char *install_dir = calloc(PATH_MAX, 1);
 #ifdef __APPLE__
     char *home_dir = env("HOME");
     assert(strlen(home_dir) > 0);
@@ -129,9 +128,9 @@ char *get_installation_dir() {
         break;
     }
 #elif defined(_WIN32)
-    char result[MAX_PATH - 5];
-    wchar_t result_w[MAX_PATH - 5];
-    SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, result_w);
+    char result[MAX_PATH - 5] = {0};
+    wchar_t result_w[MAX_PATH - 5] = {0};
+    SHGetFolderPath(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, result_w);
     assert(result_w[0] != L'\0' && wcslen(result_w) < MAX_PATH - 5);
     int len = WideCharToMultiByte(CP_UTF8, 0, result_w, -1, result, MAX_PATH, nullptr, nullptr);
     assert(len > 0);
@@ -223,38 +222,67 @@ bool copy_tree(const char *src, const char *dest) {
     }
     fts_close(fts);
 #elif defined(_WIN32)
-    wchar_t src_w[MAX_PATH];
-    wchar_t dest_w[MAX_PATH];
-    if (MultiByteToWideChar(CP_UTF8, 0, src, -1, src_w, MAX_PATH) == 0) {
+    wchar_t *src_w = nullptr;
+    wchar_t *dest_w = nullptr;
+    int src_w_len = MultiByteToWideChar(CP_UTF8, 0, src, -1, nullptr, 0);
+    int dest_w_len = MultiByteToWideChar(CP_UTF8, 0, dest, -1, nullptr, 0);
+    if (src_w_len == 0 || dest_w_len == 0) {
+        log_error("Failed to calculate wide string lengths.\n");
+        return false;
+    }
+    src_w = calloc(src_w_len + 3, sizeof(wchar_t));
+    dest_w = calloc(dest_w_len + 2, sizeof(wchar_t));
+    if (!src_w || !dest_w) {
+        log_error("Failed to allocate memory for wide strings.\n");
+        free(src_w);
+        free(dest_w);
+        return false;
+    }
+    if (MultiByteToWideChar(CP_UTF8, 0, src, -1, src_w, src_w_len) == 0) {
         log_error("Failed to convert source path to wide string.\n");
+        free(src_w);
+        free(dest_w);
         return false;
     }
-    if (MultiByteToWideChar(CP_UTF8, 0, dest, -1, dest_w, MAX_PATH) == 0) {
+    if (MultiByteToWideChar(CP_UTF8, 0, dest, -1, dest_w, dest_w_len) == 0) {
         log_error("Failed to convert destination path to wide string.\n");
-        return false;
-    }
-    size_t src_len = wcslen(src_w);
-    if (src_len + 2 >= MAX_PATH) {
-        log_error("Source path '%s' is too long.\n", src);
+        free(src_w);
+        free(dest_w);
         return false;
     }
     wcscat(src_w, L"\\*");
-    src_w[src_len + 2] = L'\0';
-    size_t dest_len = wcslen(dest_w);
-    if (dest_len + 1 >= MAX_PATH) {
-        log_error("Destination path '%s' is too long.\n", dest);
-        return false;
-    }
-    dest_w[dest_len + 1] = L'\0';
-    SHFILEOPSTRUCTW file_op = {0};
+    src_w[src_w_len + 1] = L'\0';
+    src_w[src_w_len + 2] = L'\0';
+    dest_w[dest_w_len] = L'\0';
+    dest_w[dest_w_len + 1] = L'\0';
+#ifndef NDEBUG
+    wprintf(L"Copying '%ls' (length: %d) to '%ls' (length: %d).\n",
+            src_w,
+            wcslen(src_w),
+            dest_w,
+            wcslen(dest_w));
+#endif
+    SHFILEOPSTRUCT file_op = {0};
     file_op.wFunc = FO_COPY;
     file_op.pFrom = src_w;
     file_op.pTo = dest_w;
-    file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
-    if (SHFileOperationW(&file_op) != 0) {
-        log_error("Failed to copy directory from '%s' to '%s'.\n", src, dest);
+    file_op.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR;
+    int ret = SHFileOperation(&file_op);
+    if (file_op.fAnyOperationsAborted) {
+        log_error("Failed to copy '%s' to '%s'; ret = %d.\n", src, dest, ret);
+        log_error("At least one file operation was aborted.\n");
+        free(src_w);
+        free(dest_w);
         return false;
     }
+    if (ret != 0) {
+        log_error("Failed to copy '%s' to '%s'; ret = %d.\n", src, dest, ret);
+        free(src_w);
+        free(dest_w);
+        return false;
+    }
+    free(src_w);
+    free(dest_w);
 #else
     DIR *dir = opendir(src);
     struct stat statbuf;
@@ -363,15 +391,15 @@ bool remove_tree(const char *path) {
     wchar_t *path_w;
     size_t path_len = strlen(path);
     int req_size = MultiByteToWideChar(CP_UTF8, 0, path, path_len, nullptr, 0);
-    path_w = malloc((req_size + 1) * sizeof(wchar_t));
+    path_w = calloc(req_size + 1, sizeof(wchar_t));
     MultiByteToWideChar(CP_UTF8, 0, path, path_len, path_w, req_size);
     path_w[req_size] = L'\0';
     path_w[req_size + 1] = L'\0';
-    SHFILEOPSTRUCTW file_op = {0};
+    SHFILEOPSTRUCT file_op = {0};
     file_op.wFunc = FO_DELETE;
     file_op.pFrom = path_w;
     file_op.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
-    int ret = SHFileOperationW(&file_op);
+    int ret = SHFileOperation(&file_op);
     free(path_w);
     if (ret != 0) {
         log_error("Failed to remove directory: %d\n", ret);
