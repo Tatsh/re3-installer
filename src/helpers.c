@@ -235,12 +235,16 @@ bool copy_tree(const char *src, const char *dest) {
     }
     size_t src_len = wcslen(src_w);
     if (src_len + 2 >= MAX_PATH) {
-        log_error("Source path is too long.\n");
+        log_error("Source path '%s' is too long.\n", src);
         return false;
     }
     wcscat(src_w, L"\\*");
-    size_t dest_len = wcslen(dest_w);
     src_w[src_len + 2] = L'\0';
+    size_t dest_len = wcslen(dest_w);
+    if (dest_len + 1 >= MAX_PATH) {
+        log_error("Destination path '%s' is too long.\n", dest);
+        return false;
+    }
     dest_w[dest_len + 1] = L'\0';
     SHFILEOPSTRUCTW file_op = {0};
     file_op.wFunc = FO_COPY;
