@@ -147,11 +147,32 @@ if(BUILD_STATIC AND NOT MSVC)
   target_compile_options(re3-installer PRIVATE -static)
 endif()
 
-install(TARGETS re3-installer RUNTIME)
+install(
+  TARGETS re3-installer
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
+  RUNTIME_DEPENDENCY_SET re3-installer)
 install(FILES ../man/re3-installer.1 TYPE MAN)
-# FIXME include license file in zip
-
-# FIXME install path should not have version number
+if(NOT LINUX)
+  install(FILES ../LICENSE.txt ../README.md ../CHANGELOG.md ../SECURITY.md TYPE DOC)
+  install(FILES ../CITATION.cff DESTINATION ${CMAKE_INSTALL_DATADIR}/re3-installer)
+  if(NOT BUILD_STATIC)
+    if(MINGW)
+      get_filename_component(_mingw_bin_dir ${CMAKE_C_COMPILER} DIRECTORY)
+      set(_mingw_lib_dir ${_mingw_bin_dir}/../lib)
+    endif()
+    message(STATUS "Directories: ${CMAKE_INSTALL_PREFIX}/lib ${_mingw_lib_dir}")
+    install(
+      RUNTIME_DEPENDENCY_SET
+      re3-installer
+      PRE_EXCLUDE_REGEXES
+      "."
+      PRE_INCLUDE_REGEXES
+      "iso9660|cdio|unshield"
+      DIRECTORIES
+      ${CMAKE_INSTALL_PREFIX}/lib
+      ${_mingw_lib_dir})
+  endif()
+endif()
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_VENDOR Tatsh)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt)

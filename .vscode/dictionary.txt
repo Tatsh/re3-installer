@@ -23,6 +23,7 @@ defenses
 denable
 docstrings
 doxyfile
+dylib
 egor
 endforeach
 endfunction
