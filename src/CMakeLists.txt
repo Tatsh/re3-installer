@@ -34,6 +34,9 @@ function(add_flags target)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(${target} PRIVATE ${GCC_CLANG_SHARED_C_FLAGS}
                                              $<$<CONFIG:Debug>:${GCC_CLANG_DEBUG_C_FLAGS}>)
+    if(WIN32)
+      target_link_options(${target} PRIVATE -static -static-libgcc -static-libstdc++)
+    endif()
   else()
     target_compile_options(${target} PRIVATE /Zc:forScope /Zc:inline /external:W0 /utf-8)
   endif()
@@ -167,7 +170,7 @@ if(NOT LINUX)
       PRE_EXCLUDE_REGEXES
       "."
       PRE_INCLUDE_REGEXES
-      "iso9660|cdio|unshield|iconv|zlib|crypto"
+      "gcc|iso9660|cdio|unshield|iconv|zlib|crypto|winpthread"
       DIRECTORIES
       ${CMAKE_INSTALL_PREFIX}/bin
       ${_mingw_bin_dir})

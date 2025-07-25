@@ -223,6 +223,16 @@ jobs:
           cpack -C ${{matrix.build-type}}
           --config ${{steps.fixed_workspace.outputs.out}}/build/CPackConfig.cmake --verbose
         shell: msys2 {0}
+      - name: Get Latest Tag
+        id: latest_tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+      - if: ${{matrix.sys.name == 'mingw32'}}
+        name: Upload package
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{github.workspace}}/re3-installer-*.zip
+          tag_name: ${{ steps.latest_tag.outputs.tag }}
     strategy:
       fail-fast: false
       matrix:
