@@ -158,7 +158,7 @@ if(NOT LINUX)
   if(NOT BUILD_STATIC)
     if(MINGW)
       get_filename_component(_mingw_bin_dir ${CMAKE_C_COMPILER} DIRECTORY)
-      set(_mingw_lib_dir ${_mingw_bin_dir}/../lib)
+      set(_mingw_lib_dir ${_mingw_bin_dir})
     endif()
     message(STATUS "Directories: ${CMAKE_INSTALL_PREFIX}/lib ${_mingw_lib_dir}")
     install(
@@ -167,10 +167,10 @@ if(NOT LINUX)
       PRE_EXCLUDE_REGEXES
       "."
       PRE_INCLUDE_REGEXES
-      "iso9660|cdio|unshield"
+      "iso9660|cdio|unshield|iconv|zlib|crypto"
       DIRECTORIES
-      ${CMAKE_INSTALL_PREFIX}/lib
-      ${_mingw_lib_dir})
+      ${CMAKE_INSTALL_PREFIX}/bin
+      ${_mingw_bin_dir})
   endif()
 endif()
 set(CPACK_GENERATOR "ZIP")
