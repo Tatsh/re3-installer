@@ -2,7 +2,7 @@
 
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/re3-installer)](https://github.com/Tatsh/re3-installer/tags)
 [![License](https://img.shields.io/github/license/Tatsh/re3-installer)](https://github.com/Tatsh/re3-installer/blob/master/LICENSE.txt)
-[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/re3-installer/v0.2.0/master)](https://github.com/Tatsh/re3-installer/compare/v0.2.0...master)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/re3-installer/v0.2.1/master)](https://github.com/Tatsh/re3-installer/compare/v0.2.1...master)
 [![CodeQL](https://github.com/Tatsh/re3-installer/actions/workflows/codeql.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/codeql.yml)
 [![QA](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml)
 [![Tests](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml)

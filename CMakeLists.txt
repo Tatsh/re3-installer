@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.31)
 project(
   re3-installer
   HOMEPAGE_URL "https://tatsh.github.io/re3-installer/"
-  VERSION 0.2.0
+  VERSION 0.2.1
   LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 
