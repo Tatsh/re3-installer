@@ -203,10 +203,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 if (group_index == 0 && !strcmp(dir, "audio")) { // Keep casing consistent
                     dir[0] = 'A';
                 }
-                int ret2 =
-                    sprintf(target_dir, "%s%s%s", installation_dir, dir ? "/" : "", dir ? dir : "");
-                (void)ret2;
-                assert(ret2 > 0);
+                sprintf(target_dir, "%s%s%s", installation_dir, dir ? "/" : "", dir ? dir : "");
                 if (mkdir_p(target_dir) < 0) {
                     if (errno != EEXIST) {
                         log_error("Failed to create directory %s: ", target_dir);
@@ -215,9 +212,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                     }
                 }
                 char *target_path = calloc(PATH_MAX, 1);
-                ret2 = sprintf(target_path, "%s/%s", target_dir, name);
-                (void)ret2;
-                assert(ret2 > 0);
+                sprintf(target_path, "%s/%s", target_dir, name);
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);
                 if (!unshield_ret) {
                     log_debug("Ignoring error saving file '%s'.\n", target_path);
