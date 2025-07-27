@@ -26,12 +26,6 @@
   "editor.rulers": [100],
   "editor.tabSize": 2,
   "editor.wordWrapColumn": 100,
-  "files.associations": {
-    "__config": "c",
-    "errno.h": "c",
-    "libunshield.h": "c",
-    "support.h": "c"
-  },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,

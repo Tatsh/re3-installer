@@ -52,7 +52,7 @@ static int iso_extract_files(iso9660_t *p_iso,
     psz_basename = &psz_fullpath[i_length];
     p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
     if (!p_entlist) {
-        log_error("Could not access %s\n.", psz_path);
+        log_error("Could not access '%s'.\n", psz_path);
         return 1;
     }
     _CDIO_LIST_FOREACH(p_entnode, p_entlist) {
@@ -143,7 +143,7 @@ bool extract_iso_to_temp(const char *iso_path,
     }
     *output_dir = mkdtemp(template);
 #endif
-    if (!output_dir) {
+    if (!*output_dir) {
         log_error("Failed to create temporary directory.\n");
         return false;
     }
@@ -215,7 +215,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 }
                 char *target_path = calloc(PATH_MAX, 1);
                 ret2 = sprintf(target_path, "%s/%s", target_dir, name);
-                assert(ret > 0);
+                assert(ret2 > 0);
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);
                 if (!unshield_ret) {
                     log_debug("Ignoring error saving file '%s'.\n", target_path);
