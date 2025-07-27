@@ -179,8 +179,13 @@ static void test_unshield_extract_failure_open(void **state) {
 
 static void test_unshield_extract_failure_group_find(void **state) {
     (void)state;
+    expect_string(__wrap_unshield_open, filename, "test.cab");
     will_return(__wrap_unshield_open, (void *)0x1);
+    expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
+    expect_string(__wrap_unshield_file_group_find, group_name, "App Executables");
     will_return(__wrap_unshield_file_group_find, NULL);
+    expect_any(__wrap_unshield_set_log_level, level);
+    expect_value(__wrap_unshield_close, unshield, (void *)0x1);
     bool result = unshield_extract("test.cab", "/installation");
     assert_false(result);
 }
@@ -229,24 +234,34 @@ static void test_extract_iso_to_temp_failure_env(void **state) {
 static void test_extract_iso_to_temp_failure_mkdtemp(void **state) {
     (void)state;
     expect_string(__wrap_env, var_name, "TMPDIR");
-    will_return(__wrap_env, "/tmp");
+    char *tmpdir = calloc(PATH_MAX, 1);
+    strcpy(tmpdir, "/tmp");
+    will_return(__wrap_env, tmpdir);
+    expect_string(__wrap_mkdtemp, template, "/tmp/re3.XXXXXX");
     will_return(__wrap_mkdtemp, NULL);
     char *output_dir = nullptr;
     bool result = extract_iso_to_temp("test.iso", &output_dir, nullptr);
     assert_false(result);
     assert_null(output_dir);
+    free(tmpdir);
 }
 
 static void test_extract_iso_to_temp_failure_iso_open(void **state) {
     (void)state;
-    will_return(__wrap_env, "/tmp");
+    expect_string(__wrap_env, var_name, "TMPDIR");
+    char *tmpdir = calloc(PATH_MAX, 1);
+    strcpy(tmpdir, "/tmp");
+    will_return(__wrap_env, tmpdir);
+    expect_string(__wrap_mkdtemp, template, "/tmp/re3.XXXXXX");
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
+    expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
+    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, NULL);
     char *output_dir = nullptr;
     bool result = extract_iso_to_temp("test.iso", &output_dir, nullptr);
     assert_false(result);
     assert_non_null(output_dir);
-    free(output_dir);
+    free(tmpdir);
 }
 
 static void test_extract_iso_to_temp_ifs_readdir_fail(void **state) {
@@ -277,10 +292,10 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_extract_iso_to_temp_failure_env),
         cmocka_unit_test(test_extract_iso_to_temp_ifs_readdir_fail),
-        // cmocka_unit_test(test_extract_iso_to_temp_failure_iso_open),
-        // cmocka_unit_test(test_extract_iso_to_temp_failure_mkdtemp),
+        cmocka_unit_test(test_extract_iso_to_temp_failure_iso_open),
+        cmocka_unit_test(test_extract_iso_to_temp_failure_mkdtemp),
         // cmocka_unit_test(test_extract_iso_to_temp_success),
-        // cmocka_unit_test(test_unshield_extract_failure_group_find),
+        cmocka_unit_test(test_unshield_extract_failure_group_find),
         // cmocka_unit_test(test_unshield_extract_failure_mkdir),
         // cmocka_unit_test(test_unshield_extract_failure_open),
         // cmocka_unit_test(test_unshield_extract_success),
