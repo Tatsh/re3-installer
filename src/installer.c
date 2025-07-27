@@ -14,11 +14,11 @@
 #include "support.h"
 
 static bool cd1_filter(const char *path) {
-    return !strncmp(path, "data", 4);
+    return path[0] == 'd' && path[1] == 'a' && path[2] == 't' && path[3] == 'a';
 }
 
 static bool cd2_filter(const char *path) {
-    return !strncmp(path, "Audio", 5);
+    return path[0] == 'A' && path[1] == 'u' && path[2] == 'd' && path[3] == 'i' && path[4] == 'o';
 }
 
 bool install_re3_game_data(const char *disc1_path,
