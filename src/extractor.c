@@ -205,6 +205,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 }
                 int ret2 =
                     sprintf(target_dir, "%s%s%s", installation_dir, dir ? "/" : "", dir ? dir : "");
+                (void)ret2;
                 assert(ret2 > 0);
                 if (mkdir_p(target_dir) < 0) {
                     if (errno != EEXIST) {
@@ -215,6 +216,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                 }
                 char *target_path = calloc(PATH_MAX, 1);
                 ret2 = sprintf(target_path, "%s/%s", target_dir, name);
+                (void)ret2;
                 assert(ret2 > 0);
                 bool unshield_ret = unshield_file_save(unshield, (int)i, target_path);
                 if (!unshield_ret) {

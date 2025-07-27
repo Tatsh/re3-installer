@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "env.h"
+#include "support.h"
 
 char *env(const char *var_name) {
 #ifdef _WIN32

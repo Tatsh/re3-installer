@@ -46,8 +46,7 @@ jobs:
           -e src/tests
     strategy:
       matrix:
-        build-type: [Debug]
-        # RelWithDebInfo
+        build-type: [Debug, Release]
   asan-test:
     runs-on: ubuntu-latest
     steps:
@@ -67,8 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build-type: [Debug]
-        # RelWithDebInfo
+        build-type: [Debug, RelWithDebInfo]
 name: Tests
 'on':
   pull_request:
