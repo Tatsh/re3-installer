@@ -34,7 +34,7 @@ set(debug_flags
 
 set(installer_tests_mocked_functions
     is_dir_empty
-    is_iso
+    ends_with_iso
     extract_iso_to_temp
     unshield_extract
     copy_tree

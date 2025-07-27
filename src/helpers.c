@@ -40,10 +40,7 @@ bool is_directory(const char *path) {
     return S_ISDIR(statbuf.st_mode);
 }
 
-bool is_iso(const char *path) {
-    if (!strncmp(path, "iso", 3)) {
-        return true;
-    }
+bool ends_with_iso(const char *path) {
     size_t len = strlen(path);
     if (len < 3) {
         return false;

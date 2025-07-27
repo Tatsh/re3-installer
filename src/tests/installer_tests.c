@@ -16,7 +16,7 @@ bool __wrap_is_dir_empty(const char *path) {
     return mock_type(bool);
 }
 
-bool __wrap_is_iso(const char *path) {
+bool __wrap_ends_with_iso(const char *path) {
     check_expected_ptr(path);
     return mock_type(bool);
 }
@@ -53,11 +53,11 @@ static void test_install_re3_game_data_success(void **state) {
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
 
-    expect_string(__wrap_is_iso, path, "/path/to/disc1");
-    will_return(__wrap_is_iso, false);
+    expect_string(__wrap_ends_with_iso, path, "/path/to/disc1");
+    will_return(__wrap_ends_with_iso, false);
 
-    expect_string(__wrap_is_iso, path, "/path/to/disc2");
-    will_return(__wrap_is_iso, false);
+    expect_string(__wrap_ends_with_iso, path, "/path/to/disc2");
+    will_return(__wrap_ends_with_iso, false);
 
     expect_string(__wrap_unshield_extract, cab_path, "/path/to/disc1/data1.cab");
     expect_string(__wrap_unshield_extract, dest_dir, "/installation/dir");
@@ -91,8 +91,8 @@ static void test_install_re3_game_data_failed_extract_iso(void **state) {
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
 
-    expect_string(__wrap_is_iso, path, "/path/to/disc1");
-    will_return(__wrap_is_iso, true);
+    expect_string(__wrap_ends_with_iso, path, "/path/to/disc1");
+    will_return(__wrap_ends_with_iso, true);
 
     expect_string(__wrap_extract_iso_to_temp, iso_path, "/path/to/disc1");
     expect_any(__wrap_extract_iso_to_temp, out_dir);
@@ -110,11 +110,11 @@ static void test_install_re3_game_data_failed_copy_tree(void **state) {
     expect_string(__wrap_is_dir_empty, path, "/installation/dir");
     will_return(__wrap_is_dir_empty, true);
 
-    expect_string(__wrap_is_iso, path, "/path/to/disc1");
-    will_return(__wrap_is_iso, false);
+    expect_string(__wrap_ends_with_iso, path, "/path/to/disc1");
+    will_return(__wrap_ends_with_iso, false);
 
-    expect_string(__wrap_is_iso, path, "/path/to/disc2");
-    will_return(__wrap_is_iso, false);
+    expect_string(__wrap_ends_with_iso, path, "/path/to/disc2");
+    will_return(__wrap_ends_with_iso, false);
 
     expect_string(__wrap_unshield_extract, cab_path, "/path/to/disc1/data1.cab");
     expect_string(__wrap_unshield_extract, dest_dir, "/installation/dir");

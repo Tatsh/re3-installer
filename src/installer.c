@@ -40,14 +40,14 @@ bool install_re3_game_data(const char *disc1_path,
         err = true;
         goto cleanup;
     }
-    if (is_iso(disc1_path)) {
+    if (ends_with_iso(disc1_path)) {
         iso_mode_disc1 = true;
         if (!extract_iso_to_temp(disc1_path, &disc1_out_dir, cd1_filter)) {
             log_error("Failed to extract disc 1.\n");
             return false;
         }
     }
-    if (is_iso(disc2_path)) {
+    if (ends_with_iso(disc2_path)) {
         iso_mode_disc2 = true;
         if (!extract_iso_to_temp(disc2_path, &disc2_out_dir, cd2_filter)) {
             log_error("Failed to extract disc 2.\n");
