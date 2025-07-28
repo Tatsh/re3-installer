@@ -84,7 +84,7 @@ jobs:
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x64
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build unshield
@@ -186,7 +186,7 @@ jobs:
             toolchain:p
             zlib:p
           update: true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build unshield
