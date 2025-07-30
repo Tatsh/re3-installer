@@ -179,7 +179,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
          group_index++) {
         UnshieldFileGroup *group = unshield_file_group_find(unshield, FILE_GROUPS[group_index]);
         if (!group) {
-            log_error("Could not find %s group.\n", FILE_GROUPS[group_index]);
+            log_error("Could not find '%s' group.\n", FILE_GROUPS[group_index]);
             ret = group_index != 0;
             goto cleanup;
         }
@@ -199,14 +199,13 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                     }
                 }
 #endif
-                memset(target_dir, 0, PATH_MAX);
                 if (group_index == 0 && !strcmp(dir, "audio")) { // Keep casing consistent
                     dir[0] = 'A';
                 }
                 sprintf(target_dir, "%s%s%s", installation_dir, dir ? "/" : "", dir ? dir : "");
                 if (mkdir_p(target_dir) < 0) {
                     if (errno != EEXIST) {
-                        log_error("Failed to create directory %s: ", target_dir);
+                        log_error("Failed to create directory: %s\n", target_dir);
                         ret = false;
                         goto cleanup;
                     }
