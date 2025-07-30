@@ -180,7 +180,7 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
         UnshieldFileGroup *group = unshield_file_group_find(unshield, FILE_GROUPS[group_index]);
         if (!group) {
             log_error("Could not find %s group.\n", FILE_GROUPS[group_index]);
-            ret = false;
+            ret = group_index != 0;
             goto cleanup;
         }
         char *target_dir = calloc(PATH_MAX, 1);
