@@ -16,6 +16,9 @@
 
 Install GTA III files from ISO or directories for use with re3.
 
+This also works with ISO files or directories GTA Vice City. You should specify the `INSTALL_DIR`
+argument.
+
 ## Usage
 
 ```plain
