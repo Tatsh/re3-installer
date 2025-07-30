@@ -73,6 +73,10 @@ static void test_ends_with_iso_dll_exe_url(void **state) {
     assert_true(ends_with_url("link.url"));
     assert_true(ends_with_url("LINK.URL"));
     assert_false(ends_with_url("link.txt"));
+    assert_false(ends_with_iso(""));
+    assert_false(ends_with_dll(""));
+    assert_false(ends_with_exe(""));
+    assert_false(ends_with_url(""));
 }
 
 static void test_validate_args(void **state) {
@@ -86,6 +90,8 @@ static void test_validate_args(void **state) {
     assert_non_null(f2);
     fclose(f1);
     fclose(f2);
+    char *const empty_argv[] = {(char *)"prog"};
+    assert_false(validate_args(1, empty_argv));
     char *const argv1[] = {(char *)"prog", iso1, iso2};
     assert_true(validate_args(3, argv1));
     char *const argv2[] = {(char *)"prog", iso1, iso2, dir};

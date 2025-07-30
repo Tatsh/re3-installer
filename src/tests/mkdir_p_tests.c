@@ -80,14 +80,9 @@ static void test_mkdir_p_existing(void **state) {
 
 static void test_mkdir_p_long_path(void **state) {
     (void)state;
-    char path[PATH_MAX];
+    char path[PATH_MAX + 10];
     memset(path, 'a', sizeof(path) - 1);
     path[sizeof(path) - 1] = '\0';
-
-    expect_string(__wrap_mkdir, path, path);
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
-    will_return(__wrap_mkdir, ENAMETOOLONG);
-    will_return(__wrap_mkdir, -1);
 
     int ret = mkdir_p(path);
     assert_true(ret == -1);

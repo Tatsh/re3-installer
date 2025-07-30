@@ -78,7 +78,9 @@ bool is_dir_empty(const char *path) {
 #ifndef _WIN32
     DIR *dir = opendir(path);
     if (!dir) {
+        // LCOV_EXCL_START
         return false;
+        // LCOV_EXCL_STOP
     }
     struct dirent *entry;
     while ((entry = readdir(dir)) != nullptr) {

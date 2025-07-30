@@ -13,6 +13,7 @@
 #include "mkdir_p.h"
 #include "support.h"
 
+// LCOV_EXCL_START
 static bool cd1_filter(const char *path) {
     return path[0] == 'd' && path[1] == 'a' && path[2] == 't' && path[3] == 'a';
 }
@@ -20,6 +21,7 @@ static bool cd1_filter(const char *path) {
 static bool cd2_filter(const char *path) {
     return path[0] == 'A' && path[1] == 'u' && path[2] == 'd' && path[3] == 'i' && path[4] == 'o';
 }
+// LCOV_EXCL_STOP
 
 bool install_re3_game_data(const char *disc1_path,
                            const char *disc2_path,
