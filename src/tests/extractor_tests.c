@@ -230,7 +230,7 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     UnshieldFileGroup *group = calloc(1, sizeof(UnshieldFileGroup));
     group->name = "App Executables";
     group->first_file = 0;
-    group->last_file = 0;
+    group->last_file = 1;
     will_return(__wrap_unshield_file_group_find, group);
 
     expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
@@ -241,9 +241,17 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     expect_value(__wrap_unshield_file_is_valid, index, 0);
     will_return(__wrap_unshield_file_is_valid, true);
 
+    expect_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
+    expect_value(__wrap_unshield_file_is_valid, index, 1);
+    will_return(__wrap_unshield_file_is_valid, true);
+
     expect_value(__wrap_unshield_file_name, unshield, (void *)0x1);
     expect_value(__wrap_unshield_file_name, index, 0);
     will_return(__wrap_unshield_file_name, "test_file.txt");
+
+    expect_value(__wrap_unshield_file_name, unshield, (void *)0x1);
+    expect_value(__wrap_unshield_file_name, index, 1);
+    will_return(__wrap_unshield_file_name, "test_file.exe");
 
     expect_string(__wrap_ends_with_dll, filename, "test_file.txt");
     will_return(__wrap_ends_with_dll, false);
@@ -252,20 +260,23 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     expect_string(__wrap_ends_with_url, filename, "test_file.txt");
     will_return(__wrap_ends_with_url, false);
 
+    expect_string(__wrap_ends_with_exe, filename, "test_file.exe");
+    will_return(__wrap_ends_with_exe, true);
+
     expect_value(__wrap_unshield_file_directory, unshield, (void *)0x1);
     expect_value(__wrap_unshield_file_directory, index, 0);
     will_return(__wrap_unshield_file_directory, 1);
 
     expect_value(__wrap_unshield_directory_name, unshield, (void *)0x1);
     expect_value(__wrap_unshield_directory_name, index, 1);
-    will_return(__wrap_unshield_directory_name, "audio");
+    will_return(__wrap_unshield_directory_name, "aud\\io");
 
-    expect_string(__wrap_mkdir_p, path, "/installation/Audio");
+    expect_string(__wrap_mkdir_p, path, "/installation/aud/io");
     will_return(__wrap_mkdir_p, 0);
 
     expect_value(__wrap_unshield_file_save, unshield, (void *)0x1);
     expect_value(__wrap_unshield_file_save, index, 0);
-    expect_string(__wrap_unshield_file_save, output_dir, "/installation/Audio/test_file.txt");
+    expect_string(__wrap_unshield_file_save, output_dir, "/installation/aud/io/test_file.txt");
     will_return(__wrap_unshield_file_save, false);
 
     expect_any(__wrap_unshield_set_log_level, level);

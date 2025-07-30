@@ -222,7 +222,9 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
         }
         free(target_dir);
     }
+// LCOV_EXCL_START
 cleanup:
+    // LCOV_EXCL_STOP
     unshield_close(unshield);
     return ret;
 }
