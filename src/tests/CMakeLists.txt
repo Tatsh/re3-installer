@@ -121,7 +121,7 @@ set(mkdir_p_tests_mocked_functions mkdir)
 foreach(func ${mkdir_p_tests_mocked_functions})
   list(APPEND mkdir_p_tests_flags "-Wl,--wrap,${func}")
 endforeach()
-add_executable(mkdir_p_tests ../mkdir_p.c mkdir_p_tests.c)
+add_executable(mkdir_p_tests ../mkdir_p.c ../mkdir_p.h mkdir_p_tests.c)
 target_link_libraries(mkdir_p_tests cmocka)
 add_min_winnt(mkdir_p_tests)
 add_asan(mkdir_p_tests)
@@ -135,3 +135,28 @@ if(ENABLE_COVERAGE)
 endif()
 target_link_options(mkdir_p_tests PRIVATE ${mkdir_p_tests_flags})
 add_test(NAME mkdir_p_tests COMMAND mkdir_p_tests)
+
+add_executable(
+  helpers_tests
+  ../env.c
+  ../env.h
+  ../helpers.c
+  ../helpers.h
+  ../log.c
+  ../log.h
+  ../mkdir_p.c
+  ../mkdir_p.h
+  helpers_tests.c)
+target_link_libraries(helpers_tests cmocka)
+add_min_winnt(helpers_tests)
+add_asan(helpers_tests)
+add_ubsan(helpers_tests)
+add_flags(helpers_tests)
+target_include_directories(helpers_tests PRIVATE ..)
+target_compile_options(helpers_tests PRIVATE ${debug_flags})
+if(ENABLE_COVERAGE)
+  target_compile_options(helpers_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
+  target_link_libraries(helpers_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
+endif()
+target_link_options(helpers_tests PRIVATE ${helpers_tests_flags})
+add_test(NAME helpers_tests COMMAND helpers_tests)

@@ -39,6 +39,8 @@ jobs:
           -i src/env.h
           -i src/extractor.c
           -i src/extractor.h
+          -i src/helpers.c
+          -i src/helpers.h
           -i src/installer.c
           -i src/installer.h
           -i src/log.c

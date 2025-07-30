@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
@@ -73,14 +75,40 @@ bool ends_with_url(const char *path) {
 }
 
 bool is_dir_empty(const char *path) {
-    struct stat statbuf;
-    if (stat(path, &statbuf) < 0) {
+#ifndef _WIN32
+    DIR *dir = opendir(path);
+    if (!dir) {
         return false;
     }
-    if (!S_ISDIR(statbuf.st_mode)) {
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+            closedir(dir);
+            return false;
+        }
+    }
+    closedir(dir);
+    return true;
+#else
+    WIN32_FIND_DATA find_data;
+    HANDLE h_find;
+    char search_path[MAX_PATH];
+    snprintf(search_path, MAX_PATH, "%s\\*", path);
+    h_find = FindFirstFile(search_path, &find_data);
+    if (h_find == INVALID_HANDLE_VALUE) {
         return false;
     }
-    return statbuf.st_nlink <= 2;
+    bool is_empty = true;
+    do {
+        if (strncmp(find_data.cFileName, ".", 1) != 0 &&
+            strncmp(find_data.cFileName, "..", 2) != 0) {
+            is_empty = false;
+            break;
+        }
+    } while (FindNextFile(h_find, &find_data) != 0);
+    FindClose(h_find);
+    return is_empty;
+#endif
 }
 
 bool validate_args(int argc, char *const argv[]) {
@@ -141,6 +169,7 @@ char *get_installation_dir() {
     } else {
         sprintf(install_dir, "%s/re3", xdg_data_home);
     }
+    free(home_dir);
     free(xdg_data_home);
 #endif
     return install_dir;
