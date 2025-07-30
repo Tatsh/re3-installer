@@ -43,6 +43,9 @@ jobs:
           -i src/installer.h
           -i src/log.c
           -i src/log.h
+          -i src/mkdir_p.c
+          -i src/mkdir_p.h
+          -i src/support.h
           -e src/tests
     strategy:
       matrix:

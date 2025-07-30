@@ -1,7 +1,6 @@
-#include <string.h>
-
 #include <errno.h>
 #include <limits.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -31,18 +30,16 @@ int mkdir_p(const char *path) {
             /* Temporarily truncate */
             *p = '\0';
 
-            if (mkdir(_path, S_IRWXU) != 0) {
-                if (errno != EEXIST)
-                    return -1;
+            if (mkdir(_path, S_IRWXU) != 0 && errno != EEXIST) {
+                return -1;
             }
 
             *p = '/';
         }
     }
 
-    if (mkdir(_path, S_IRWXU) != 0) {
-        if (errno != EEXIST)
-            return -1;
+    if (mkdir(_path, S_IRWXU) != 0 && errno != EEXIST) {
+        return -1;
     }
 
     return 0;
