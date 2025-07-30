@@ -203,12 +203,12 @@ bool unshield_extract(const char *cab_path, const char *installation_dir) {
                     dir[0] = 'A';
                 }
                 sprintf(target_dir, "%s%s%s", installation_dir, dir ? "/" : "", dir ? dir : "");
-                if (mkdir_p(target_dir) < 0) {
-                    if (errno != EEXIST) {
-                        log_error("Failed to create directory: %s\n", target_dir);
-                        ret = false;
-                        goto cleanup;
-                    }
+                if (mkdir_p(target_dir) < 0 && errno != EEXIST) {
+                    log_error("Failed to create directory: %s\n", target_dir);
+                    ret = false;
+                    free(target_dir);
+                    free(dir);
+                    goto cleanup;
                 }
                 char *target_path = calloc(PATH_MAX, 1);
                 sprintf(target_path, "%s/%s", target_dir, name);
