@@ -94,16 +94,25 @@ bool is_dir_empty(const char *path) {
 #else
     WIN32_FIND_DATA find_data;
     HANDLE h_find;
-    char search_path[MAX_PATH];
-    snprintf(search_path, MAX_PATH, "%s\\*", path);
+    wchar_t search_path[MAX_PATH];
+    int wlen = MultiByteToWideChar(CP_UTF8, 0, path, -1, search_path, MAX_PATH);
+    if (wlen == 0) {
+        return false;
+    }
+    size_t plen = wcslen(search_path);
+    if (plen + 2 >= MAX_PATH) {
+        return false;
+    }
+    search_path[plen] = L'\\';
+    search_path[plen + 1] = L'*';
+    search_path[plen + 2] = L'\0';
     h_find = FindFirstFile(search_path, &find_data);
     if (h_find == INVALID_HANDLE_VALUE) {
         return false;
     }
     bool is_empty = true;
     do {
-        if (strncmp(find_data.cFileName, ".", 1) != 0 &&
-            strncmp(find_data.cFileName, "..", 2) != 0) {
+        if (wcscmp(find_data.cFileName, L".") != 0 && wcscmp(find_data.cFileName, L"..") != 0) {
             is_empty = false;
             break;
         }
