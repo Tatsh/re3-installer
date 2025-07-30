@@ -22,6 +22,10 @@ winpbcopy simulates macOS' pbcopy/pbpaste commands.
   - `config` for configuration.
 - Prefer to use immutable data structures over mutable ones.
 
+## C/C++ guidelines
+
+- Use `nullptr` instead of `NULL` unless it is required.
+
 ## JSON and YAML
 
 - By default, output should be recursively sorted by key.
