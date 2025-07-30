@@ -9,6 +9,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Improved detection of empty directories.
+- Leniency to missing file groups so that GTA VC can also be installed using this tool.
+
+### Fixed
+
+- Fixed some potential memory leaks.
+
 ## [0.2.1] - 2025-07-24
 
 ### Added
