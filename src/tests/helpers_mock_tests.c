@@ -108,19 +108,31 @@ int __wrap_stat(const char *path, struct stat *buf) {
     return mock_type(int);
 }
 
-static void test_get_installation_dir_xdg_data_home_empty(void **state) {
+static void test_is_directory_stat_returns_negative(void **state) {
+    (void)state;
+    // Expect stat to be called with the given path and return -1
+    expect_string(__wrap_stat, path, "notadir");
+    expect_any(__wrap_stat, buf);
+    will_return(__wrap_stat, -1);
+
+    bool result = is_directory("notadir");
+    assert_false(result);
+}
+
+static void test_get_installation_dir_xdg_data_home_not_empty(void **state) {
     (void)state;
     // Expect env to be called with 'XDG_DATA_HOME' and return zero-length string
     expect_string(__wrap_env, name, "HOME");
     will_return(__wrap_env, strdup("/home/user"));
 
     expect_string(__wrap_env, name, "XDG_DATA_HOME");
-    will_return(__wrap_env, strdup(""));
+    will_return(__wrap_env, strdup("/home/user/.local/share"));
 
     char *dir = get_installation_dir();
     assert_non_null(dir);
     // Should not be empty, as fallback is used
     assert_true(strlen(dir) > 0);
+    assert_string_equal(dir, "/home/user/.local/share/re3");
     free(dir);
 }
 
@@ -434,6 +446,7 @@ static void test_remove_tree_fts_read_returns_fts_ns(void **state) {
 
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_is_directory_stat_returns_negative),
         cmocka_unit_test(test_copy_tree_fts_open_returns_null),
         cmocka_unit_test(test_copy_tree_fts_read_returns_fts_err),
         cmocka_unit_test(test_copy_tree_fts_read_returns_fts_ns),
@@ -441,7 +454,7 @@ int main(void) {
         cmocka_unit_test(test_copy_tree_open_dest_returns_negative),
         cmocka_unit_test(test_copy_tree_open_src_returns_negative),
         cmocka_unit_test(test_copy_tree_sendfile_returns_negative),
-        cmocka_unit_test(test_get_installation_dir_xdg_data_home_empty),
+        cmocka_unit_test(test_get_installation_dir_xdg_data_home_not_empty),
         cmocka_unit_test(test_remove_tree_fts_open_returns_null),
         cmocka_unit_test(test_remove_tree_fts_read_returns_fts_err),
         cmocka_unit_test(test_remove_tree_fts_read_returns_fts_ns),

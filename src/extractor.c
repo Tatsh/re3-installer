@@ -26,11 +26,11 @@
 #endif
 
 // Taken from https://github.com/libcdio/libcdio/blob/master/example/extract.c
-static int iso_extract_files(iso9660_t *p_iso,
-                             const char *psz_path,
-                             const char *psz_extract_dir,
-                             uint8_t i_joliet_level,
-                             should_extract_callback_t should_extract) {
+ATTR_NONNULL static int iso_extract_files(iso9660_t *p_iso,
+                                          const char *psz_path,
+                                          const char *psz_extract_dir,
+                                          uint8_t i_joliet_level,
+                                          should_extract_callback_t should_extract) {
     FILE *fd = nullptr;
     int i_length, r = 1;
     char psz_fullpath[PATH_MAX] = {0}, *psz_basename;
@@ -42,13 +42,8 @@ static int iso_extract_files(iso9660_t *p_iso,
     size_t i;
     lsn_t lsn;
     int64_t i_file_length;
-    if (p_iso == nullptr || psz_path == nullptr) {
-        return 1;
-    }
     i_length = snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
-    if (i_length < 0) {
-        return 1;
-    }
+    assert(i_length > 0);
     psz_basename = &psz_fullpath[i_length];
     p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
     if (!p_entlist) {
@@ -58,7 +53,9 @@ static int iso_extract_files(iso9660_t *p_iso,
     _CDIO_LIST_FOREACH(p_entnode, p_entlist) {
         p_statbuf = (iso9660_stat_t *)_cdio_list_node_data(p_entnode);
         /* Eliminate . and .. entries */
-        if (strcmp(p_statbuf->filename, ".") == 0 || strcmp(p_statbuf->filename, "..") == 0) {
+        if (p_statbuf->filename[0] == '.' &&
+            (p_statbuf->filename[1] == '\0' ||
+             (p_statbuf->filename[1] == '.' && p_statbuf->filename[2] == '\0'))) {
             continue;
         }
         iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
@@ -67,11 +64,13 @@ static int iso_extract_files(iso9660_t *p_iso,
             continue;
         }
         if (p_statbuf->type == _STAT_DIR) {
+            // LCOV_EXCL_START
             mkdir(psz_fullpath, S_IRWXU);
             if (iso_extract_files(
                     p_iso, psz_iso_name, psz_extract_dir, i_joliet_level, should_extract)) {
                 goto out;
             }
+            // LCOV_EXCL_STOP
         } else {
             log_debug("Extracting: %s\n", psz_iso_name + 1);
             fd = fopen(psz_fullpath, "wb");
@@ -102,8 +101,9 @@ static int iso_extract_files(iso9660_t *p_iso,
     }
     r = 0;
 out:
-    if (fd != nullptr)
+    if (fd != nullptr) {
         fclose(fd);
+    }
     iso9660_filelist_free(p_entlist);
     return r;
 }

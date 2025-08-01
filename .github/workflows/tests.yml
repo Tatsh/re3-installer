@@ -25,6 +25,7 @@ jobs:
         name: Generate coverage information
         run: >-
           geninfo
+          --ignore-errors negative
           '--include=src/*'
           -b ${{github.workspace}}
           -o coverage1.info

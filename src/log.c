@@ -13,17 +13,17 @@ enum log_level g_log_level = LOG_LEVEL_INFO;
 enum log_level g_log_level = LOG_LEVEL_DEBUG;
 #endif
 
+// LCOV_EXCL_START
 void log_debug(const char *msg, ...) {
-    // LCOV_EXCL_START
     if (g_log_level != LOG_LEVEL_DEBUG) {
         return;
     }
-    // LCOV_EXCL_STOP
     va_list ap;
     va_start(ap, msg);
     vfprintf(stderr, msg, ap);
     va_end(ap);
 }
+// LCOV_EXCL_STOP
 
 void log_error(const char *msg, ...) {
     va_list ap;
