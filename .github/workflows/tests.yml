@@ -25,6 +25,7 @@ jobs:
         name: Generate coverage information
         run: >-
           geninfo
+          --exclude src/tests
           --ignore-errors negative,negative
           '--include=src/*'
           -b ${{github.workspace}}
@@ -33,8 +34,6 @@ jobs:
       - if: ${{ matrix.build-type == 'Debug' }}
         name: 'Coveralls'
         uses: coverallsapp/github-action@v2
-        with:
-          debug: true
     strategy:
       matrix:
         build-type: [Debug, Release]
