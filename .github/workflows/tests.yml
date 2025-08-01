@@ -20,7 +20,7 @@ jobs:
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/src/tests
+        run: ctest --test-dir ${{github.workspace}}/build/src/tests --output-on-failure
       - if: ${{ matrix.build-type == 'Debug' }}
         name: Generate coverage information
         run: >-
