@@ -120,10 +120,6 @@ int __wrap_mkdir_p(const char *path) {
     return mock_type(int);
 }
 
-int __wrap_errno(void) {
-    return mock_type(int);
-}
-
 char *__wrap_env(const char *var_name) {
     check_expected_ptr(var_name);
     return mock_ptr_type(char *);
@@ -203,10 +199,6 @@ ssize_t __wrap_iso9660_iso_seek_read(void *iso, void *ptr, size_t size, off_t of
 void *__wrap__cdio_list_node_next(void *node) {
     check_expected_ptr(node);
     return mock_ptr_type(void *);
-}
-
-void __wrap_iso9660_filelist_free(void *filelist) {
-    check_expected_ptr(filelist);
 }
 
 void *__wrap_iso9660_ifs_readdir(void *iso, void *dir) {
