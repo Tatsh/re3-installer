@@ -31,43 +31,42 @@ set(debug_flags
     -Wunused-value
     -Wunused-variable
     -Wwrite-strings)
+function(create_test target mocked_functions)
+  set(test_flags "")
+  foreach(func ${mocked_functions})
+    list(APPEND test_flags "-Wl,--wrap,${func}")
+  endforeach()
+  add_executable(${target} ${ARGN})
+  target_link_libraries(${target} cmocka::cmocka $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
+  add_min_winnt(${target})
+  add_asan(${target})
+  add_ubsan(${target})
+  add_flags(${target})
+  target_include_directories(${target} PRIVATE ..)
+  target_compile_options(${target} PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero
+                                           ${debug_flags} $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
+  target_link_options(${target} PRIVATE ${test_flags})
+  add_test(NAME ${target} COMMAND ${target})
+endfunction()
 
 set(installer_tests_mocked_functions
-    is_dir_empty
-    ends_with_iso
-    extract_iso_to_temp
-    unshield_extract
     copy_tree
+    ends_with_iso
+    exists
+    extract_iso_to_temp
+    is_dir_empty
     remove_tree
-    exists)
-foreach(func ${installer_tests_mocked_functions})
-  list(APPEND test_flags "-Wl,--wrap,${func}")
-endforeach()
-add_executable(installer_tests ../installer.c ../installer.h ../log.c ../log.h installer_tests.c)
-target_link_libraries(installer_tests cmocka)
-add_min_winnt(installer_tests)
-add_asan(installer_tests)
-add_ubsan(installer_tests)
-add_flags(installer_tests)
-target_include_directories(installer_tests PRIVATE ..)
-target_compile_options(installer_tests PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero)
-target_compile_options(installer_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(installer_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(installer_tests PRIVATE ${test_flags})
-add_test(NAME installer_tests COMMAND installer_tests)
+    unshield_extract)
+create_test(
+  installer_tests
+  "${installer_tests_mocked_functions}"
+  ../installer.c
+  ../installer.h
+  ../log.c
+  ../log.h
+  installer_tests.c)
 
-add_executable(env_tests ../env.c ../env.h env_tests.c)
-target_link_libraries(env_tests cmocka)
-add_min_winnt(env_tests)
-add_asan(env_tests)
-add_ubsan(env_tests)
-add_flags(env_tests)
-target_include_directories(env_tests PRIVATE ..)
-target_compile_options(env_tests PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero)
-target_compile_options(env_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(env_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(env_tests PRIVATE ${test_flags})
-add_test(NAME env_tests COMMAND env_tests)
+create_test(env_tests "" ../env.c ../env.h env_tests.c)
 
 set(extractor_tests_mocked_functions
     _cdio_list_begin
@@ -98,43 +97,23 @@ set(extractor_tests_mocked_functions
     unshield_file_save
     unshield_open
     unshield_set_log_level)
-foreach(func ${extractor_tests_mocked_functions})
-  list(APPEND extractor_tests_flags "-Wl,--wrap,${func}")
-endforeach()
-add_executable(extractor_tests ../extractor.c ../extractor.h ../log.c ../log.h extractor_tests.c)
-target_link_libraries(extractor_tests cmocka PkgConfig::ISO9660)
-add_min_winnt(extractor_tests)
-add_asan(extractor_tests)
-add_ubsan(extractor_tests)
-add_flags(extractor_tests)
-target_include_directories(extractor_tests PRIVATE ..)
-target_compile_options(extractor_tests PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero)
-target_compile_options(extractor_tests PRIVATE ${debug_flags})
-target_compile_options(extractor_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(extractor_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(extractor_tests PRIVATE ${extractor_tests_flags})
-add_test(NAME extractor_tests COMMAND extractor_tests)
+create_test(
+  extractor_tests
+  "${extractor_tests_mocked_functions}"
+  ../extractor.c
+  ../extractor.h
+  ../log.c
+  ../log.h
+  extractor_tests.c)
+target_link_libraries(extractor_tests PkgConfig::ISO9660)
 
 set(mkdir_p_tests_mocked_functions mkdir)
-foreach(func ${mkdir_p_tests_mocked_functions})
-  list(APPEND mkdir_p_tests_flags "-Wl,--wrap,${func}")
-endforeach()
-add_executable(mkdir_p_tests ../mkdir_p.c ../mkdir_p.h mkdir_p_tests.c)
-target_link_libraries(mkdir_p_tests cmocka)
-add_min_winnt(mkdir_p_tests)
-add_asan(mkdir_p_tests)
-add_ubsan(mkdir_p_tests)
-add_flags(mkdir_p_tests)
-target_include_directories(mkdir_p_tests PRIVATE ..)
-target_compile_options(mkdir_p_tests PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero)
-target_compile_options(mkdir_p_tests PRIVATE ${debug_flags})
-target_compile_options(mkdir_p_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(mkdir_p_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(mkdir_p_tests PRIVATE ${mkdir_p_tests_flags})
-add_test(NAME mkdir_p_tests COMMAND mkdir_p_tests)
+create_test(mkdir_p_tests "${mkdir_p_tests_mocked_functions}" ../mkdir_p.c ../mkdir_p.h
+            mkdir_p_tests.c)
 
-add_executable(
+create_test(
   helpers_tests
+  ""
   ../env.c
   ../env.h
   ../helpers.c
@@ -144,18 +123,6 @@ add_executable(
   ../mkdir_p.c
   ../mkdir_p.h
   helpers_tests.c)
-target_link_libraries(helpers_tests cmocka)
-add_min_winnt(helpers_tests)
-add_asan(helpers_tests)
-add_ubsan(helpers_tests)
-add_flags(helpers_tests)
-target_include_directories(helpers_tests PRIVATE ..)
-target_compile_options(helpers_tests PRIVATE -fprofile-update=atomic -ftrivial-auto-var-init=zero)
-target_compile_options(helpers_tests PRIVATE ${debug_flags})
-target_compile_options(helpers_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(helpers_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(helpers_tests PRIVATE ${helpers_tests_flags})
-add_test(NAME helpers_tests COMMAND helpers_tests)
 
 set(helpers_mock_tests_mocked_functions
     close
@@ -169,20 +136,11 @@ set(helpers_mock_tests_mocked_functions
     sendfile
     stat
     unlink)
-foreach(func ${helpers_mock_tests_mocked_functions})
-  list(APPEND helpers_mock_tests_flags "-Wl,--wrap,${func}")
-endforeach()
-add_executable(helpers_mock_tests ../helpers.c ../helpers.h ../log.c ../log.h helpers_mock_tests.c)
-target_link_libraries(helpers_mock_tests cmocka)
-add_min_winnt(helpers_mock_tests)
-add_asan(helpers_mock_tests)
-add_ubsan(helpers_mock_tests)
-add_flags(helpers_mock_tests)
-target_include_directories(helpers_mock_tests PRIVATE ..)
-target_compile_options(helpers_mock_tests PRIVATE -fprofile-update=atomic
-                                                  -ftrivial-auto-var-init=zero)
-target_compile_options(helpers_mock_tests PRIVATE ${debug_flags})
-target_compile_options(helpers_mock_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
-target_link_libraries(helpers_mock_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
-target_link_options(helpers_mock_tests PRIVATE ${helpers_mock_tests_flags})
-add_test(NAME helpers_mock_tests COMMAND helpers_mock_tests)
+create_test(
+  helpers_mock_tests
+  "${helpers_mock_tests_mocked_functions}"
+  ../helpers.c
+  ../helpers.h
+  ../log.c
+  ../log.h
+  helpers_mock_tests.c)
