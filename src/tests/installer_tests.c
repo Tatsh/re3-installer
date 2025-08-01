@@ -195,7 +195,7 @@ static void test_install_re3_clean_up_disc1_temp_dir(void **state) {
     expect_string(__wrap_extract_iso_to_temp, iso_path, "/path/to/disc1.iso");
     expect_any(__wrap_extract_iso_to_temp, out_dir);
     char *temp_dir = calloc(9, 1);
-    strncpy(temp_dir, "temp_dir", 8);
+    strncpy(temp_dir, "temp_dir", 9);
     will_return(__wrap_extract_iso_to_temp, temp_dir);
     will_return(__wrap_extract_iso_to_temp, true);
 
@@ -232,7 +232,7 @@ static void test_install_re3_clean_up_disc2_temp_dir(void **state) {
     expect_string(__wrap_extract_iso_to_temp, iso_path, "/path/to/disc2.iso");
     expect_any(__wrap_extract_iso_to_temp, out_dir);
     char *temp_dir = calloc(9, 1);
-    strncpy(temp_dir, "temp_dir", 8);
+    strncpy(temp_dir, "temp_dir", 9);
     will_return(__wrap_extract_iso_to_temp, temp_dir);
     will_return(__wrap_extract_iso_to_temp, true);
 
