@@ -44,4 +44,12 @@
 #include <sysdir.h>
 #endif
 
+#ifdef __GNUC__
+#define ATTR_RETURNS_NONNULL __attribute__((returns_nonnull))
+#define ATTR_NONNULL __attribute__((nonnull))
+#else
+#define ATTR_RETURNS_NONNULL
+#define ATTR_NONNULL
+#endif
+
 #endif // RE3_INSTALLER_SUPPORT_H
