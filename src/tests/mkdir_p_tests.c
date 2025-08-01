@@ -131,5 +131,5 @@ int main(void) {
         cmocka_unit_test(test_mkdir_p_other_error),
         cmocka_unit_test(test_mkdir_p_nested_error),
     };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    return cmocka_run_group_tests(tests, nullptr, nullptr);
 }

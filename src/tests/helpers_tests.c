@@ -145,5 +145,5 @@ int main(void) {
         cmocka_unit_test(test_get_installation_dir),
         cmocka_unit_test_setup_teardown(test_copy_tree_and_remove_tree, setup, teardown),
     };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    return cmocka_run_group_tests(tests, nullptr, nullptr);
 }
