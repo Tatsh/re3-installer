@@ -160,3 +160,33 @@ if(ENABLE_COVERAGE)
 endif()
 target_link_options(helpers_tests PRIVATE ${helpers_tests_flags})
 add_test(NAME helpers_tests COMMAND helpers_tests)
+
+set(helpers_mock_tests_mocked_functions
+    close
+    env
+    fts_open
+    fts_read
+    fts_close
+    mkdir_p
+    open
+    rmdir
+    sendfile
+    stat
+    unlink)
+foreach(func ${helpers_mock_tests_mocked_functions})
+  list(APPEND helpers_mock_tests_flags "-Wl,--wrap,${func}")
+endforeach()
+add_executable(helpers_mock_tests ../helpers.c ../helpers.h ../log.c ../log.h helpers_mock_tests.c)
+target_link_libraries(helpers_mock_tests cmocka)
+add_min_winnt(helpers_mock_tests)
+add_asan(helpers_mock_tests)
+add_ubsan(helpers_mock_tests)
+add_flags(helpers_mock_tests)
+target_include_directories(helpers_mock_tests PRIVATE ..)
+target_compile_options(helpers_mock_tests PRIVATE ${debug_flags})
+if(ENABLE_COVERAGE)
+  target_compile_options(helpers_mock_tests PRIVATE $<$<BOOL:${ENABLE_COVERAGE}>:--coverage>)
+  target_link_libraries(helpers_mock_tests $<$<BOOL:${ENABLE_COVERAGE}>:gcov>)
+endif()
+target_link_options(helpers_mock_tests PRIVATE ${helpers_mock_tests_flags})
+add_test(NAME helpers_mock_tests COMMAND helpers_mock_tests)
