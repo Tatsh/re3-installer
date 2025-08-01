@@ -157,7 +157,8 @@ char *get_installation_dir() {
     while ((state = sysdir_get_next_search_path_enumeration(state, path)) != 0) {
         if (state == 0) {
             log_error("Failed to get a valid directory.\n");
-            return nullptr;
+            sprintf(install_dir, "%s/re3", home_dir);
+            break;
         }
         assert(path[0] != '\0');
         sprintf(install_dir, "%s%s/re3", home_dir, path + 1);
