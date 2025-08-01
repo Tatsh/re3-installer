@@ -22,15 +22,6 @@ jobs:
       - name: Run tests
         run: ctest --test-dir ${{github.workspace}}/build/src/tests --output-on-failure
       - if: ${{ matrix.build-type == 'Debug' }}
-        name: Generate coverage information
-        run: >-
-          geninfo
-          --ignore-errors negative
-          '--include=src/*'
-          -b ${{github.workspace}}
-          -o coverage1.info
-          ${{github.workspace}}/build
-      - if: ${{ matrix.build-type == 'Debug' }}
         name: 'Coveralls'
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
