@@ -1,9 +1,11 @@
 #include <fcntl.h>
+#include <limits.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -14,7 +16,31 @@
 #include "helpers.h"
 #include "support.h"
 
+bool ends_with_ext_gcda(const char *s) {
+    return strlen(s) > 5 && !strcmp(s + strlen(s) - 5, ".gcda");
+}
+
+bool is_gcda(int fno) {
+    char proc_lnk[32];
+    ssize_t r;
+    char filename[PATH_MAX];
+    if (fno >= 0) {
+        sprintf(proc_lnk, "/proc/self/fd/%d", fno);
+        r = readlink(proc_lnk, filename, PATH_MAX);
+        if (r < 0) {
+            return false;
+        }
+        filename[r] = '\0';
+        return ends_with_ext_gcda(filename);
+    }
+    return false;
+}
+
+int __real_close(int fd);
 int __wrap_close(int fd) {
+    if (is_gcda(fd)) {
+        return __real_close(fd);
+    }
     check_expected(fd);
     return mock_type(int);
 }
@@ -47,7 +73,12 @@ int __wrap_mkdir_p(const char *path) {
     return mock_type(int);
 }
 
+int __real_open(const char *path, int flags, ...);
 int __wrap_open(const char *path, int flags, ...) {
+    if (ends_with_ext_gcda(path)) {
+        int real_fd = __real_open(path, flags);
+        return real_fd;
+    }
     check_expected_ptr(path);
     check_expected(flags);
     return mock_type(int);

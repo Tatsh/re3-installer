@@ -37,6 +37,7 @@ filesubtype
 fileversion
 fsanitize
 ftrivial
+gcda
 gcov
 geninfo
 ggdb
