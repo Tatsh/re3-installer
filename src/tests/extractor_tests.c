@@ -141,12 +141,6 @@ int __wrap_iso9660_ifs_get_joliet_level(void *iso) {
     return mock_type(int);
 }
 
-int __wrap_iso_extract_files(void *iso, const char *output_dir) {
-    check_expected_ptr(iso);
-    check_expected_ptr(output_dir);
-    return mock_type(int);
-}
-
 bool __wrap_ends_with_exe(const char *filename) {
     check_expected_ptr(filename);
     return mock_type(bool);
