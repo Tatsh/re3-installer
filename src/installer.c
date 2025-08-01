@@ -11,7 +11,6 @@
 #include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
-#include "support.h"
 
 // LCOV_EXCL_START
 static bool cd1_filter(const char *path) {
