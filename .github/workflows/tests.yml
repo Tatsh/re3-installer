@@ -9,7 +9,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        run: sudo apt-get install -y lcov libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
+        run: pipx install cpp-coveralls && sudo apt-get install -y lcov libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
       - name: Configure
         run: >-
           cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build
@@ -20,20 +20,42 @@ jobs:
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/src/tests --output-on-failure
+        run: ctest -VV --test-dir ${{github.workspace}}/build/src/tests --output-on-failure
       - if: ${{ matrix.build-type == 'Debug' }}
         name: Generate coverage information
         run: >-
           geninfo
+          --debug
           --exclude src/tests
-          --ignore-errors negative,negative
+          --follow
+          --keep-going
           '--include=src/*'
           -b ${{github.workspace}}
           -o coverage1.lcov
           ${{github.workspace}}/build
+      # - if: ${{ matrix.build-type == 'Debug' }}
+      #   name: 'Coveralls'
+      #   uses: coverallsapp/github-action@v2
       - if: ${{ matrix.build-type == 'Debug' }}
         name: 'Coveralls'
-        uses: coverallsapp/github-action@v2
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: >-
+          coveralls
+          -i src/env.c
+          -i src/env.h
+          -i src/extractor.c
+          -i src/extractor.h
+          -i src/helpers.c
+          -i src/helpers.h
+          -i src/installer.c
+          -i src/installer.h
+          -i src/log.c
+          -i src/log.h
+          -i src/mkdir_p.c
+          -i src/mkdir_p.h
+          -i src/support.h
+          -e src/tests
     strategy:
       matrix:
         build-type: [Debug, Release]
