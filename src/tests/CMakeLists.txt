@@ -111,6 +111,19 @@ set(mkdir_p_tests_mocked_functions mkdir)
 create_test(mkdir_p_tests "${mkdir_p_tests_mocked_functions}" ../mkdir_p.c ../mkdir_p.h
             mkdir_p_tests.c)
 
+create_test(
+  utils_functional_tests
+  ""
+  ../env.c
+  ../env.h
+  ../utils.c
+  ../utils.h
+  ../log.c
+  ../log.h
+  ../mkdir_p.c
+  ../mkdir_p.h
+  utils_functional_tests.c)
+
 set(utils_tests_mocked_functions
     close
     env
