@@ -220,7 +220,7 @@ bool copy_tree(const char *src, const char *dest) {
                 char dest_path[PATH_MAX];
                 snprintf(dest_path, PATH_MAX, "%s/%s", dest, node->fts_path + strlen(src) + 1);
                 log_debug("%s -> %s\n", node->fts_path, dest_path);
-                int fd_src = open(node->fts_path, O_RDONLY);
+                int fd_src = open(node->fts_path, O_RDONLY, 0);
                 if (fd_src < 0) {
                     fts_close(fts);
                     return false;

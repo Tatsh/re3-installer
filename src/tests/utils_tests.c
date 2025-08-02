@@ -36,6 +36,16 @@ bool is_gcda(int fno) {
     return false;
 }
 
+int __real_open(const char *path, int flags, mode_t mode);
+int __wrap_open(const char *path, int flags, mode_t mode) {
+    if (ends_with_ext_gcda(path)) {
+        return __real_open(path, flags, mode);
+    }
+    check_expected_ptr(path);
+    check_expected(flags);
+    return mock_type(int);
+}
+
 int __real_close(int fd);
 int __wrap_close(int fd) {
     if (is_gcda(fd)) {
@@ -70,17 +80,6 @@ int __wrap_fts_close(void *fts) {
 
 int __wrap_mkdir_p(const char *path) {
     check_expected_ptr(path);
-    return mock_type(int);
-}
-
-int __real_open(const char *path, int flags, ...);
-int __wrap_open(const char *path, int flags, ...) {
-    if (ends_with_ext_gcda(path)) {
-        int real_fd = __real_open(path, flags);
-        return real_fd;
-    }
-    check_expected_ptr(path);
-    check_expected(flags);
     return mock_type(int);
 }
 
