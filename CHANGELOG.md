@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### [0.2.2]
+
 ### Changed
 
 - Improved detection of empty directories.
@@ -40,4 +42,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 First tagged version.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.2...HEAD
