@@ -10,10 +10,10 @@
 #include <unistd.h>
 
 #include "env.h"
-#include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
 #include "support.h"
+#include "utils.h"
 
 bool exists(const char *path) {
     struct stat statbuf;

@@ -8,9 +8,9 @@
 
 #include "env.h"
 #include "extractor.h"
-#include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
+#include "utils.h"
 
 // LCOV_EXCL_START
 static bool cd1_filter(const char *path) {

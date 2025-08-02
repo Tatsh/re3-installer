@@ -111,7 +111,7 @@ set(mkdir_p_tests_mocked_functions mkdir)
 create_test(mkdir_p_tests "${mkdir_p_tests_mocked_functions}" ../mkdir_p.c ../mkdir_p.h
             mkdir_p_tests.c)
 
-set(helpers_tests_mocked_functions
+set(utils_tests_mocked_functions
     close
     env
     fts_open
@@ -124,10 +124,10 @@ set(helpers_tests_mocked_functions
     stat
     unlink)
 create_test(
-  helpers_tests
-  "${helpers_tests_mocked_functions}"
-  ../helpers.c
-  ../helpers.h
+  utils_tests
+  "${utils_tests_mocked_functions}"
+  ../utils.c
+  ../utils.h
   ../log.c
   ../log.h
-  helpers_tests.c)
+  utils_tests.c)

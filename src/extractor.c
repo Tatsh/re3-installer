@@ -12,9 +12,9 @@
 
 #include "env.h"
 #include "extractor.h"
-#include "helpers.h"
 #include "log.h"
 #include "mkdir_p.h"
+#include "utils.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

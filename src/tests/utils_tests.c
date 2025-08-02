@@ -13,8 +13,8 @@
 
 #include <cmocka.h>
 
-#include "helpers.h"
 #include "support.h"
+#include "utils.h"
 
 bool ends_with_ext_gcda(const char *s) {
     return strlen(s) > 5 && !strcmp(s + strlen(s) - 5, ".gcda");

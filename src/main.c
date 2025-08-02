@@ -2,11 +2,11 @@
 
 #include "env.h"
 #include "extractor.h"
-#include "helpers.h"
 #include "installer.h"
 #include "log.h"
 #include "mkdir_p.h"
 #include "support.h"
+#include "utils.h"
 
 int main(int argc, char *argv[]) {
     if (!validate_args(argc, argv)) {

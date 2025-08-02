@@ -42,12 +42,13 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: >-
           coveralls
+          -e src/tests
           -i src/env.c
           -i src/env.h
           -i src/extractor.c
           -i src/extractor.h
-          -i src/helpers.c
-          -i src/helpers.h
+          -i src/utils.c
+          -i src/utils.h
           -i src/installer.c
           -i src/installer.h
           -i src/log.c
@@ -55,7 +56,6 @@ jobs:
           -i src/mkdir_p.c
           -i src/mkdir_p.h
           -i src/support.h
-          -e src/tests
     strategy:
       matrix:
         build-type: [Debug, Release]

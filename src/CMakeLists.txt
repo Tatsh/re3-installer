@@ -47,8 +47,8 @@ set(LIBRE3_INSTALLER_SOURCES
     env.h
     extractor.c
     extractor.h
-    helpers.c
-    helpers.h
+    utils.c
+    utils.h
     installer.c
     installer.h
     log.c
