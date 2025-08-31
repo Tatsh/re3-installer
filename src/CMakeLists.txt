@@ -154,7 +154,7 @@ install(
   TARGETS re3-installer
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   RUNTIME_DEPENDENCY_SET re3-installer)
-install(FILES ../man/re3-installer.1 TYPE MAN)
+install(FILES ../man/re3-installer.1 DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/man/man1)
 if(NOT LINUX)
   install(FILES ../LICENSE.txt ../README.md ../CHANGELOG.md ../SECURITY.md TYPE DOC)
   install(FILES ../CITATION.cff DESTINATION ${CMAKE_INSTALL_DATADIR}/re3-installer)

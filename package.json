@@ -63,7 +63,7 @@
     }
   },
   "name": "re3-installer",
-  "packageManager": "yarn@4.9.2",
+  "packageManager": "yarn@4.9.4",
   "prettier": {
     "endOfLine": "lf",
     "iniSpaceAroundEquals": true,
@@ -98,9 +98,9 @@
   },
   "scripts": {
     "build": "cmake --preset=default -DBUILD_DOCS=ON && cmake --build build",
-    "check-formatting": "cmake-format --check CMakeLists.txt src/CMakeLists.txt && clang-format -n src/*.c src/*.h && prettier -c . && markdownlint-cli2 '**/*.md' '#node_modules'",
+    "check-formatting": "cmake-format --check CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt && clang-format -n src/*.c src/*.h src/tests/*.c && prettier -c . && markdownlint-cli2 '**/*.md' '#node_modules'",
     "check-spelling": "cspell --no-progress .",
-    "format": "cmake-format -i CMakeLists.txt src/CMakeLists.txt && clang-format -i src/*.c src/*.h && yarn prettier -w .",
+    "format": "cmake-format -i CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt && clang-format -i src/*.c src/*.h src/tests/*.c && yarn prettier -w .",
     "qa": "yarn check-spelling && yarn check-formatting"
   },
   "version": "0.2.2"
