@@ -8,9 +8,9 @@
       "CITATION.cff",
       "CMakeLists.txt",
       "README.md",
-      "man/re3-installer.1",
       "package.json",
-      "vcpkg.json"
+      "vcpkg.json",
+      "man/re3-installer.1"
     ],
     "version_provider": "npm",
     "version_scheme": "semver"

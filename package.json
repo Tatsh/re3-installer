@@ -47,7 +47,7 @@
   },
   "files": ["LICENSE.txt", "README.md"],
   "homepage": "https://tatsh.github.io/re3-installer/",
-  "keywords": ["gta iii", "re3"],
+  "keywords": ["gta iii", "gta vice city", "re3"],
   "license": "MIT",
   "markdownlint-cli2": {
     "config": {
@@ -63,7 +63,7 @@
     }
   },
   "name": "re3-installer",
-  "packageManager": "yarn@4.9.4",
+  "packageManager": "yarn@4.10.2",
   "prettier": {
     "endOfLine": "lf",
     "iniSpaceAroundEquals": true,
