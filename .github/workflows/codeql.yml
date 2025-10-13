@@ -10,7 +10,7 @@ jobs:
       - name: 'Checkout repository'
         uses: 'actions/checkout@v5'
       - name: 'Initialize CodeQL'
-        uses: 'github/codeql-action/init@v3'
+        uses: 'github/codeql-action/init@v4'
         with:
           languages: '${{ matrix.language }}'
       - name: Install dependencies
@@ -20,7 +20,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build -DBUILD_TESTS=ON
           cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
       - name: 'Perform CodeQL Analysis'
-        uses: 'github/codeql-action/analyze@v3'
+        uses: 'github/codeql-action/analyze@v4'
         with:
           category: '/language:${{matrix.language}}'
     strategy:
