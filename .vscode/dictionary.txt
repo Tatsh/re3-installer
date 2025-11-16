@@ -12,6 +12,7 @@ commitizen
 copyfile
 coveragerc
 coverallsapp
+coverallsapps
 cpack
 cpptools
 csidl
@@ -79,6 +80,7 @@ shfileopstruct
 softprops
 stdbool
 stddef
+strncmp
 tatsh
 tensin
 typelib
