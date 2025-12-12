@@ -13,7 +13,7 @@ set(CMAKE_C_STANDARD 23)
 
 option(BUILD_TESTS "Build tests." OFF)
 option(BUILD_STATIC "Build static executable." OFF)
-option(BUILD_NSIS_INSTALLER "Build NSIS installer for Windows." OFF)
+option(BUILD_INSTALLER "Build NSIS installer for Windows." OFF)
 option(ENABLE_ASAN "Enable address sanitiser." OFF)
 option(ENABLE_COVERAGE "Link tests with gcov." OFF)
 option(ENABLE_UBSAN "Enable undefined behaviour sanitiser." OFF)

@@ -1,18 +1,18 @@
-; NSIS installer script for re3-installer
-; This installer will guide users through installing GTA III files for re3
+; NSIS installer script for re3-installer.
+; This installer will guide users through installing GTA III/VC files for re3.
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
 
-; Basic installer information
+; Basic installer information.
 Name "re3-installer"
 OutFile "re3-installer-@CMAKE_PROJECT_VERSION@-setup.exe"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3" "Install_Dir"
 RequestExecutionLevel highest
 
-; Variables
+; Variables.
 Var Disc1Path
 Var Disc2Path
 Var ErrorOccurred
@@ -21,41 +21,41 @@ Var Disc1TextField
 Var Disc2TextField
 Var IsAdmin
 
-; MUI Settings
+; MUI Settings.
 !define MUI_ABORTWARNING
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
-; Welcome page
+; Welcome page.
 !insertmacro MUI_PAGE_WELCOME
 
-; License page
+; License page.
 !insertmacro MUI_PAGE_LICENSE "@CMAKE_SOURCE_DIR@\LICENSE.txt"
 
-; Custom page for Disc selection
+; Custom page for Disc selection.
 !define MUI_PAGE_HEADER_TEXT "Disc Selection"
 !define MUI_PAGE_HEADER_SUBTEXT "Choose the location of your GTA III/VC disc images or folders."
 Page custom DiscSelectionPage DiscSelectionPageLeave
 !undef MUI_PAGE_HEADER_TEXT
 !undef MUI_PAGE_HEADER_SUBTEXT
 
-; Installation directory page
+; Installation directory page.
 !insertmacro MUI_PAGE_DIRECTORY
 
-; Installation page
+; Installation page.
 !insertmacro MUI_PAGE_INSTFILES
 
-; Finish page
+; Finish page.
 !insertmacro MUI_PAGE_FINISH
 
-; Uninstaller pages
+; Uninstaller pages.
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
-; Languages
+; Languages.
 !insertmacro MUI_LANGUAGE "English"
 
-; Initialization function to set installation directory based on admin status
+; Initialization function to set installation directory based on admin status.
 Function .onInit
   UserInfo::GetAccountType
   Pop $0
@@ -84,7 +84,7 @@ Function .onInit
   ${EndIf}
 FunctionEnd
 
-; Custom page for disc selection
+; Custom page for disc selection.
 Function DiscSelectionPage
   !insertmacro MUI_HEADER_TEXT "Source Selection" "Choose the location of your GTA III/VC disc images or folders."
   
@@ -137,7 +137,7 @@ Function Disc1BrowseFile
 FunctionEnd
 
 Function Disc1BrowseFolder
-  nsDialogs::SelectFolderDialog "Select Disc 1 Directory" "$Disc1Path"
+  nsDialogs::SelectFolderDialog "Select disc 1 directory" "$Disc1Path"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
@@ -155,7 +155,7 @@ Function Disc2BrowseFile
 FunctionEnd
 
 Function Disc2BrowseFolder
-  nsDialogs::SelectFolderDialog "Select Disc 2 Directory" "$Disc2Path"
+  nsDialogs::SelectFolderDialog "Select disc 2 directory" "$Disc2Path"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
@@ -186,7 +186,7 @@ Function DiscSelectionPageLeave
     Abort
 FunctionEnd
 
-; Installation section
+; Installation section.
 Section "Install" SecInstall
   StrCpy $ErrorOccurred "0"
 
@@ -277,7 +277,7 @@ Section "Install" SecInstall
   ${EndIf}
 SectionEnd
 
-; Uninstaller initialization to determine registry root
+; Uninstaller initialization to determine registry root.
 Function un.onInit
   ; Check if uninstall info exists in HKLM (admin install)
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName"
@@ -288,7 +288,7 @@ Function un.onInit
   ${EndIf}
 FunctionEnd
 
-; Uninstaller section
+; Uninstaller section.
 Section "Uninstall"
   ; Confirm before removing files
   MessageBox MB_YESNO|MB_ICONQUESTION "This will remove all game data files from $INSTDIR. Continue?" IDYES +2

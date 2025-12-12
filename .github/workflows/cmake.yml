@@ -210,7 +210,7 @@ jobs:
           --install-prefix ${{steps.fixed_workspace.outputs.out}}/build/prefix
           -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           -DCMAKE_PREFIX_PATH=${{steps.fixed_workspace.outputs.out}}/build/prefix
-          -DBUILD_NSIS_INSTALLER=ON
+          -DBUILD_INSTALLER=ON
         shell: msys2 {0}
       - name: Build
         run: cmake --build ${{steps.fixed_workspace.outputs.out}}/build --verbose
