@@ -130,7 +130,7 @@ FunctionEnd
 Function DiscSelectionPageLeave
   ${NSD_GetText} $Disc1TextField $Disc1Path
   ${NSD_GetText} $Disc2TextField $Disc2Path
-  
+
   ${If} $Disc1Path == ""
     MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 1."
     Abort
