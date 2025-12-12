@@ -43,6 +43,7 @@ fprofile
 fsanitize
 ftrivial
 fwrite
+gamecontrollerdb
 gcda
 gcov
 geninfo
@@ -57,6 +58,7 @@ hklm
 htmlcov
 iconexclamation
 iconquestion
+idno
 idyes
 ifdef
 insertmacro
@@ -94,6 +96,7 @@ nullsoft
 outfile
 pacboy
 pipx
+pluginsdir
 productversion
 programfiles
 progs
@@ -122,6 +125,7 @@ udvare
 undef
 unicon
 unshield
+userfiles
 userinfo
 userprofile
 vcpkg
