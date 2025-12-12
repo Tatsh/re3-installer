@@ -10,7 +10,7 @@ Name "re3-installer"
 OutFile "re3-installer-setup-@CMAKE_PROJECT_VERSION@.exe"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3-installer" "Install_Dir"
-RequestExecutionLevel admin
+RequestExecutionLevel highest
 
 ; Variables
 Var Disc1Path
@@ -59,6 +59,7 @@ Function .onInit
     ; Running as admin, use Program Files
     StrCpy $IsAdmin "1"
     ; Check if there's a previous installation in HKLM
+    StrCpy $1 ""
     ReadRegStr $1 HKLM "Software\re3-installer" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
@@ -69,6 +70,7 @@ Function .onInit
     ; Running as user, use AppData
     StrCpy $IsAdmin "0"
     ; Check if there's a previous installation in HKCU
+    StrCpy $1 ""
     ReadRegStr $1 HKCU "Software\re3-installer" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
