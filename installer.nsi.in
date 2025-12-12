@@ -10,7 +10,7 @@ Name "re3-installer"
 OutFile "re3-installer-setup-@CMAKE_PROJECT_VERSION@.exe"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3-installer" "Install_Dir"
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 ; Variables
 Var Disc1Path
@@ -19,6 +19,7 @@ Var ErrorOccurred
 Var InstallSize
 Var Disc1TextField
 Var Disc2TextField
+Var IsAdmin
 
 ; MUI Settings
 !define MUI_ABORTWARNING
@@ -49,6 +50,33 @@ Page custom DiscSelectionPage DiscSelectionPageLeave
 
 ; Languages
 !insertmacro MUI_LANGUAGE "English"
+
+; Initialization function to set installation directory based on admin status
+Function .onInit
+  UserInfo::GetAccountType
+  Pop $0
+  ${If} $0 == "Admin"
+    ; Running as admin, use Program Files
+    StrCpy $IsAdmin "1"
+    ; Check if there's a previous installation in HKLM
+    ReadRegStr $1 HKLM "Software\re3-installer" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$PROGRAMFILES\re3"
+    ${EndIf}
+  ${Else}
+    ; Running as user, use AppData
+    StrCpy $IsAdmin "0"
+    ; Check if there's a previous installation in HKCU
+    ReadRegStr $1 HKCU "Software\re3-installer" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$APPDATA\re3"
+    ${EndIf}
+  ${EndIf}
+FunctionEnd
 
 ; Custom page for disc selection
 Function DiscSelectionPage
@@ -204,19 +232,34 @@ Section "Install" SecInstall
   RMDir "$TEMP\re3-installer-temp"
 
   ; Write registry keys for uninstaller
-  WriteRegStr HKCU "Software\re3-installer" "Install_Dir" "$INSTDIR"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayName" "re3-installer"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "Publisher" "Tatsh"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayVersion" "@CMAKE_PROJECT_VERSION@"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
-  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoModify" 1
-  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoRepair" 1
+  ${If} $IsAdmin == "1"
+    WriteRegStr HKLM "Software\re3-installer" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayName" "re3-installer"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "Publisher" "Tatsh"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayVersion" "@CMAKE_PROJECT_VERSION@"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoModify" 1
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoRepair" 1
+  ${Else}
+    WriteRegStr HKCU "Software\re3-installer" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayName" "re3-installer"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "Publisher" "Tatsh"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayVersion" "@CMAKE_PROJECT_VERSION@"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoModify" 1
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoRepair" 1
+  ${EndIf}
 
   ; Calculate and write estimated size
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $InstallSize "0x%08X" $0
-  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "EstimatedSize" "$InstallSize"
+  ${If} $IsAdmin == "1"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "EstimatedSize" "$InstallSize"
+  ${Else}
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "EstimatedSize" "$InstallSize"
+  ${EndIf}
 
   ; Create uninstaller
   WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -226,6 +269,17 @@ Section "Install" SecInstall
     Abort
   ${EndIf}
 SectionEnd
+
+; Uninstaller initialization to determine registry root
+Function un.onInit
+  ; Check if uninstall info exists in HKLM (admin install)
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayName"
+  ${If} $0 != ""
+    StrCpy $IsAdmin "1"
+  ${Else}
+    StrCpy $IsAdmin "0"
+  ${EndIf}
+FunctionEnd
 
 ; Uninstaller section
 Section "Uninstall"
@@ -248,8 +302,13 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
   ; Remove registry keys
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer"
-  DeleteRegKey HKCU "Software\re3-installer"
+  ${If} $IsAdmin == "1"
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer"
+    DeleteRegKey HKLM "Software\re3-installer"
+  ${Else}
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer"
+    DeleteRegKey HKCU "Software\re3-installer"
+  ${EndIf}
 
   MessageBox MB_OK "Uninstallation complete. If the installation directory still exists, it may contain user-created files that were not removed."
 SectionEnd
