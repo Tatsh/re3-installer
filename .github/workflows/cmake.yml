@@ -178,6 +178,7 @@ jobs:
         with:
           install: >-
             make
+            nsis
           msystem: ${{matrix.sys.name}}
           pacboy: >-
             cmake:p
@@ -209,6 +210,7 @@ jobs:
           --install-prefix ${{steps.fixed_workspace.outputs.out}}/build/prefix
           -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           -DCMAKE_PREFIX_PATH=${{steps.fixed_workspace.outputs.out}}/build/prefix
+          -DBUILD_NSIS_INSTALLER=ON
         shell: msys2 {0}
       - name: Build
         run: cmake --build ${{steps.fixed_workspace.outputs.out}}/build --verbose
@@ -232,6 +234,7 @@ jobs:
         with:
           files: |
             ${{github.workspace}}/re3-installer-*.zip
+            ${{github.workspace}}/build/re3-installer-setup-*.exe
           tag_name: ${{ steps.latest_tag.outputs.tag }}
     strategy:
       fail-fast: false

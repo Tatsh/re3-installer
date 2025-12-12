@@ -17,6 +17,8 @@ Var Disc1Path
 Var Disc2Path
 Var ErrorOccurred
 Var InstallSize
+Var Disc1TextField
+Var Disc2TextField
 
 ; MUI Settings
 !define MUI_ABORTWARNING
@@ -29,11 +31,8 @@ Var InstallSize
 ; License page
 !insertmacro MUI_PAGE_LICENSE "@CMAKE_SOURCE_DIR@\LICENSE.txt"
 
-; Custom page for Disc 1
-Page custom Disc1Page Disc1PageLeave
-
-; Custom page for Disc 2
-Page custom Disc2Page Disc2PageLeave
+; Custom page for Disc selection
+Page custom DiscSelectionPage DiscSelectionPageLeave
 
 ; Installation directory page
 !insertmacro MUI_PAGE_DIRECTORY
@@ -51,27 +50,43 @@ Page custom Disc2Page Disc2PageLeave
 ; Languages
 !insertmacro MUI_LANGUAGE "English"
 
-; Custom page for Disc 1 input
-Function Disc1Page
+; Custom page for disc selection
+Function DiscSelectionPage
   nsDialogs::Create 1018
   Pop $0
   ${If} $0 == error
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 24u "Please select the path to Disc 1 (ISO file or directory):$\r$\n$\r$\nClick 'Browse File' for an ISO file or 'Browse Folder' for a directory."
+  ; Disc 1 section
+  ${NSD_CreateLabel} 0 0 100% 12u "Disc 1 (ISO file or directory):"
   Pop $0
 
-  ${NSD_CreateText} 0 30u 100% 12u "$Disc1Path"
+  ${NSD_CreateText} 0 15u 100% 12u "$Disc1Path"
+  Pop $Disc1TextField
+
+  ${NSD_CreateButton} 0 30u 49% 14u "Browse File..."
   Pop $1
+  ${NSD_OnClick} $1 Disc1BrowseFile
 
-  ${NSD_CreateButton} 0 45u 49% 14u "Browse File..."
+  ${NSD_CreateButton} 51% 30u 49% 14u "Browse Folder..."
   Pop $2
-  ${NSD_OnClick} $2 Disc1BrowseFile
+  ${NSD_OnClick} $2 Disc1BrowseFolder
 
-  ${NSD_CreateButton} 51% 45u 49% 14u "Browse Folder..."
+  ; Disc 2 section
+  ${NSD_CreateLabel} 0 55u 100% 12u "Disc 2 (ISO file or directory with Audio folder):"
+  Pop $0
+
+  ${NSD_CreateText} 0 70u 100% 12u "$Disc2Path"
+  Pop $Disc2TextField
+
+  ${NSD_CreateButton} 0 85u 49% 14u "Browse File..."
   Pop $3
-  ${NSD_OnClick} $3 Disc1BrowseFolder
+  ${NSD_OnClick} $3 Disc2BrowseFile
+
+  ${NSD_CreateButton} 51% 85u 49% 14u "Browse Folder..."
+  Pop $4
+  ${NSD_OnClick} $4 Disc2BrowseFolder
 
   nsDialogs::Show
 FunctionEnd
@@ -81,7 +96,7 @@ Function Disc1BrowseFile
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
-    ${NSD_SetText} $1 $Disc1Path
+    ${NSD_SetText} $Disc1TextField $Disc1Path
   ${EndIf}
 FunctionEnd
 
@@ -90,45 +105,8 @@ Function Disc1BrowseFolder
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
-    ${NSD_SetText} $1 $Disc1Path
+    ${NSD_SetText} $Disc1TextField $Disc1Path
   ${EndIf}
-FunctionEnd
-
-Function Disc1PageLeave
-  ${NSD_GetText} $1 $Disc1Path
-  ${If} $Disc1Path == ""
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 1."
-    Abort
-  ${EndIf}
-
-  IfFileExists "$Disc1Path" +3 0
-    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 1 does not exist."
-    Abort
-FunctionEnd
-
-; Custom page for Disc 2 input
-Function Disc2Page
-  nsDialogs::Create 1018
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-
-  ${NSD_CreateLabel} 0 0 100% 24u "Please select the path to Disc 2 (ISO file or directory with Audio folder):$\r$\n$\r$\nClick 'Browse File' for an ISO file or 'Browse Folder' for a directory."
-  Pop $0
-
-  ${NSD_CreateText} 0 30u 100% 12u "$Disc2Path"
-  Pop $1
-
-  ${NSD_CreateButton} 0 45u 49% 14u "Browse File..."
-  Pop $2
-  ${NSD_OnClick} $2 Disc2BrowseFile
-
-  ${NSD_CreateButton} 51% 45u 49% 14u "Browse Folder..."
-  Pop $3
-  ${NSD_OnClick} $3 Disc2BrowseFolder
-
-  nsDialogs::Show
 FunctionEnd
 
 Function Disc2BrowseFile
@@ -136,7 +114,7 @@ Function Disc2BrowseFile
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
-    ${NSD_SetText} $1 $Disc2Path
+    ${NSD_SetText} $Disc2TextField $Disc2Path
   ${EndIf}
 FunctionEnd
 
@@ -145,16 +123,27 @@ Function Disc2BrowseFolder
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
-    ${NSD_SetText} $1 $Disc2Path
+    ${NSD_SetText} $Disc2TextField $Disc2Path
   ${EndIf}
 FunctionEnd
 
-Function Disc2PageLeave
-  ${NSD_GetText} $1 $Disc2Path
+Function DiscSelectionPageLeave
+  ${NSD_GetText} $Disc1TextField $Disc1Path
+  ${NSD_GetText} $Disc2TextField $Disc2Path
+  
+  ${If} $Disc1Path == ""
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 1."
+    Abort
+  ${EndIf}
+
   ${If} $Disc2Path == ""
     MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 2."
     Abort
   ${EndIf}
+
+  IfFileExists "$Disc1Path" +3 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 1 does not exist."
+    Abort
 
   IfFileExists "$Disc2Path" +3 0
     MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 2 does not exist."
