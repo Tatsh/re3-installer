@@ -1,3 +1,5 @@
+abortwarning
+anim
 appdata
 argn
 asan
@@ -10,6 +12,7 @@ cdio
 cmocka
 codeowners
 commitizen
+contrib
 copyfile
 coveragerc
 coverallsapp
@@ -52,10 +55,14 @@ haximus
 hkcu
 hklm
 htmlcov
+iconexclamation
+iconquestion
+idyes
 ifdef
 insertmacro
 installdirregkey
 instdir
+instfiles
 interprocedural
 iwyu
 jsonnet
@@ -63,10 +70,12 @@ jsonschema
 libcdio
 libcmocka
 libgcc
+libiconv
 libiso
 libjsonnet
 libstdc
 libunshield
+libwinpthread
 makensis
 mmnn
 msvc
@@ -75,6 +84,7 @@ msystem
 noconfirmation
 noconfirmmkdir
 noerrorui
+nonfatal
 nsdialogs
 nsexec
 nsis
@@ -94,6 +104,8 @@ reflow
 requestexecutionlevel
 rpath
 schemafile
+selectfiledialog
+selectfolderdialog
 sendfile
 shfileopstruct
 softprops
@@ -108,6 +120,7 @@ ubsan
 ucrt
 udvare
 undef
+unicon
 unshield
 userinfo
 userprofile
