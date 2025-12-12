@@ -165,13 +165,27 @@ FunctionEnd
 Section "Install" SecInstall
   StrCpy $ErrorOccurred "0"
 
+  ; Check if installation directory already exists with content
+  IfFileExists "$INSTDIR\*.*" 0 +3
+    MessageBox MB_YESNO|MB_ICONQUESTION "The installation directory already contains files. Continue anyway? (Not recommended)" IDYES +2
+    Abort
+
+  ; Create installation directory
+  CreateDirectory "$INSTDIR"
+
   SetOutPath "$TEMP\re3-installer-temp"
 
   ; Extract re3-installer.exe to temporary directory
   File "@CMAKE_BINARY_DIR@\src\re3-installer.exe"
 
-  ; Also extract any required DLLs from the prefix/bin directory
-  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\*.dll"
+  ; Extract required DLLs from the prefix/bin directory
+  ; Note: These files are optional and may not exist depending on build configuration
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libcdio-*.dll"
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libiso9660-*.dll"
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libunshield-*.dll"
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libiconv-*.dll"
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libwinpthread-*.dll"
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\zlib*.dll"
 
   DetailPrint "Running re3-installer..."
   DetailPrint "Disc 1: $Disc1Path"
@@ -186,9 +200,10 @@ Section "Install" SecInstall
   ; Check if the installation was successful
   ${If} $0 != 0
     StrCpy $ErrorOccurred "1"
-    DetailPrint "Installation failed with error code $0. Rolling back changes..."
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Rolling back changes..."
-    RMDir /r "$INSTDIR"
+    DetailPrint "Installation failed with error code $0. Cleaning up..."
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Installation directory will be cleaned if it was created by this installer."
+    ; Only remove the directory if we created it (it should be empty except for what we tried to install)
+    RMDir "$INSTDIR"
     Goto InstallEnd
   ${EndIf}
 
@@ -225,10 +240,27 @@ SectionEnd
 
 ; Uninstaller section
 Section "Uninstall"
-  ; Remove installed files
-  RMDir /r "$INSTDIR"
+  ; Confirm before removing files
+  MessageBox MB_YESNO|MB_ICONQUESTION "This will remove all game data files from $INSTDIR. Continue?" IDYES +2
+    Abort
+
+  ; Remove the uninstaller
+  Delete "$INSTDIR\uninstall.exe"
+
+  ; Remove common game data directories that re3-installer creates
+  RMDir /r "$INSTDIR\data"
+  RMDir /r "$INSTDIR\models"
+  RMDir /r "$INSTDIR\audio"
+  RMDir /r "$INSTDIR\Audio"
+  RMDir /r "$INSTDIR\anim"
+  RMDir /r "$INSTDIR\txd"
+
+  ; Try to remove the installation directory if it is empty
+  RMDir "$INSTDIR"
 
   ; Remove registry keys
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer"
   DeleteRegKey HKCU "Software\re3-installer"
+
+  MessageBox MB_OK "Uninstallation complete. If the installation directory still exists, it may contain user-created files that were not removed."
 SectionEnd
