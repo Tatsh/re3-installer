@@ -1,0 +1,222 @@
+; NSIS installer script for re3-installer
+; This installer will guide users through installing GTA III files for re3
+
+!include "MUI2.nsh"
+!include "FileFunc.nsh"
+!include "LogicLib.nsh"
+
+; Basic installer information
+Name "re3-installer"
+OutFile "re3-installer-setup-@CMAKE_PROJECT_VERSION@.exe"
+InstallDir "$APPDATA\re3"
+InstallDirRegKey HKCU "Software\re3-installer" "Install_Dir"
+RequestExecutionLevel user
+
+; Variables
+Var Disc1Path
+Var Disc2Path
+Var ErrorOccurred
+Var InstallSize
+
+; MUI Settings
+!define MUI_ABORTWARNING
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+
+; Welcome page
+!insertmacro MUI_PAGE_WELCOME
+
+; License page
+!insertmacro MUI_PAGE_LICENSE "@CMAKE_SOURCE_DIR@\LICENSE.txt"
+
+; Custom page for Disc 1
+Page custom Disc1Page Disc1PageLeave
+
+; Custom page for Disc 2
+Page custom Disc2Page Disc2PageLeave
+
+; Installation directory page
+!insertmacro MUI_PAGE_DIRECTORY
+
+; Installation page
+!insertmacro MUI_PAGE_INSTFILES
+
+; Finish page
+!insertmacro MUI_PAGE_FINISH
+
+; Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+; Languages
+!insertmacro MUI_LANGUAGE "English"
+
+; Custom page for Disc 1 input
+Function Disc1Page
+  nsDialogs::Create 1018
+  Pop $0
+  ${If} $0 == error
+    Abort
+  ${EndIf}
+
+  ${NSD_CreateLabel} 0 0 100% 12u "Please select the path to Disc 1 (ISO file or directory):"
+  Pop $0
+
+  ${NSD_CreateText} 0 15u 80% 12u "$Disc1Path"
+  Pop $1
+
+  ${NSD_CreateBrowseButton} 81% 15u 19% 12u "Browse..."
+  Pop $2
+  ${NSD_OnClick} $2 Disc1Browse
+
+  nsDialogs::Show
+FunctionEnd
+
+Function Disc1Browse
+  nsDialogs::SelectFileDialog open "" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc1Path $0
+    ${NSD_SetText} $1 $Disc1Path
+  ${EndIf}
+
+  ${If} $0 == ""
+    nsDialogs::SelectFolderDialog "Select Disc 1 Directory" ""
+    Pop $0
+    ${If} $0 != ""
+      StrCpy $Disc1Path $0
+      ${NSD_SetText} $1 $Disc1Path
+    ${EndIf}
+  ${EndIf}
+FunctionEnd
+
+Function Disc1PageLeave
+  ${NSD_GetText} $1 $Disc1Path
+  ${If} $Disc1Path == ""
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 1."
+    Abort
+  ${EndIf}
+
+  IfFileExists "$Disc1Path" +3 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 1 does not exist."
+    Abort
+FunctionEnd
+
+; Custom page for Disc 2 input
+Function Disc2Page
+  nsDialogs::Create 1018
+  Pop $0
+  ${If} $0 == error
+    Abort
+  ${EndIf}
+
+  ${NSD_CreateLabel} 0 0 100% 12u "Please select the path to Disc 2 (ISO file or directory with Audio folder):"
+  Pop $0
+
+  ${NSD_CreateText} 0 15u 80% 12u "$Disc2Path"
+  Pop $1
+
+  ${NSD_CreateBrowseButton} 81% 15u 19% 12u "Browse..."
+  Pop $2
+  ${NSD_OnClick} $2 Disc2Browse
+
+  nsDialogs::Show
+FunctionEnd
+
+Function Disc2Browse
+  nsDialogs::SelectFileDialog open "" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc2Path $0
+    ${NSD_SetText} $1 $Disc2Path
+  ${EndIf}
+
+  ${If} $0 == ""
+    nsDialogs::SelectFolderDialog "Select Disc 2 Directory" ""
+    Pop $0
+    ${If} $0 != ""
+      StrCpy $Disc2Path $0
+      ${NSD_SetText} $1 $Disc2Path
+    ${EndIf}
+  ${EndIf}
+FunctionEnd
+
+Function Disc2PageLeave
+  ${NSD_GetText} $1 $Disc2Path
+  ${If} $Disc2Path == ""
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select a path for Disc 2."
+    Abort
+  ${EndIf}
+
+  IfFileExists "$Disc2Path" +3 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 2 does not exist."
+    Abort
+FunctionEnd
+
+; Installation section
+Section "Install" SecInstall
+  StrCpy $ErrorOccurred "0"
+
+  SetOutPath "$TEMP\re3-installer-temp"
+
+  ; Extract re3-installer.exe to temporary directory
+  File "@CMAKE_BINARY_DIR@\src\re3-installer.exe"
+
+  ; Also extract any required DLLs
+  File /nonfatal "@CMAKE_BINARY_DIR@\src\*.dll"
+
+  DetailPrint "Running re3-installer..."
+  DetailPrint "Disc 1: $Disc1Path"
+  DetailPrint "Disc 2: $Disc2Path"
+  DetailPrint "Install Directory: $INSTDIR"
+
+  ; Execute re3-installer.exe with the provided paths
+  nsExec::ExecToLog '"$TEMP\re3-installer-temp\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
+  Pop $0
+
+  ; Check if the installation was successful
+  ${If} $0 != 0
+    StrCpy $ErrorOccurred "1"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Rolling back changes..."
+    RMDir /r "$INSTDIR"
+    Goto InstallEnd
+  ${EndIf}
+
+  ; Clean up temporary files
+  Delete "$TEMP\re3-installer-temp\re3-installer.exe"
+  Delete "$TEMP\re3-installer-temp\*.dll"
+  RMDir "$TEMP\re3-installer-temp"
+
+  ; Write registry keys for uninstaller
+  WriteRegStr HKCU "Software\re3-installer" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayName" "re3-installer"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "Publisher" "Tatsh"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "DisplayVersion" "@CMAKE_PROJECT_VERSION@"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoModify" 1
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "NoRepair" 1
+
+  ; Calculate and write estimated size
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $InstallSize "0x%08X" $0
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer" "EstimatedSize" "$InstallSize"
+
+  ; Create uninstaller
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+
+  InstallEnd:
+  ${If} $ErrorOccurred == "1"
+    Abort
+  ${EndIf}
+SectionEnd
+
+; Uninstaller section
+Section "Uninstall"
+  ; Remove installed files
+  RMDir /r "$INSTDIR"
+
+  ; Remove registry keys
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3-installer"
+  DeleteRegKey HKCU "Software\re3-installer"
+SectionEnd

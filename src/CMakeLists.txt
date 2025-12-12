@@ -191,6 +191,25 @@ set(CPACK_PACKAGE_FILE_NAME
     ${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${__cpack_system_name}-${CMAKE_BUILD_TYPE})
 include(CPack)
 
+if(WIN32 AND BUILD_NSIS_INSTALLER)
+  find_program(MAKENSIS_EXECUTABLE makensis)
+  if(MAKENSIS_EXECUTABLE)
+    configure_file(${CMAKE_SOURCE_DIR}/installer.nsi.in ${CMAKE_BINARY_DIR}/installer.nsi @ONLY)
+    add_custom_target(
+      nsis_installer ALL
+      COMMAND ${MAKENSIS_EXECUTABLE} ${CMAKE_BINARY_DIR}/installer.nsi
+      DEPENDS re3-installer
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Building NSIS installer...")
+    message(STATUS "NSIS installer will be built")
+  else()
+    message(
+      WARNING
+        "makensis not found. NSIS installer will not be built. Install NSIS to enable installer generation."
+    )
+  endif()
+endif()
+
 if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
