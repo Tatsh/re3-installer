@@ -52,3 +52,22 @@ cd re3-installer/  # cloned repository
 cmake -S . -B build
 cmake --build build
 ```
+
+### Building the Windows NSIS installer
+
+On Windows, you can build a graphical installer using NSIS:
+
+Requirements:
+
+- All of the above
+- [NSIS (Nullsoft Scriptable Install System)](https://nsis.sourceforge.io/)
+
+```shell
+cd re3-installer/  # cloned repository
+cmake -S . -B build -DBUILD_NSIS_INSTALLER=ON
+cmake --build build
+```
+
+This will generate `re3-installer-setup-<version>.exe` in the build directory. The installer
+provides a GUI for selecting disc 1 and disc 2 paths (ISOs or directories), choosing the
+installation directory, and automatically running the extraction process.

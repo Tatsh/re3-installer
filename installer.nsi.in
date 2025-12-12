@@ -59,34 +59,38 @@ Function Disc1Page
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 12u "Please select the path to Disc 1 (ISO file or directory):"
+  ${NSD_CreateLabel} 0 0 100% 24u "Please select the path to Disc 1 (ISO file or directory):$\r$\n$\r$\nClick 'Browse File' for an ISO file or 'Browse Folder' for a directory."
   Pop $0
 
-  ${NSD_CreateText} 0 15u 80% 12u "$Disc1Path"
+  ${NSD_CreateText} 0 30u 100% 12u "$Disc1Path"
   Pop $1
 
-  ${NSD_CreateBrowseButton} 81% 15u 19% 12u "Browse..."
+  ${NSD_CreateButton} 0 45u 49% 14u "Browse File..."
   Pop $2
-  ${NSD_OnClick} $2 Disc1Browse
+  ${NSD_OnClick} $2 Disc1BrowseFile
+
+  ${NSD_CreateButton} 51% 45u 49% 14u "Browse Folder..."
+  Pop $3
+  ${NSD_OnClick} $3 Disc1BrowseFolder
 
   nsDialogs::Show
 FunctionEnd
 
-Function Disc1Browse
-  nsDialogs::SelectFileDialog open "" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
+Function Disc1BrowseFile
+  nsDialogs::SelectFileDialog open "$Disc1Path" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
     ${NSD_SetText} $1 $Disc1Path
   ${EndIf}
+FunctionEnd
 
-  ${If} $0 == ""
-    nsDialogs::SelectFolderDialog "Select Disc 1 Directory" ""
-    Pop $0
-    ${If} $0 != ""
-      StrCpy $Disc1Path $0
-      ${NSD_SetText} $1 $Disc1Path
-    ${EndIf}
+Function Disc1BrowseFolder
+  nsDialogs::SelectFolderDialog "Select Disc 1 Directory" "$Disc1Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc1Path $0
+    ${NSD_SetText} $1 $Disc1Path
   ${EndIf}
 FunctionEnd
 
@@ -110,34 +114,38 @@ Function Disc2Page
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 12u "Please select the path to Disc 2 (ISO file or directory with Audio folder):"
+  ${NSD_CreateLabel} 0 0 100% 24u "Please select the path to Disc 2 (ISO file or directory with Audio folder):$\r$\n$\r$\nClick 'Browse File' for an ISO file or 'Browse Folder' for a directory."
   Pop $0
 
-  ${NSD_CreateText} 0 15u 80% 12u "$Disc2Path"
+  ${NSD_CreateText} 0 30u 100% 12u "$Disc2Path"
   Pop $1
 
-  ${NSD_CreateBrowseButton} 81% 15u 19% 12u "Browse..."
+  ${NSD_CreateButton} 0 45u 49% 14u "Browse File..."
   Pop $2
-  ${NSD_OnClick} $2 Disc2Browse
+  ${NSD_OnClick} $2 Disc2BrowseFile
+
+  ${NSD_CreateButton} 51% 45u 49% 14u "Browse Folder..."
+  Pop $3
+  ${NSD_OnClick} $3 Disc2BrowseFolder
 
   nsDialogs::Show
 FunctionEnd
 
-Function Disc2Browse
-  nsDialogs::SelectFileDialog open "" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
+Function Disc2BrowseFile
+  nsDialogs::SelectFileDialog open "$Disc2Path" "ISO Files (*.iso)|*.iso|All Files (*.*)|*.*"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
     ${NSD_SetText} $1 $Disc2Path
   ${EndIf}
+FunctionEnd
 
-  ${If} $0 == ""
-    nsDialogs::SelectFolderDialog "Select Disc 2 Directory" ""
-    Pop $0
-    ${If} $0 != ""
-      StrCpy $Disc2Path $0
-      ${NSD_SetText} $1 $Disc2Path
-    ${EndIf}
+Function Disc2BrowseFolder
+  nsDialogs::SelectFolderDialog "Select Disc 2 Directory" "$Disc2Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc2Path $0
+    ${NSD_SetText} $1 $Disc2Path
   ${EndIf}
 FunctionEnd
 
@@ -162,8 +170,8 @@ Section "Install" SecInstall
   ; Extract re3-installer.exe to temporary directory
   File "@CMAKE_BINARY_DIR@\src\re3-installer.exe"
 
-  ; Also extract any required DLLs
-  File /nonfatal "@CMAKE_BINARY_DIR@\src\*.dll"
+  ; Also extract any required DLLs from the prefix/bin directory
+  File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\*.dll"
 
   DetailPrint "Running re3-installer..."
   DetailPrint "Disc 1: $Disc1Path"
@@ -171,16 +179,20 @@ Section "Install" SecInstall
   DetailPrint "Install Directory: $INSTDIR"
 
   ; Execute re3-installer.exe with the provided paths
+  ClearErrors
   nsExec::ExecToLog '"$TEMP\re3-installer-temp\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
   Pop $0
 
   ; Check if the installation was successful
   ${If} $0 != 0
     StrCpy $ErrorOccurred "1"
+    DetailPrint "Installation failed with error code $0. Rolling back changes..."
     MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Rolling back changes..."
     RMDir /r "$INSTDIR"
     Goto InstallEnd
   ${EndIf}
+
+  DetailPrint "Installation completed successfully."
 
   ; Clean up temporary files
   Delete "$TEMP\re3-installer-temp\re3-installer.exe"
