@@ -178,12 +178,12 @@ jobs:
         with:
           install: >-
             make
-            nsis
           msystem: ${{matrix.sys.name}}
           pacboy: >-
             cmake:p
             libcdio:p
             ninja:p
+            nsis:p
             toolchain:p
             zlib:p
           update: true
