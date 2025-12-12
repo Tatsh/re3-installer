@@ -204,8 +204,8 @@ if(WIN32 AND BUILD_INSTALLER)
     message(STATUS "NSIS installer will be built")
   else()
     message(
-      WARNING
-        "makensis not found. NSIS installer will not be built. Install NSIS to enable installer generation."
+      FATAL_ERROR
+        "makensis not found. NSIS installer cannot be built. Install NSIS to enable installer generation."
     )
   endif()
 endif()

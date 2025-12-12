@@ -60,9 +60,9 @@ Function .onInit
   UserInfo::GetAccountType
   Pop $0
   ${If} $0 == "Admin"
-    ; Running as admin, use Program Files
+    ; Running as admin, use Program Files.
     StrCpy $IsAdmin "1"
-    ; Check if there's a previous installation in HKLM
+    ; Check if there's a previous installation in HKLM.
     StrCpy $1 ""
     ReadRegStr $1 HKLM "Software\re3" "Install_Dir"
     ${If} $1 != ""
@@ -71,9 +71,9 @@ Function .onInit
       StrCpy $INSTDIR "$PROGRAMFILES\re3"
     ${EndIf}
   ${Else}
-    ; Running as user, use AppData
+    ; If running as user, use AppData.
     StrCpy $IsAdmin "0"
-    ; Check if there's a previous installation in HKCU
+    ; Check if there's a previous installation in HKCU.
     StrCpy $1 ""
     ReadRegStr $1 HKCU "Software\re3" "Install_Dir"
     ${If} $1 != ""
@@ -290,24 +290,47 @@ FunctionEnd
 
 ; Uninstaller section.
 Section "Uninstall"
-  ; Confirm before removing files
+  ; Confirm before removing files.
   MessageBox MB_YESNO|MB_ICONQUESTION "This will remove all game data files from $INSTDIR. Continue?" IDYES +2
     Abort
 
-  ; Remove the uninstaller
+  ; Remove the uninstaller.
   Delete "$INSTDIR\uninstall.exe"
 
-  ; Remove common game data directories that re3-installer creates
+  ; Remove common game data directories that re3-installer creates.
   RMDir /r "$INSTDIR\data"
   RMDir /r "$INSTDIR\models"
   RMDir /r "$INSTDIR\audio"
   RMDir /r "$INSTDIR\anim"
   RMDir /r "$INSTDIR\txd"
+  RMDir /r "$INSTDIR\text"
+  RMDir /r "$INSTDIR\skins"
+  RMDir /r "$INSTDIR\readme"
+  RMDir /r "$INSTDIR\mss"
+  RMDir /r "$INSTDIR\movies"
+  RMDir /r "$INSTDIR\icons"
+  RMDir /r "$INSTDIR\neo"
+  RMDir /r "$INSTDIR\mp3"
 
-  ; Try to remove the installation directory if it is empty
+  ; Remove game controller database file.
+  Delete "$INSTDIR\gamecontrollerdb.txt"
+
+  ; Ask user if they want to delete saved data.
+  MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to delete your saved game data and settings?" IDYES DeleteSavedData IDNO SkipSavedData
+
+  DeleteSavedData:
+    Delete "$INSTDIR\gta3.ini"
+    Delete "$INSTDIR\gta3.set"
+    Delete "$INSTDIR\re3.ini"
+    Delete "$INSTDIR\reVC.ini"
+    RMDir /r "$INSTDIR\userfiles"
+
+  SkipSavedData:
+
+  ; Try to remove the installation directory if it is empty.
   RMDir "$INSTDIR"
 
-  ; Remove registry keys
+  ; Remove registry keys.
   ${If} $IsAdmin == "1"
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
     DeleteRegKey HKLM "Software\re3"
