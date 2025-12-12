@@ -198,7 +198,9 @@ Section "Install" SecInstall
   ; Create installation directory
   CreateDirectory "$INSTDIR"
 
-  SetOutPath "$TEMP\re3-installer-temp"
+  ; Use NSIS's plugin directory for temporary files (unique per installation)
+  InitPluginsDir
+  SetOutPath "$PLUGINSDIR"
 
   ; Extract re3-installer.exe to temporary directory
   File "@CMAKE_BINARY_DIR@\src\re3-installer.exe"
@@ -219,7 +221,7 @@ Section "Install" SecInstall
 
   ; Execute re3-installer.exe with the provided paths
   ClearErrors
-  nsExec::ExecToLog '"$TEMP\re3-installer-temp\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
+  nsExec::ExecToLog '"$PLUGINSDIR\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
   Pop $0
 
   ; Check if the installation was successful
@@ -234,10 +236,7 @@ Section "Install" SecInstall
 
   DetailPrint "Installation completed successfully."
 
-  ; Clean up temporary files
-  Delete "$TEMP\re3-installer-temp\re3-installer.exe"
-  Delete "$TEMP\re3-installer-temp\*.dll"
-  RMDir "$TEMP\re3-installer-temp"
+  ; Note: $PLUGINSDIR is automatically cleaned up by NSIS when the installer exits
 
   ; Write registry keys for uninstaller
   ${If} $IsAdmin == "1"
