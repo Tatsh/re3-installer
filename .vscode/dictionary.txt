@@ -31,6 +31,7 @@ egor
 endforeach
 endfunction
 esbenp
+exch
 fclose
 ferror
 fileflags
