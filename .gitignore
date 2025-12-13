@@ -18,3 +18,4 @@
 __pycache__/
 htmlcov/
 node_modules/
+re3-installer-setup-*.exe
