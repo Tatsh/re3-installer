@@ -361,14 +361,14 @@ FunctionEnd
 
 ; Uninstaller section.
 Section "Uninstall"
-  ; Confirm before removing files.
-  MessageBox MB_YESNO|MB_ICONQUESTION "This will remove game data files installed by re3-installer from $INSTDIR. Continue?" IDYES +2
-    Abort
-
   ; Check if inventory file exists.
   IfFileExists "$INSTDIR\.re3_installed_files.txt" UseInventory NoInventory
   
   UseInventory:
+    ; Confirm before removing files when inventory exists.
+    MessageBox MB_YESNO|MB_ICONQUESTION "This will remove game data files installed by re3-installer from $INSTDIR. Continue?" IDYES +2
+      Abort
+    
     ; Use the inventory file to determine files and folders to delete.
     DetailPrint "Removing installed files based on inventory..."
     FileOpen $0 "$INSTDIR\.re3_installed_files.txt" r
@@ -417,8 +417,8 @@ Section "Uninstall"
     Goto UninstallerCleanup
   
   NoInventory:
-    ; No inventory file found - give user options.
-    MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nDo you want to remove game files? This may delete custom files but will not delete save data.$\n$\nClick 'No' to only remove the uninstaller and registry entries.$\n$\nClick 'Cancel' to abort uninstallation." IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
+    ; No inventory file found - show custom dialog with action-based choices.
+    MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nWhat would you like to do?$\n$\nYes = Remove game data (may delete custom files, preserves saves)$\nNo = Remove uninstall entry (keeps all game files)$\nCancel = Abort uninstallation" IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
     ; If user clicks Cancel, abort the uninstaller.
     Abort
     
