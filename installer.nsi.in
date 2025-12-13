@@ -11,7 +11,7 @@ Name "re3-installer"
 OutFile "re3-installer-@CMAKE_PROJECT_VERSION@-setup.exe"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3" "Install_Dir"
-RequestExecutionLevel highest
+RequestExecutionLevel user
 
 ; Variables.
 Var Disc1Path
