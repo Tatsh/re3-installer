@@ -417,6 +417,10 @@ Section "Uninstall"
     Goto UninstallerCleanup
   
   NoInventory:
+    ; No inventory file found - give user options.
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nThis can happen if the installation was from an older version.$\n$\nDo you want to remove game files? This may delete custom files but will not delete save data.$\n$\nClick 'No' to only remove the uninstaller registry entries." IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
+    
+  RemoveGameFiles:
     ; Fallback: remove common game data directories if no inventory file.
     DetailPrint "No inventory file found, using fallback removal method..."
     RMDir /r "$INSTDIR\data"
@@ -433,6 +437,13 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\neo"
     RMDir /r "$INSTDIR\mp3"
     Delete "$INSTDIR\gamecontrollerdb.txt"
+    Goto UninstallerCleanup
+  
+  RegistryOnlyRemoval:
+    ; User chose to only remove registry entries.
+    DetailPrint "Removing only registry entries, keeping all files..."
+    ; Skip to registry cleanup, don't remove uninstaller or files.
+    Goto RegistryCleanup
   
   UninstallerCleanup:
   
@@ -442,6 +453,7 @@ Section "Uninstall"
   ; Try to remove the installation directory if it is empty.
   RMDir "$INSTDIR"
 
+  RegistryCleanup:
   ; Remove registry keys.
   ${If} $IsAdmin == "1"
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
