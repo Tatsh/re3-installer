@@ -4,6 +4,7 @@
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
+!include "nsDialogs.nsh"
 
 ; Basic installer information.
 Name "re3-installer"
@@ -20,6 +21,7 @@ Var InstallSize
 Var Disc1TextField
 Var Disc2TextField
 Var IsAdmin
+Var UninstallChoice
 
 ; MUI Settings.
 !define MUI_ABORTWARNING
@@ -417,9 +419,10 @@ Section "Uninstall"
     Goto UninstallerCleanup
   
   NoInventory:
-    ; No inventory file found - show custom dialog with action-based choices.
-    MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nWhat would you like to do?$\n$\nYes = Remove game data (may delete custom files, preserves saves)$\nNo = Remove uninstall entry (keeps all game files)$\nCancel = Abort uninstallation" IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
-    ; If user clicks Cancel, abort the uninstaller.
+    ; No inventory file found - present options sequentially.
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nRemove game data? (May delete custom files, preserves saves)" IDYES RemoveGameFiles
+    MessageBox MB_YESNO|MB_ICONQUESTION "Remove uninstall entry only? (Keeps all game files)" IDYES RegistryOnlyRemoval
+    ; If user clicked No to both, abort.
     Abort
     
   RemoveGameFiles:
