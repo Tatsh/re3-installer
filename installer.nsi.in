@@ -418,7 +418,7 @@ Section "Uninstall"
   
   NoInventory:
     ; No inventory file found - give user options.
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nThis can happen if the installation was from an older version.$\n$\nDo you want to remove game files? This may delete custom files but will not delete save data.$\n$\nClick 'No' to only remove the uninstaller registry entries." IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nDo you want to remove game files? This may delete custom files but will not delete save data.$\n$\nClick 'No' to only remove the uninstaller and registry entries." IDYES RemoveGameFiles IDNO RegistryOnlyRemoval
     
   RemoveGameFiles:
     ; Fallback: remove common game data directories if no inventory file.
@@ -440,9 +440,11 @@ Section "Uninstall"
     Goto UninstallerCleanup
   
   RegistryOnlyRemoval:
-    ; User chose to only remove registry entries.
-    DetailPrint "Removing only registry entries, keeping all files..."
-    ; Skip to registry cleanup, don't remove uninstaller or files.
+    ; User chose to only remove uninstaller and registry entries.
+    DetailPrint "Removing uninstaller and registry entries, keeping all files..."
+    ; Remove the uninstaller.
+    Delete "$INSTDIR\uninstall.exe"
+    ; Now clean up registry entries.
     Goto RegistryCleanup
   
   UninstallerCleanup:
