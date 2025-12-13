@@ -190,23 +190,28 @@ FunctionEnd
 Section "Install" SecInstall
   StrCpy $ErrorOccurred "0"
 
-  ; Check if installation directory already exists with content
+  ; Check if installation directory already exists with content.
   IfFileExists "$INSTDIR\*.*" 0 +3
     MessageBox MB_YESNO|MB_ICONQUESTION "The installation directory already contains files. Continue anyway? (Not recommended)" IDYES +2
     Abort
 
-  ; Create installation directory
+  ; If $INSTDIR already exists, take a pre-installation inventory.
+  IfFileExists "$INSTDIR" 0 +3
+    DetailPrint "Taking pre-installation inventory..."
+    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_pre_inventory.txt" 2>nul'
+
+  ; Create installation directory.
   CreateDirectory "$INSTDIR"
 
-  ; Use NSIS's plugin directory for temporary files (unique per installation)
+  ; Use NSIS's plugin directory for temporary files (unique per installation).
   InitPluginsDir
   SetOutPath "$PLUGINSDIR"
 
-  ; Extract re3-installer.exe to temporary directory
+  ; Extract re3-installer.exe to temporary directory.
   File "@CMAKE_BINARY_DIR@\src\re3-installer.exe"
 
-  ; Extract required DLLs from the prefix/bin directory
-  ; Note: These files are optional and may not exist depending on build configuration
+  ; Extract required DLLs from the prefix/bin directory.
+  ; Note: These files are optional and may not exist depending on build configuration.
   File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libcdio-*.dll"
   File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libiso9660-*.dll"
   File /nonfatal "@CMAKE_INSTALL_PREFIX@\bin\libunshield-*.dll"
@@ -219,24 +224,61 @@ Section "Install" SecInstall
   DetailPrint "Disc 2: $Disc2Path"
   DetailPrint "Install Directory: $INSTDIR"
 
-  ; Execute re3-installer.exe with the provided paths
+  ; Execute re3-installer.exe with the provided paths.
   ClearErrors
   nsExec::ExecToLog '"$PLUGINSDIR\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
   Pop $0
 
-  ; Check if the installation was successful
+  ; Check if the installation was successful.
   ${If} $0 != 0
     StrCpy $ErrorOccurred "1"
     DetailPrint "Installation failed with error code $0. Cleaning up..."
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Installation directory will be cleaned if it was created by this installer."
-    ; Only remove the directory if we created it (it should be empty except for what we tried to install)
-    RMDir /r "$INSTDIR"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Only newly created files will be removed."
+    ; Take a post-failure inventory and remove only new files.
+    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
+    ; Use PowerShell to compare and delete files (more reliable than batch).
+    IfFileExists "$TEMP\re3_pre_inventory.txt" 0 NoPreInvRollback
+      nsExec::ExecToLog 'powershell -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {Remove-Item $_.InputObject -Force -ErrorAction SilentlyContinue}"'
+      Goto CleanupDirs
+    NoPreInvRollback:
+    ; If no pre-inventory, remove only newly created directories.
+    CleanupDirs:
+    ; Remove empty directories.
+    RMDir "$INSTDIR\data"
+    RMDir "$INSTDIR\models"
+    RMDir "$INSTDIR\audio"
+    RMDir "$INSTDIR\anim"
+    RMDir "$INSTDIR\txd"
+    RMDir "$INSTDIR\text"
+    Delete "$TEMP\re3_pre_inventory.txt"
+    Delete "$TEMP\re3_post_inventory.txt"
     Goto InstallEnd
   ${EndIf}
 
   DetailPrint "Installation completed successfully."
 
-  ; Note: $PLUGINSDIR is automatically cleaned up by NSIS when the installer exits
+  ; Take a post-installation inventory and create a list of installed files.
+  DetailPrint "Creating installation inventory..."
+  nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
+  
+  ; Create the installed files list (excluding pre-existing files).
+  IfFileExists "$TEMP\re3_pre_inventory.txt" HasPreInventory NoPreInventory
+  
+  HasPreInventory:
+    ; Compare inventories and save only new files using PowerShell.
+    nsExec::ExecToLog 'powershell -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
+    Delete "$TEMP\re3_pre_inventory.txt"
+    Goto InventoryDone
+  
+  NoPreInventory:
+    ; All files in post-inventory are new.
+    CopyFiles "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
+  
+  InventoryDone:
+  Delete "$TEMP\re3_post_inventory.txt"
+  DetailPrint "Installation inventory created."
+
+  ; Note: $PLUGINSDIR is automatically cleaned up by NSIS when the installer exits.
 
   ; Write registry keys for uninstaller
   ${If} $IsAdmin == "1"
@@ -291,41 +333,78 @@ FunctionEnd
 ; Uninstaller section.
 Section "Uninstall"
   ; Confirm before removing files.
-  MessageBox MB_YESNO|MB_ICONQUESTION "This will remove all game data files from $INSTDIR. Continue?" IDYES +2
+  MessageBox MB_YESNO|MB_ICONQUESTION "This will remove game data files installed by re3-installer from $INSTDIR. Continue?" IDYES +2
     Abort
 
+  ; Check if inventory file exists.
+  IfFileExists "$INSTDIR\.re3_installed_files.txt" UseInventory NoInventory
+  
+  UseInventory:
+    ; Use the inventory file to determine files and folders to delete.
+    DetailPrint "Removing installed files based on inventory..."
+    FileOpen $0 "$INSTDIR\.re3_installed_files.txt" r
+    
+    ReadFileLoop:
+      FileRead $0 $1
+      IfErrors DoneReading
+      ; Remove trailing newline/carriage return.
+      StrCpy $2 $1 -2
+      ; Skip empty lines.
+      StrCmp $2 "" ReadFileLoop
+      ; Skip the uninstaller itself and inventory file.
+      StrCmp $2 "$INSTDIR\uninstall.exe" ReadFileLoop
+      StrCmp $2 "$INSTDIR\.re3_installed_files.txt" ReadFileLoop
+      ; Delete the file if it exists.
+      IfFileExists "$2\*.*" 0 +2
+        RMDir "$2"
+        Goto ReadFileLoop
+      Delete "$2"
+      Goto ReadFileLoop
+    
+    DoneReading:
+    FileClose $0
+    
+    ; Remove the inventory file.
+    Delete "$INSTDIR\.re3_installed_files.txt"
+    
+    ; Remove empty parent directories in reverse order.
+    RMDir "$INSTDIR\data"
+    RMDir "$INSTDIR\models"
+    RMDir "$INSTDIR\audio"
+    RMDir "$INSTDIR\anim"
+    RMDir "$INSTDIR\txd"
+    RMDir "$INSTDIR\text"
+    RMDir "$INSTDIR\skins"
+    RMDir "$INSTDIR\readme"
+    RMDir "$INSTDIR\mss"
+    RMDir "$INSTDIR\movies"
+    RMDir "$INSTDIR\icons"
+    RMDir "$INSTDIR\neo"
+    RMDir "$INSTDIR\mp3"
+    Goto UninstallerCleanup
+  
+  NoInventory:
+    ; Fallback: remove common game data directories if no inventory file.
+    DetailPrint "No inventory file found, using fallback removal method..."
+    RMDir /r "$INSTDIR\data"
+    RMDir /r "$INSTDIR\models"
+    RMDir /r "$INSTDIR\audio"
+    RMDir /r "$INSTDIR\anim"
+    RMDir /r "$INSTDIR\txd"
+    RMDir /r "$INSTDIR\text"
+    RMDir /r "$INSTDIR\skins"
+    RMDir /r "$INSTDIR\readme"
+    RMDir /r "$INSTDIR\mss"
+    RMDir /r "$INSTDIR\movies"
+    RMDir /r "$INSTDIR\icons"
+    RMDir /r "$INSTDIR\neo"
+    RMDir /r "$INSTDIR\mp3"
+    Delete "$INSTDIR\gamecontrollerdb.txt"
+  
+  UninstallerCleanup:
+  
   ; Remove the uninstaller.
   Delete "$INSTDIR\uninstall.exe"
-
-  ; Remove common game data directories that re3-installer creates.
-  RMDir /r "$INSTDIR\data"
-  RMDir /r "$INSTDIR\models"
-  RMDir /r "$INSTDIR\audio"
-  RMDir /r "$INSTDIR\anim"
-  RMDir /r "$INSTDIR\txd"
-  RMDir /r "$INSTDIR\text"
-  RMDir /r "$INSTDIR\skins"
-  RMDir /r "$INSTDIR\readme"
-  RMDir /r "$INSTDIR\mss"
-  RMDir /r "$INSTDIR\movies"
-  RMDir /r "$INSTDIR\icons"
-  RMDir /r "$INSTDIR\neo"
-  RMDir /r "$INSTDIR\mp3"
-
-  ; Remove game controller database file.
-  Delete "$INSTDIR\gamecontrollerdb.txt"
-
-  ; Ask user if they want to delete saved data.
-  MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to delete your saved game data and settings?" IDYES DeleteSavedData IDNO SkipSavedData
-
-  DeleteSavedData:
-    Delete "$INSTDIR\gta3.ini"
-    Delete "$INSTDIR\gta3.set"
-    Delete "$INSTDIR\re3.ini"
-    Delete "$INSTDIR\reVC.ini"
-    RMDir /r "$INSTDIR\userfiles"
-
-  SkipSavedData:
 
   ; Try to remove the installation directory if it is empty.
   RMDir "$INSTDIR"
@@ -339,5 +418,5 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\re3"
   ${EndIf}
 
-  MessageBox MB_OK "Uninstallation complete. If the installation directory still exists, it may contain user-created files that were not removed."
+  MessageBox MB_OK "Uninstallation complete. Saved game data and settings were preserved."
 SectionEnd
