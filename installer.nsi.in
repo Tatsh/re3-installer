@@ -238,7 +238,7 @@ Section "Install" SecInstall
     nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
     ; Use PowerShell to compare and delete files (more reliable than batch).
     IfFileExists "$TEMP\re3_pre_inventory.txt" 0 NoPreInvRollback
-      nsExec::ExecToLog 'powershell -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {Remove-Item $_.InputObject -Force -ErrorAction SilentlyContinue}"'
+      nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {Remove-Item $_.InputObject -Force -ErrorAction SilentlyContinue}"'
       Goto CleanupDirs
     NoPreInvRollback:
     ; If no pre-inventory, remove only newly created directories.
@@ -266,13 +266,13 @@ Section "Install" SecInstall
   
   HasPreInventory:
     ; Compare inventories and save only new files using PowerShell.
-    nsExec::ExecToLog 'powershell -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
+    nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
     Delete "$TEMP\re3_pre_inventory.txt"
     Goto InventoryDone
   
   NoPreInventory:
     ; All files in post-inventory are new.
-    CopyFiles "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
+    CopyFiles /SILENT "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
   
   InventoryDone:
   Delete "$TEMP\re3_post_inventory.txt"
@@ -330,6 +330,35 @@ Function un.onInit
   ${EndIf}
 FunctionEnd
 
+; Trim function for uninstaller to remove whitespace and newlines.
+Function un.Trim
+  Exch $0
+  Push $1
+  Push $2
+  StrLen $2 $0
+  
+  TrimLoop:
+    IntOp $1 $2 - 1
+    ${If} $1 < 0
+      StrCpy $0 ""
+      Goto TrimDone
+    ${EndIf}
+    StrCpy $1 $0 1 $1
+    ${If} $1 == " "
+    ${OrIf} $1 == "$\r"
+    ${OrIf} $1 == "$\n"
+    ${OrIf} $1 == "$\t"
+      IntOp $2 $2 - 1
+      StrCpy $0 $0 $2
+      Goto TrimLoop
+    ${EndIf}
+  
+  TrimDone:
+  Pop $2
+  Pop $1
+  Exch $0
+FunctionEnd
+
 ; Uninstaller section.
 Section "Uninstall"
   ; Confirm before removing files.
@@ -347,19 +376,23 @@ Section "Uninstall"
     ReadFileLoop:
       FileRead $0 $1
       IfErrors DoneReading
-      ; Remove trailing newline/carriage return.
-      StrCpy $2 $1 -2
+      ; Trim whitespace and newlines from the path.
+      Push $1
+      Call un.Trim
+      Pop $2
       ; Skip empty lines.
       StrCmp $2 "" ReadFileLoop
       ; Skip the uninstaller itself and inventory file.
       StrCmp $2 "$INSTDIR\uninstall.exe" ReadFileLoop
       StrCmp $2 "$INSTDIR\.re3_installed_files.txt" ReadFileLoop
-      ; Delete the file if it exists.
-      IfFileExists "$2\*.*" 0 +2
+      ; Check if it's a directory or file and delete accordingly.
+      IfFileExists "$2\*.*" IsDirectory IsFile
+      IsDirectory:
         RMDir "$2"
         Goto ReadFileLoop
-      Delete "$2"
-      Goto ReadFileLoop
+      IsFile:
+        Delete "$2"
+        Goto ReadFileLoop
     
     DoneReading:
     FileClose $0
