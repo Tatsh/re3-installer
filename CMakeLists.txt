@@ -6,6 +6,7 @@ include(CheckTypeSize)
 cmake_minimum_required(VERSION 3.31)
 project(
   re3-installer
+  DESCRIPTION "GTA III/VC file installer for re3."
   HOMEPAGE_URL "https://tatsh.github.io/re3-installer/"
   VERSION 0.2.2
   LANGUAGES C)

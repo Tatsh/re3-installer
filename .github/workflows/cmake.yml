@@ -183,6 +183,7 @@ jobs:
             cmake:p
             libcdio:p
             ninja:p
+            nsis:p
             toolchain:p
             zlib:p
           update: true
@@ -220,8 +221,8 @@ jobs:
         shell: msys2 {0}
       - name: Package
         run: >-
-          cpack -C ${{matrix.build-type}}
-          --config ${{steps.fixed_workspace.outputs.out}}/build/CPackConfig.cmake --verbose
+          cd ${{steps.fixed_workspace.outputs.out}}/build &&
+          cpack -C ${{matrix.build-type}} --verbose
         shell: msys2 {0}
       - name: Get Latest Tag
         id: latest_tag
@@ -231,7 +232,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{github.workspace}}/re3-installer-*.zip
+            ${{github.workspace}}/build/re3-installer-*.zip
+            ${{github.workspace}}/build/re3-installer-*.exe
           tag_name: ${{ steps.latest_tag.outputs.tag }}
     strategy:
       fail-fast: false

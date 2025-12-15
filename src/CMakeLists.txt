@@ -176,7 +176,12 @@ if(NOT LINUX)
       ${_mingw_bin_dir})
   endif()
 endif()
-set(CPACK_GENERATOR "ZIP")
+find_program(NSIS makensis)
+if(WIN32 AND NSIS)
+  set(CPACK_GENERATOR "NSIS;ZIP")
+else()
+  set(CPACK_GENERATOR "ZIP")
+endif()
 set(CPACK_PACKAGE_VENDOR Tatsh)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt)
 set(__cpack_system_name ${CMAKE_SYSTEM_NAME})
@@ -189,6 +194,18 @@ if(__cpack_system_name MATCHES "Windows")
 endif()
 set(CPACK_PACKAGE_FILE_NAME
     ${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${__cpack_system_name}-${CMAKE_BUILD_TYPE})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR};${CMAKE_MODULE_PATH}")
+set(CPACK_NSIS_MANIFEST_DPI_AWARE ON)
+string(REPLACE / \\\\ CMAKE_INSTALL_PREFIX_BS ${CMAKE_INSTALL_PREFIX})
+set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\re3-installer.exe
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libcdio*.dll
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libcrypto*.dll
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libiconv*.dll
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libiso9660*.dll
+  File /nonfatal ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libgcc*.dll
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libunshield*.dll
+  File /nonfatal ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libwinpthread*.dll
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\zlib*.dll")
 include(CPack)
 
 if(BUILD_TESTS)

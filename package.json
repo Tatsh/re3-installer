@@ -98,7 +98,7 @@
   },
   "scripts": {
     "build": "cmake --preset=default -DBUILD_DOCS=ON && cmake --build build",
-    "check-formatting": "cmake-format --check CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt && clang-format -n src/*.c src/*.h src/tests/*.c && prettier -c . && markdownlint-cli2 '**/*.md' '#node_modules'",
+    "check-formatting": "cmake-format --check CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt; clang-format -n src/*.c src/*.h src/tests/*.c && prettier -c . && markdownlint-cli2 '**/*.md' '#node_modules'",
     "check-spelling": "cspell --no-progress .",
     "format": "cmake-format -i CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt && clang-format -i src/*.c src/*.h src/tests/*.c && yarn prettier -w .",
     "qa": "yarn check-spelling && yarn check-formatting"
