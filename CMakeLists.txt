@@ -64,36 +64,3 @@ if(WIN32)
 endif()
 
 add_subdirectory(src)
-
-# CPack configuration for NSIS installer
-if(WIN32)
-  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR};${CMAKE_MODULE_PATH}")
-  
-  set(CPACK_GENERATOR "NSIS")
-  set(CPACK_PACKAGE_NAME "re3-installer")
-  set(CPACK_PACKAGE_VENDOR "re3")
-  set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GTA III/VC file installer for re3")
-  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
-  
-  set(CPACK_NSIS_PACKAGE_NAME "re3-installer")
-  set(CPACK_NSIS_DISPLAY_NAME "re3 Installer")
-  set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/installer.ico")
-  set(CPACK_NSIS_MUI_UNICO "${CMAKE_SOURCE_DIR}/installer.ico")
-  
-  # Custom template path
-  set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
-  
-  # Extra install commands for DLL dependencies
-  set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-    ; Install DLL dependencies
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\libcdio-*.dll\"
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\libiso9660-*.dll\"
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\libunshield-*.dll\"
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\libiconv-*.dll\"
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\libwinpthread-*.dll\"
-    File /nonfatal \"${CMAKE_INSTALL_PREFIX}\\\\bin\\\\zlib*.dll\"
-  ")
-  
-  include(CPack)
-endif()

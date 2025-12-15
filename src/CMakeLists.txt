@@ -189,9 +189,25 @@ if(__cpack_system_name MATCHES "Windows")
 endif()
 set(CPACK_PACKAGE_FILE_NAME
     ${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${__cpack_system_name}-${CMAKE_BUILD_TYPE})
-include(CPack)
 
-# NSIS installer generation is now handled by CPack (see root CMakeLists.txt)
+# CPack NSIS configuration for Windows installer
+if(WIN32)
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR};${CMAKE_MODULE_PATH}")
+  
+  set(CPACK_GENERATOR "NSIS")
+  set(CPACK_PACKAGE_NAME "re3-installer")
+  set(CPACK_PACKAGE_VENDOR "re3")
+  set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GTA III/VC file installer for re3")
+  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+  
+  set(CPACK_NSIS_PACKAGE_NAME "re3-installer")
+  set(CPACK_NSIS_DISPLAY_NAME "re3 Installer")
+  set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/installer.ico")
+  set(CPACK_NSIS_MUI_UNICO "${CMAKE_SOURCE_DIR}/installer.ico")
+endif()
+
+include(CPack)
 
 if(BUILD_TESTS)
   enable_testing()
