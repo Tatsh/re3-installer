@@ -72,6 +72,7 @@ jsonnet
 jsonschema
 libcdio
 libcmocka
+libcrypto
 libgcc
 libiconv
 libiso
@@ -119,11 +120,13 @@ strcpy
 strncmp
 tatsh
 tensin
+toplevel
 typelib
 ubsan
 ucrt
 udvare
 undef
+unico
 unicon
 unshield
 userfiles
@@ -151,5 +154,3 @@ wunreachable
 wunused
 wwrite
 wyri
-toplevel
-unico

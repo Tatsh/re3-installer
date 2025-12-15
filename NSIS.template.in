@@ -10,7 +10,11 @@
 Name "@CPACK_NSIS_PACKAGE_NAME@"
 OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 InstallDir "$APPDATA\re3"
+InstallDirRegKey HKCU "Software\re3" "Install_Dir"
 RequestExecutionLevel user
+@CPACK_NSIS_MANIFEST_DPI_AWARE_CODE@
+@CPACK_NSIS_BRANDING_TEXT_CODE@
+@CPACK_NSIS_CRC_CHECK_CODE@
 
 ; Variables.
 Var Disc1Path
@@ -121,7 +125,7 @@ FunctionEnd
 
 ; Browse functions for disc selection.
 Function BrowseDisc1File
-  nsDialogs::SelectFileDialog open "Select disc 1 ISO file" "$Disc1Path"
+  nsDialogs::SelectFileDialog open "$DOCUMENTS" "ISO files|*.iso|All files|*.*"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
@@ -130,7 +134,7 @@ Function BrowseDisc1File
 FunctionEnd
 
 Function BrowseDisc1Folder
-  nsDialogs::SelectFolderDialog "Select disc 1 directory" "$Disc1Path"
+  nsDialogs::SelectFolderDialog "Select disc 1 directory" "$DOCUMENTS"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc1Path $0
@@ -139,7 +143,7 @@ Function BrowseDisc1Folder
 FunctionEnd
 
 Function BrowseDisc2File
-  nsDialogs::SelectFileDialog open "Select disc 2 ISO file" "$Disc2Path"
+  nsDialogs::SelectFileDialog "$DOCUMENTS" "ISO files|*.iso|All files|*.*"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
@@ -148,7 +152,7 @@ Function BrowseDisc2File
 FunctionEnd
 
 Function BrowseDisc2Folder
-  nsDialogs::SelectFolderDialog "Select disc 2 directory" "$Disc2Path"
+  nsDialogs::SelectFolderDialog "Select disc 2 directory" "$DOCUMENTS"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
@@ -201,7 +205,6 @@ Section "Install" SecInstall
   SetOutPath "$PLUGINSDIR"
 
   ; Extract re3-installer.exe and dependencies to temporary directory.
-  ; CPack will insert the necessary File commands here via @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@.
   @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
 
   DetailPrint "Running re3-installer..."
@@ -223,7 +226,7 @@ Section "Install" SecInstall
     nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
     ; Use PowerShell to compare and delete files (more reliable than batch).
     IfFileExists "$TEMP\re3_pre_inventory.txt" 0 NoPreInvRollback
-      nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {Remove-Item $_.InputObject -Force -ErrorAction SilentlyContinue}"'
+      nsExec::ExecToLog `powershell -ExecutionPolicy Bypass -Command '$$post = Get-Content "$TEMP\re3_post_inventory.txt"; $$pre = Get-Content "$TEMP\re3_pre_inventory.txt"; Compare-Object $$pre $$post | Where-Object {$$_.SideIndicator -eq "=>"} | ForEach-Object {Remove-Item $$_.InputObject -Force -ErrorAction SilentlyContinue}'`
       Goto CleanupDirs
     NoPreInvRollback:
     ; If no pre-inventory, remove only newly created directories.
@@ -251,7 +254,7 @@ Section "Install" SecInstall
 
   HasPreInventory:
     ; Compare inventories and save only new files using PowerShell.
-    nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
+    nsExec::ExecToLog `powershell -ExecutionPolicy Bypass -Command '$$post = Get-Content "$TEMP\re3_post_inventory.txt"; $$pre = Get-Content "$TEMP\re3_pre_inventory.txt"; Compare-Object $$pre $$post | Where-Object {$$_.SideIndicator -eq "=>"} | ForEach-Object {$$_.InputObject} | Out-File "$INSTDIR\.re3_installed_files.txt" -Encoding ASCII'`
     Delete "$TEMP\re3_pre_inventory.txt"
     Goto InventoryDone
 
@@ -425,6 +428,7 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\neo"
     RMDir /r "$INSTDIR\mp3"
     Delete "$INSTDIR\gamecontrollerdb.txt"
+    Delete "$INSTDIR\gta3.ini"
     Goto UninstallerCleanup
 
   RegistryOnlyRemoval:

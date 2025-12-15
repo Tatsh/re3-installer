@@ -222,7 +222,7 @@ jobs:
       - name: Package
         run: >-
           cd ${{steps.fixed_workspace.outputs.out}}/build &&
-          cpack -G NSIS -C ${{matrix.build-type}} --verbose
+          cpack -C ${{matrix.build-type}} --verbose
         shell: msys2 {0}
       - name: Get Latest Tag
         id: latest_tag
@@ -232,8 +232,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{github.workspace}}/re3-installer-*.zip
-            ${{github.workspace}}/build/re3-installer-*-setup.exe
+            ${{github.workspace}}/build/re3-installer-*.zip
+            ${{github.workspace}}/build/re3-installer-*.exe
           tag_name: ${{ steps.latest_tag.outputs.tag }}
     strategy:
       fail-fast: false
