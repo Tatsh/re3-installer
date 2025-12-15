@@ -41,6 +41,7 @@ Page custom DiscSelectionPage DiscSelectionPageLeave
 !undef MUI_PAGE_HEADER_TEXT
 !undef MUI_PAGE_HEADER_SUBTEXT
 
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE DirectoryPageLeave
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -183,19 +184,27 @@ Function DiscSelectionPageLeave
     Abort
 FunctionEnd
 
+; Directory page leave function - validate directory is empty.
+Function DirectoryPageLeave
+  ; Check if directory exists and is not empty.
+  IfFileExists "$INSTDIR" 0 dir_ok
+    ; Directory exists, check if it's empty.
+    FindFirst $0 $1 "$INSTDIR\*.*"
+    FindNext $0 $1
+    FindNext $0 $1
+    StrCmp $1 "" dir_empty
+      ; Directory is not empty - don't allow installation.
+      FindClose $0
+      MessageBox MB_OK|MB_ICONEXCLAMATION "The installation directory already contains files. Please choose an empty directory or create a new one."
+      Abort
+    dir_empty:
+      FindClose $0
+  dir_ok:
+FunctionEnd
+
 ; Installation section.
 Section "Install" SecInstall
   StrCpy $ErrorOccurred "0"
-
-  ; Check if installation directory already exists with content.
-  IfFileExists "$INSTDIR\*.*" 0 +3
-    MessageBox MB_YESNO|MB_ICONQUESTION "The installation directory already contains files. Continue anyway? (Not recommended)" IDYES +2
-    Abort
-
-  ; If $INSTDIR already exists, take a pre-installation inventory.
-  IfFileExists "$INSTDIR" 0 +3
-    DetailPrint "Taking pre-installation inventory..."
-    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_pre_inventory.txt" 2>nul'
 
   ; Create installation directory.
   CreateDirectory "$INSTDIR"
@@ -221,49 +230,17 @@ Section "Install" SecInstall
   ${If} $0 != 0
     StrCpy $ErrorOccurred "1"
     DetailPrint "Installation failed with error code $0. Cleaning up..."
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Only newly created files will be removed."
-    ; Take a post-failure inventory and remove only new files.
-    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
-    ; Use PowerShell to compare and delete files (more reliable than batch).
-    IfFileExists "$TEMP\re3_pre_inventory.txt" 0 NoPreInvRollback
-      nsExec::ExecToLog `powershell -ExecutionPolicy Bypass -Command '$$post = Get-Content "$TEMP\re3_post_inventory.txt"; $$pre = Get-Content "$TEMP\re3_pre_inventory.txt"; Compare-Object $$pre $$post | Where-Object {$$_.SideIndicator -eq "=>"} | ForEach-Object {Remove-Item $$_.InputObject -Force -ErrorAction SilentlyContinue}'`
-      Goto CleanupDirs
-    NoPreInvRollback:
-    ; If no pre-inventory, remove only newly created directories.
-    CleanupDirs:
-    ; Remove empty directories.
-    RMDir "$INSTDIR\data"
-    RMDir "$INSTDIR\models"
-    RMDir "$INSTDIR\audio"
-    RMDir "$INSTDIR\anim"
-    RMDir "$INSTDIR\txd"
-    RMDir "$INSTDIR\text"
-    Delete "$TEMP\re3_pre_inventory.txt"
-    Delete "$TEMP\re3_post_inventory.txt"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. All files will be removed."
+    ; Remove the entire installation directory on failure.
+    RMDir /r "$INSTDIR"
     Goto InstallEnd
   ${EndIf}
 
   DetailPrint "Installation completed successfully."
 
-  ; Take a post-installation inventory and create a list of installed files.
+  ; Create installation inventory (list of all files).
   DetailPrint "Creating installation inventory..."
-  nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
-
-  ; Create the installed files list (excluding pre-existing files).
-  IfFileExists "$TEMP\re3_pre_inventory.txt" HasPreInventory NoPreInventory
-
-  HasPreInventory:
-    ; Compare inventories and save only new files using PowerShell.
-    nsExec::ExecToLog `powershell -ExecutionPolicy Bypass -Command '$$post = Get-Content "$TEMP\re3_post_inventory.txt"; $$pre = Get-Content "$TEMP\re3_pre_inventory.txt"; Compare-Object $$pre $$post | Where-Object {$$_.SideIndicator -eq "=>"} | ForEach-Object {$$_.InputObject} | Out-File "$INSTDIR\.re3_installed_files.txt" -Encoding ASCII'`
-    Delete "$TEMP\re3_pre_inventory.txt"
-    Goto InventoryDone
-
-  NoPreInventory:
-    ; All files in post-inventory are new.
-    CopyFiles /SILENT "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
-
-  InventoryDone:
-  Delete "$TEMP\re3_post_inventory.txt"
+  nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$INSTDIR\.re3_installed_files.txt" 2>nul'
   DetailPrint "Installation inventory created."
 
   ; Note: $PLUGINSDIR is automatically cleaned up by NSIS when the installer exits.
