@@ -10,7 +10,6 @@
 Name "@CPACK_NSIS_PACKAGE_NAME@"
 OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 InstallDir "$APPDATA\re3"
-InstallDirRegKey HKCU "Software\re3" "Install_Dir"
 RequestExecutionLevel user
 
 ; Variables.
@@ -80,7 +79,7 @@ FunctionEnd
 ; Custom disc selection page.
 Function DiscSelectionPage
   !insertmacro MUI_HEADER_TEXT "Source Selection" "Choose the location of your GTA III/VC disc images or folders."
-  
+
   nsDialogs::Create 1018
   Pop $0
   ${If} $0 == error
@@ -90,14 +89,14 @@ Function DiscSelectionPage
   ; Disc 1 section.
   ${NSD_CreateLabel} 0 0 100% 12u "Disc 1 (ISO file or directory):"
   Pop $0
-  
+
   ${NSD_CreateText} 0 14u 75% 12u "$Disc1Path"
   Pop $Disc1TextField
-  
+
   ${NSD_CreateButton} 76% 14u 11% 12u "File..."
   Pop $0
   ${NSD_OnClick} $0 BrowseDisc1File
-  
+
   ${NSD_CreateButton} 88% 14u 12% 12u "Folder..."
   Pop $0
   ${NSD_OnClick} $0 BrowseDisc1Folder
@@ -105,14 +104,14 @@ Function DiscSelectionPage
   ; Disc 2 section.
   ${NSD_CreateLabel} 0 34u 100% 12u "Disc 2 (ISO file or directory):"
   Pop $0
-  
+
   ${NSD_CreateText} 0 48u 75% 12u "$Disc2Path"
   Pop $Disc2TextField
-  
+
   ${NSD_CreateButton} 76% 48u 11% 12u "File..."
   Pop $0
   ${NSD_OnClick} $0 BrowseDisc2File
-  
+
   ${NSD_CreateButton} 88% 48u 12% 12u "Folder..."
   Pop $0
   ${NSD_OnClick} $0 BrowseDisc2Folder
@@ -160,17 +159,17 @@ FunctionEnd
 Function DiscSelectionPageLeave
   ${NSD_GetText} $Disc1TextField $Disc1Path
   ${NSD_GetText} $Disc2TextField $Disc2Path
-  
+
   ${If} $Disc1Path == ""
     MessageBox MB_OK|MB_ICONEXCLAMATION "Please select disc 1 location."
     Abort
   ${EndIf}
-  
+
   ${If} $Disc2Path == ""
     MessageBox MB_OK|MB_ICONEXCLAMATION "Please select disc 2 location."
     Abort
   ${EndIf}
-  
+
   IfFileExists "$Disc1Path" +3 0
     MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 1 does not exist."
     Abort
@@ -246,20 +245,20 @@ Section "Install" SecInstall
   ; Take a post-installation inventory and create a list of installed files.
   DetailPrint "Creating installation inventory..."
   nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
-  
+
   ; Create the installed files list (excluding pre-existing files).
   IfFileExists "$TEMP\re3_pre_inventory.txt" HasPreInventory NoPreInventory
-  
+
   HasPreInventory:
     ; Compare inventories and save only new files using PowerShell.
     nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
     Delete "$TEMP\re3_pre_inventory.txt"
     Goto InventoryDone
-  
+
   NoPreInventory:
     ; All files in post-inventory are new.
     CopyFiles /SILENT "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
-  
+
   InventoryDone:
   Delete "$TEMP\re3_post_inventory.txt"
   DetailPrint "Installation inventory created."
@@ -322,7 +321,7 @@ Function un.Trim
   Push $1
   Push $2
   StrLen $2 $0
-  
+
   TrimLoop:
     IntOp $1 $2 - 1
     ${If} $1 < 0
@@ -338,7 +337,7 @@ Function un.Trim
       StrCpy $0 $0 $2
       Goto TrimLoop
     ${EndIf}
-  
+
   TrimDone:
   Pop $2
   Pop $1
@@ -349,16 +348,16 @@ FunctionEnd
 Section "Uninstall"
   ; Check if inventory file exists.
   IfFileExists "$INSTDIR\.re3_installed_files.txt" UseInventory NoInventory
-  
+
   UseInventory:
     ; Confirm before removing files when inventory exists.
     MessageBox MB_YESNO|MB_ICONQUESTION "This will remove game data files installed by re3-installer from $INSTDIR. Continue?" IDYES +2
       Abort
-    
+
     ; Use the inventory file to determine files and folders to delete.
     DetailPrint "Removing installed files based on inventory..."
     FileOpen $0 "$INSTDIR\.re3_installed_files.txt" r
-    
+
     ReadFileLoop:
       FileRead $0 $1
       IfErrors DoneReading
@@ -379,13 +378,13 @@ Section "Uninstall"
       IsFile:
         Delete "$2"
         Goto ReadFileLoop
-    
+
     DoneReading:
     FileClose $0
-    
+
     ; Remove the inventory file.
     Delete "$INSTDIR\.re3_installed_files.txt"
-    
+
     ; Remove empty parent directories in reverse order.
     RMDir "$INSTDIR\data"
     RMDir "$INSTDIR\models"
@@ -401,14 +400,14 @@ Section "Uninstall"
     RMDir "$INSTDIR\neo"
     RMDir "$INSTDIR\mp3"
     Goto UninstallerCleanup
-  
+
   NoInventory:
     ; No inventory file found - present options sequentially.
     MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nRemove game data? (May delete custom files, preserves saves)" IDYES RemoveGameFiles
     MessageBox MB_YESNO|MB_ICONQUESTION "Remove uninstall entry only? (Keeps all game files)" IDYES RegistryOnlyRemoval
     ; If user clicked No to both, abort.
     Abort
-    
+
   RemoveGameFiles:
     ; Fallback: remove common game data directories if no inventory file.
     DetailPrint "No inventory file found, using fallback removal method..."
@@ -427,7 +426,7 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\mp3"
     Delete "$INSTDIR\gamecontrollerdb.txt"
     Goto UninstallerCleanup
-  
+
   RegistryOnlyRemoval:
     ; User chose to only remove uninstaller and registry entries.
     DetailPrint "Removing uninstaller and registry entries, keeping all files..."
@@ -435,9 +434,9 @@ Section "Uninstall"
     Delete "$INSTDIR\uninstall.exe"
     ; Now clean up registry entries.
     Goto RegistryCleanup
-  
+
   UninstallerCleanup:
-  
+
   ; Remove the uninstaller.
   Delete "$INSTDIR\uninstall.exe"
 
