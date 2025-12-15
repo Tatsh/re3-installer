@@ -1,0 +1,233 @@
+; NSIS installer template for re3-installer - Minimal Prototype
+; Based on CMake's NSIS.template.in but adapted for this project
+
+!include "MUI2.nsh"
+!include "FileFunc.nsh"
+!include "LogicLib.nsh"
+!include "nsDialogs.nsh"
+
+; Basic installer information (CPack variables)
+Name "@CPACK_NSIS_PACKAGE_NAME@"
+OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
+InstallDir "$APPDATA\re3"
+InstallDirRegKey HKCU "Software\re3" "Install_Dir"
+RequestExecutionLevel user
+
+; Variables
+Var Disc1Path
+Var Disc2Path
+Var ErrorOccurred
+Var InstallSize
+Var Disc1TextField
+Var Disc2TextField
+Var IsAdmin
+
+; MUI Settings
+!define MUI_ABORTWARNING
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+
+; Pages
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
+
+; Custom disc selection page
+!define MUI_PAGE_HEADER_TEXT "Disc Selection"
+!define MUI_PAGE_HEADER_SUBTEXT "Choose the location of your GTA III/VC disc images or folders."
+Page custom DiscSelectionPage DiscSelectionPageLeave
+!undef MUI_PAGE_HEADER_TEXT
+!undef MUI_PAGE_HEADER_SUBTEXT
+
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+; Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+; Languages
+!insertmacro MUI_LANGUAGE "English"
+
+; Admin detection on init
+Function .onInit
+  UserInfo::GetAccountType
+  Pop $0
+  ${If} $0 == "Admin"
+    StrCpy $IsAdmin "1"
+    StrCpy $1 ""
+    ReadRegStr $1 HKLM "Software\re3" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$PROGRAMFILES\re3"
+    ${EndIf}
+  ${Else}
+    StrCpy $IsAdmin "0"
+    StrCpy $1 ""
+    ReadRegStr $1 HKCU "Software\re3" "Install_Dir"
+    ${If} $1 != ""
+      StrCpy $INSTDIR $1
+    ${Else}
+      StrCpy $INSTDIR "$APPDATA\re3"
+    ${EndIf}
+  ${EndIf}
+FunctionEnd
+
+; Custom disc selection page
+Function DiscSelectionPage
+  !insertmacro MUI_HEADER_TEXT "Source Selection" "Choose the location of your GTA III/VC disc images or folders."
+  
+  nsDialogs::Create 1018
+  Pop $0
+  ${If} $0 == error
+    Abort
+  ${EndIf}
+
+  ; Disc 1 section
+  ${NSD_CreateLabel} 0 0 100% 12u "Disc 1 (ISO file or directory):"
+  Pop $0
+  
+  ${NSD_CreateText} 0 14u 75% 12u "$Disc1Path"
+  Pop $Disc1TextField
+  
+  ${NSD_CreateButton} 76% 14u 11% 12u "File..."
+  Pop $0
+  ${NSD_OnClick} $0 BrowseDisc1File
+  
+  ${NSD_CreateButton} 88% 14u 12% 12u "Folder..."
+  Pop $0
+  ${NSD_OnClick} $0 BrowseDisc1Folder
+
+  ; Disc 2 section  
+  ${NSD_CreateLabel} 0 34u 100% 12u "Disc 2 (ISO file or directory):"
+  Pop $0
+  
+  ${NSD_CreateText} 0 48u 75% 12u "$Disc2Path"
+  Pop $Disc2TextField
+  
+  ${NSD_CreateButton} 76% 48u 11% 12u "File..."
+  Pop $0
+  ${NSD_OnClick} $0 BrowseDisc2File
+  
+  ${NSD_CreateButton} 88% 48u 12% 12u "Folder..."
+  Pop $0
+  ${NSD_OnClick} $0 BrowseDisc2Folder
+
+  nsDialogs::Show
+FunctionEnd
+
+; Browse functions for disc selection
+Function BrowseDisc1File
+  nsDialogs::SelectFileDialog open "Select disc 1 ISO file" "$Disc1Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc1Path $0
+    ${NSD_SetText} $Disc1TextField $Disc1Path
+  ${EndIf}
+FunctionEnd
+
+Function BrowseDisc1Folder
+  nsDialogs::SelectFolderDialog "Select disc 1 directory" "$Disc1Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc1Path $0
+    ${NSD_SetText} $Disc1TextField $Disc1Path
+  ${EndIf}
+FunctionEnd
+
+Function BrowseDisc2File
+  nsDialogs::SelectFileDialog open "Select disc 2 ISO file" "$Disc2Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc2Path $0
+    ${NSD_SetText} $Disc2TextField $Disc2Path
+  ${EndIf}
+FunctionEnd
+
+Function BrowseDisc2Folder
+  nsDialogs::SelectFolderDialog "Select disc 2 directory" "$Disc2Path"
+  Pop $0
+  ${If} $0 != ""
+    StrCpy $Disc2Path $0
+    ${NSD_SetText} $Disc2TextField $Disc2Path
+  ${EndIf}
+FunctionEnd
+
+Function DiscSelectionPageLeave
+  ${NSD_GetText} $Disc1TextField $Disc1Path
+  ${NSD_GetText} $Disc2TextField $Disc2Path
+  
+  ${If} $Disc1Path == ""
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select disc 1 location."
+    Abort
+  ${EndIf}
+  
+  ${If} $Disc2Path == ""
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Please select disc 2 location."
+    Abort
+  ${EndIf}
+FunctionEnd
+
+; Installation section
+Section "Install"
+  SetOutPath "$PLUGINSDIR"
+  
+  ; Extract re3-installer.exe to temp location
+  File "@CPACK_INSTALL_PREFIX@\bin\re3-installer.exe"
+  @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
+  
+  ; Run re3-installer with disc paths
+  DetailPrint "Running re3-installer..."
+  nsExec::ExecToLog '"$PLUGINSDIR\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
+  Pop $0
+  
+  ${If} $0 != 0
+    StrCpy $ErrorOccurred "1"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed. Error code: $0"
+    Goto InstallError
+  ${EndIf}
+  
+  ; Create uninstaller
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  
+  ; Write registry entries
+  ${If} $IsAdmin == "1"
+    WriteRegStr HKLM "Software\re3" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName" "re3 Game Data"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" "$INSTDIR\Uninstall.exe"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoModify" 1
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoRepair" 1
+  ${Else}
+    WriteRegStr HKCU "Software\re3" "Install_Dir" "$INSTDIR"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName" "re3 Game Data"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" "$INSTDIR\Uninstall.exe"
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoModify" 1
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoRepair" 1
+  ${EndIf}
+  
+  Goto InstallSuccess
+
+InstallError:
+  DetailPrint "Installation failed, rolling back..."
+  RMDir /r "$INSTDIR"
+  Abort
+
+InstallSuccess:
+  DetailPrint "Installation completed successfully"
+SectionEnd
+
+; Uninstaller section (simplified for prototype)
+Section "Uninstall"
+  ; Basic uninstall - full implementation will include file inventory system
+  RMDir /r "$INSTDIR"
+  
+  ; Remove registry entries
+  ${If} $IsAdmin == "1"
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
+    DeleteRegKey HKLM "Software\re3"
+  ${Else}
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
+    DeleteRegKey HKCU "Software\re3"
+  ${EndIf}
+SectionEnd

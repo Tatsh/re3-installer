@@ -210,7 +210,6 @@ jobs:
           --install-prefix ${{steps.fixed_workspace.outputs.out}}/build/prefix
           -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           -DCMAKE_PREFIX_PATH=${{steps.fixed_workspace.outputs.out}}/build/prefix
-          -DBUILD_INSTALLER=ON
         shell: msys2 {0}
       - name: Build
         run: cmake --build ${{steps.fixed_workspace.outputs.out}}/build --verbose
@@ -222,8 +221,8 @@ jobs:
         shell: msys2 {0}
       - name: Package
         run: >-
-          cpack -C ${{matrix.build-type}}
-          --config ${{steps.fixed_workspace.outputs.out}}/build/CPackConfig.cmake --verbose
+          cd ${{steps.fixed_workspace.outputs.out}}/build &&
+          cpack -G NSIS -C ${{matrix.build-type}} --verbose
         shell: msys2 {0}
       - name: Get Latest Tag
         id: latest_tag
