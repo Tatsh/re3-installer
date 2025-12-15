@@ -1,19 +1,19 @@
-; NSIS installer template for re3-installer - Minimal Prototype
-; Based on CMake's NSIS.template.in but adapted for this project
+; NSIS installer template for re3-installer using CPack.
+; This installer will guide users through installing GTA III/VC files for re3.
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
 !include "nsDialogs.nsh"
 
-; Basic installer information (CPack variables)
+; Basic installer information (CPack variables).
 Name "@CPACK_NSIS_PACKAGE_NAME@"
 OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3" "Install_Dir"
 RequestExecutionLevel user
 
-; Variables
+; Variables.
 Var Disc1Path
 Var Disc2Path
 Var ErrorOccurred
@@ -22,16 +22,16 @@ Var Disc1TextField
 Var Disc2TextField
 Var IsAdmin
 
-; MUI Settings
+; MUI Settings.
 !define MUI_ABORTWARNING
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
-; Pages
+; Pages.
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
 
-; Custom disc selection page
+; Custom disc selection page.
 !define MUI_PAGE_HEADER_TEXT "Disc Selection"
 !define MUI_PAGE_HEADER_SUBTEXT "Choose the location of your GTA III/VC disc images or folders."
 Page custom DiscSelectionPage DiscSelectionPageLeave
@@ -42,19 +42,20 @@ Page custom DiscSelectionPage DiscSelectionPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
-; Uninstaller pages
+; Uninstaller pages.
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
-; Languages
+; Languages.
 !insertmacro MUI_LANGUAGE "English"
 
-; Admin detection on init
+; Admin detection on init.
 Function .onInit
   UserInfo::GetAccountType
   Pop $0
   ${If} $0 == "Admin"
     StrCpy $IsAdmin "1"
+    ; Check if there's a previous installation in HKLM.
     StrCpy $1 ""
     ReadRegStr $1 HKLM "Software\re3" "Install_Dir"
     ${If} $1 != ""
@@ -64,7 +65,9 @@ Function .onInit
     ${EndIf}
   ${Else}
     StrCpy $IsAdmin "0"
+    ; If running as user, use AppData.
     StrCpy $1 ""
+    ; Check if there's a previous installation in HKCU.
     ReadRegStr $1 HKCU "Software\re3" "Install_Dir"
     ${If} $1 != ""
       StrCpy $INSTDIR $1
@@ -74,7 +77,7 @@ Function .onInit
   ${EndIf}
 FunctionEnd
 
-; Custom disc selection page
+; Custom disc selection page.
 Function DiscSelectionPage
   !insertmacro MUI_HEADER_TEXT "Source Selection" "Choose the location of your GTA III/VC disc images or folders."
   
@@ -84,7 +87,7 @@ Function DiscSelectionPage
     Abort
   ${EndIf}
 
-  ; Disc 1 section
+  ; Disc 1 section.
   ${NSD_CreateLabel} 0 0 100% 12u "Disc 1 (ISO file or directory):"
   Pop $0
   
@@ -99,7 +102,7 @@ Function DiscSelectionPage
   Pop $0
   ${NSD_OnClick} $0 BrowseDisc1Folder
 
-  ; Disc 2 section  
+  ; Disc 2 section.
   ${NSD_CreateLabel} 0 34u 100% 12u "Disc 2 (ISO file or directory):"
   Pop $0
   
@@ -117,7 +120,7 @@ Function DiscSelectionPage
   nsDialogs::Show
 FunctionEnd
 
-; Browse functions for disc selection
+; Browse functions for disc selection.
 Function BrowseDisc1File
   nsDialogs::SelectFileDialog open "Select disc 1 ISO file" "$Disc1Path"
   Pop $0
@@ -167,62 +170,282 @@ Function DiscSelectionPageLeave
     MessageBox MB_OK|MB_ICONEXCLAMATION "Please select disc 2 location."
     Abort
   ${EndIf}
+  
+  IfFileExists "$Disc1Path" +3 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 1 does not exist."
+    Abort
+
+  IfFileExists "$Disc2Path" +3 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The specified path for Disc 2 does not exist."
+    Abort
 FunctionEnd
 
-; Installation section
-Section "Install"
+; Installation section.
+Section "Install" SecInstall
+  StrCpy $ErrorOccurred "0"
+
+  ; Check if installation directory already exists with content.
+  IfFileExists "$INSTDIR\*.*" 0 +3
+    MessageBox MB_YESNO|MB_ICONQUESTION "The installation directory already contains files. Continue anyway? (Not recommended)" IDYES +2
+    Abort
+
+  ; If $INSTDIR already exists, take a pre-installation inventory.
+  IfFileExists "$INSTDIR" 0 +3
+    DetailPrint "Taking pre-installation inventory..."
+    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_pre_inventory.txt" 2>nul'
+
+  ; Create installation directory.
+  CreateDirectory "$INSTDIR"
+
+  ; Use NSIS's plugin directory for temporary files (unique per installation).
+  InitPluginsDir
   SetOutPath "$PLUGINSDIR"
-  
-  ; Extract re3-installer.exe to temp location
-  File "@CPACK_INSTALL_PREFIX@\bin\re3-installer.exe"
+
+  ; Extract re3-installer.exe and dependencies to temporary directory.
+  ; CPack will insert the necessary File commands here via @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@.
   @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
-  
-  ; Run re3-installer with disc paths
+
   DetailPrint "Running re3-installer..."
+  DetailPrint "Disc 1: $Disc1Path"
+  DetailPrint "Disc 2: $Disc2Path"
+  DetailPrint "Install Directory: $INSTDIR"
+
+  ; Execute re3-installer.exe with the provided paths.
+  ClearErrors
   nsExec::ExecToLog '"$PLUGINSDIR\re3-installer.exe" "$Disc1Path" "$Disc2Path" "$INSTDIR"'
   Pop $0
-  
+
+  ; Check if the installation was successful.
   ${If} $0 != 0
     StrCpy $ErrorOccurred "1"
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed. Error code: $0"
-    Goto InstallError
+    DetailPrint "Installation failed with error code $0. Cleaning up..."
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Installation failed with error code $0. Only newly created files will be removed."
+    ; Take a post-failure inventory and remove only new files.
+    nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
+    ; Use PowerShell to compare and delete files (more reliable than batch).
+    IfFileExists "$TEMP\re3_pre_inventory.txt" 0 NoPreInvRollback
+      nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {Remove-Item $_.InputObject -Force -ErrorAction SilentlyContinue}"'
+      Goto CleanupDirs
+    NoPreInvRollback:
+    ; If no pre-inventory, remove only newly created directories.
+    CleanupDirs:
+    ; Remove empty directories.
+    RMDir "$INSTDIR\data"
+    RMDir "$INSTDIR\models"
+    RMDir "$INSTDIR\audio"
+    RMDir "$INSTDIR\anim"
+    RMDir "$INSTDIR\txd"
+    RMDir "$INSTDIR\text"
+    Delete "$TEMP\re3_pre_inventory.txt"
+    Delete "$TEMP\re3_post_inventory.txt"
+    Goto InstallEnd
   ${EndIf}
+
+  DetailPrint "Installation completed successfully."
+
+  ; Take a post-installation inventory and create a list of installed files.
+  DetailPrint "Creating installation inventory..."
+  nsExec::ExecToLog 'cmd /c dir /s /b "$INSTDIR" > "$TEMP\re3_post_inventory.txt" 2>nul'
   
-  ; Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  ; Create the installed files list (excluding pre-existing files).
+  IfFileExists "$TEMP\re3_pre_inventory.txt" HasPreInventory NoPreInventory
   
-  ; Write registry entries
+  HasPreInventory:
+    ; Compare inventories and save only new files using PowerShell.
+    nsExec::ExecToLog 'powershell -ExecutionPolicy Bypass -Command "$post = Get-Content \"$TEMP\re3_post_inventory.txt\"; $pre = Get-Content \"$TEMP\re3_pre_inventory.txt\"; Compare-Object $pre $post | Where-Object {$_.SideIndicator -eq '=>'} | ForEach-Object {$_.InputObject} | Out-File \"$INSTDIR\.re3_installed_files.txt\" -Encoding ASCII"'
+    Delete "$TEMP\re3_pre_inventory.txt"
+    Goto InventoryDone
+  
+  NoPreInventory:
+    ; All files in post-inventory are new.
+    CopyFiles /SILENT "$TEMP\re3_post_inventory.txt" "$INSTDIR\.re3_installed_files.txt"
+  
+  InventoryDone:
+  Delete "$TEMP\re3_post_inventory.txt"
+  DetailPrint "Installation inventory created."
+
+  ; Note: $PLUGINSDIR is automatically cleaned up by NSIS when the installer exits.
+
+  ; Write registry keys for uninstaller.
   ${If} $IsAdmin == "1"
     WriteRegStr HKLM "Software\re3" "Install_Dir" "$INSTDIR"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName" "re3 Game Data"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" "$INSTDIR\Uninstall.exe"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "Publisher" "Tatsh"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayVersion" "@CPACK_PACKAGE_VERSION@"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoModify" 1
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoRepair" 1
   ${Else}
     WriteRegStr HKCU "Software\re3" "Install_Dir" "$INSTDIR"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName" "re3 Game Data"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" "$INSTDIR\Uninstall.exe"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "Publisher" "Tatsh"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayVersion" "@CPACK_PACKAGE_VERSION@"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "URLInfoAbout" "https://tatsh.github.io/re3-installer/"
     WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoModify" 1
     WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "NoRepair" 1
   ${EndIf}
-  
-  Goto InstallSuccess
 
-InstallError:
-  DetailPrint "Installation failed, rolling back..."
-  RMDir /r "$INSTDIR"
-  Abort
+  ; Calculate and write estimated size.
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $InstallSize "0x%08X" $0
+  ${If} $IsAdmin == "1"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "EstimatedSize" "$InstallSize"
+  ${Else}
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "EstimatedSize" "$InstallSize"
+  ${EndIf}
 
-InstallSuccess:
-  DetailPrint "Installation completed successfully"
+  ; Create uninstaller.
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+
+  InstallEnd:
+  ${If} $ErrorOccurred == "1"
+    Abort
+  ${EndIf}
 SectionEnd
 
-; Uninstaller section (simplified for prototype)
-Section "Uninstall"
-  ; Basic uninstall - full implementation will include file inventory system
-  RMDir /r "$INSTDIR"
+; Uninstaller initialization to determine registry root.
+Function un.onInit
+  ; Check if uninstall info exists in HKLM (admin install).
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3" "DisplayName"
+  ${If} $0 != ""
+    StrCpy $IsAdmin "1"
+  ${Else}
+    StrCpy $IsAdmin "0"
+  ${EndIf}
+FunctionEnd
+
+; Trim function for uninstaller to remove whitespace and newlines.
+Function un.Trim
+  Exch $0
+  Push $1
+  Push $2
+  StrLen $2 $0
   
-  ; Remove registry entries
+  TrimLoop:
+    IntOp $1 $2 - 1
+    ${If} $1 < 0
+      StrCpy $0 ""
+      Goto TrimDone
+    ${EndIf}
+    StrCpy $1 $0 1 $1
+    ${If} $1 == " "
+    ${OrIf} $1 == "$\r"
+    ${OrIf} $1 == "$\n"
+    ${OrIf} $1 == "$\t"
+      IntOp $2 $2 - 1
+      StrCpy $0 $0 $2
+      Goto TrimLoop
+    ${EndIf}
+  
+  TrimDone:
+  Pop $2
+  Pop $1
+  Exch $0
+FunctionEnd
+
+; Uninstaller section.
+Section "Uninstall"
+  ; Check if inventory file exists.
+  IfFileExists "$INSTDIR\.re3_installed_files.txt" UseInventory NoInventory
+  
+  UseInventory:
+    ; Confirm before removing files when inventory exists.
+    MessageBox MB_YESNO|MB_ICONQUESTION "This will remove game data files installed by re3-installer from $INSTDIR. Continue?" IDYES +2
+      Abort
+    
+    ; Use the inventory file to determine files and folders to delete.
+    DetailPrint "Removing installed files based on inventory..."
+    FileOpen $0 "$INSTDIR\.re3_installed_files.txt" r
+    
+    ReadFileLoop:
+      FileRead $0 $1
+      IfErrors DoneReading
+      ; Trim whitespace and newlines from the path.
+      Push $1
+      Call un.Trim
+      Pop $2
+      ; Skip empty lines.
+      StrCmp $2 "" ReadFileLoop
+      ; Skip the uninstaller itself and inventory file.
+      StrCmp $2 "$INSTDIR\uninstall.exe" ReadFileLoop
+      StrCmp $2 "$INSTDIR\.re3_installed_files.txt" ReadFileLoop
+      ; Check if it's a directory or file and delete accordingly.
+      IfFileExists "$2\*.*" IsDirectory IsFile
+      IsDirectory:
+        RMDir "$2"
+        Goto ReadFileLoop
+      IsFile:
+        Delete "$2"
+        Goto ReadFileLoop
+    
+    DoneReading:
+    FileClose $0
+    
+    ; Remove the inventory file.
+    Delete "$INSTDIR\.re3_installed_files.txt"
+    
+    ; Remove empty parent directories in reverse order.
+    RMDir "$INSTDIR\data"
+    RMDir "$INSTDIR\models"
+    RMDir "$INSTDIR\audio"
+    RMDir "$INSTDIR\anim"
+    RMDir "$INSTDIR\txd"
+    RMDir "$INSTDIR\text"
+    RMDir "$INSTDIR\skins"
+    RMDir "$INSTDIR\readme"
+    RMDir "$INSTDIR\mss"
+    RMDir "$INSTDIR\movies"
+    RMDir "$INSTDIR\icons"
+    RMDir "$INSTDIR\neo"
+    RMDir "$INSTDIR\mp3"
+    Goto UninstallerCleanup
+  
+  NoInventory:
+    ; No inventory file found - present options sequentially.
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "No installation inventory file was found.$\n$\nRemove game data? (May delete custom files, preserves saves)" IDYES RemoveGameFiles
+    MessageBox MB_YESNO|MB_ICONQUESTION "Remove uninstall entry only? (Keeps all game files)" IDYES RegistryOnlyRemoval
+    ; If user clicked No to both, abort.
+    Abort
+    
+  RemoveGameFiles:
+    ; Fallback: remove common game data directories if no inventory file.
+    DetailPrint "No inventory file found, using fallback removal method..."
+    RMDir /r "$INSTDIR\data"
+    RMDir /r "$INSTDIR\models"
+    RMDir /r "$INSTDIR\audio"
+    RMDir /r "$INSTDIR\anim"
+    RMDir /r "$INSTDIR\txd"
+    RMDir /r "$INSTDIR\text"
+    RMDir /r "$INSTDIR\skins"
+    RMDir /r "$INSTDIR\readme"
+    RMDir /r "$INSTDIR\mss"
+    RMDir /r "$INSTDIR\movies"
+    RMDir /r "$INSTDIR\icons"
+    RMDir /r "$INSTDIR\neo"
+    RMDir /r "$INSTDIR\mp3"
+    Delete "$INSTDIR\gamecontrollerdb.txt"
+    Goto UninstallerCleanup
+  
+  RegistryOnlyRemoval:
+    ; User chose to only remove uninstaller and registry entries.
+    DetailPrint "Removing uninstaller and registry entries, keeping all files..."
+    ; Remove the uninstaller.
+    Delete "$INSTDIR\uninstall.exe"
+    ; Now clean up registry entries.
+    Goto RegistryCleanup
+  
+  UninstallerCleanup:
+  
+  ; Remove the uninstaller.
+  Delete "$INSTDIR\uninstall.exe"
+
+  ; Try to remove the installation directory if it is empty.
+  RMDir "$INSTDIR"
+
+  RegistryCleanup:
+  ; Remove registry keys.
   ${If} $IsAdmin == "1"
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
     DeleteRegKey HKLM "Software\re3"
@@ -230,4 +453,6 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\re3"
     DeleteRegKey HKCU "Software\re3"
   ${EndIf}
+
+  MessageBox MB_OK "Uninstallation complete. Saved game data and settings were preserved."
 SectionEnd
