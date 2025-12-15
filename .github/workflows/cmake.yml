@@ -161,6 +161,13 @@ jobs:
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.zip
+      - if: ${{ github.ref_type == 'tag' }}
+        name: Upload package
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ${{github.workspace}}/re3-installer-*.zip
     strategy:
       fail-fast: false
       matrix:
