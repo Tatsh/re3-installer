@@ -21,6 +21,7 @@ cpack
 cpptools
 csidl
 ctest
+customfunction
 datarootdir
 dbuild
 dcmake

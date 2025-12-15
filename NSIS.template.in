@@ -144,7 +144,7 @@ Function BrowseDisc1Folder
 FunctionEnd
 
 Function BrowseDisc2File
-  nsDialogs::SelectFileDialog "$DOCUMENTS" "ISO files|*.iso|All files|*.*"
+  nsDialogs::SelectFileDialog open "$DOCUMENTS" "ISO files|*.iso|All files|*.*"
   Pop $0
   ${If} $0 != ""
     StrCpy $Disc2Path $0
