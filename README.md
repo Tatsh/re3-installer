@@ -45,6 +45,14 @@ If `INSTALL_DIR` is not specified, the following paths will be used:
 
 This project supports Linux, macOS, and Windows.
 
+### Windows GUI
+
+A GUI-based installer for Windows is provided in the releases. Download an EXE file on the
+[releases](https://github.com/Tatsh/re3-installer/releases/tag/v0.2.3) page for this version of the
+installer.
+
+![Windows installer source selection page](/windows-installer.png)
+
 ## How to build
 
 Requirements:
