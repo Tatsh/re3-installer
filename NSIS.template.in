@@ -368,8 +368,8 @@ Section "Uninstall"
     ; For data and models directories, recursively remove all subdirectories first.
     ; Using PowerShell to find and remove subdirectories in reverse order (deepest first).
     DetailPrint "Removing subdirectories in data and models..."
-    nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path \"$INSTDIR\data\" -Directory -Recurse -ErrorAction SilentlyContinue | Sort-Object { $_.FullName.Length } -Descending | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }"'
-    nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path \"$INSTDIR\models\" -Directory -Recurse -ErrorAction SilentlyContinue | Sort-Object { $_.FullName.Length } -Descending | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }"'
+    nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path \"$INSTDIR\data\" -Directory -Recurse -ErrorAction SilentlyContinue | Sort-Object { $$_.FullName.Length } -Descending | ForEach-Object { Remove-Item $$_.FullName -Force -ErrorAction SilentlyContinue }"'
+    nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path \"$INSTDIR\models\" -Directory -Recurse -ErrorAction SilentlyContinue | Sort-Object { $$_.FullName.Length } -Descending | ForEach-Object { Remove-Item $$_.FullName -Force -ErrorAction SilentlyContinue }"'
 
     ; Remove empty parent directories in reverse order.
     RMDir "$INSTDIR\data"
