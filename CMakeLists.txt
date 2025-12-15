@@ -8,7 +8,7 @@ project(
   re3-installer
   DESCRIPTION "GTA III/VC file installer for re3."
   HOMEPAGE_URL "https://tatsh.github.io/re3-installer/"
-  VERSION 0.2.2
+  VERSION 0.2.3
   LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 

@@ -3,7 +3,7 @@ local utils = import 'utils.libjsonnet';
 {
   project_type: 'c',
   project_name: 're3-installer',
-  version: '0.2.2',
+  version: '0.2.3',
   security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   description: 'Install GTA III files from ISO or directories for use with re3.',
   keywords: ['gta iii', 'gta vice city', 're3'],
