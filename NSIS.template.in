@@ -339,6 +339,7 @@ Section "Uninstall"
     FileOpen $0 "$INSTDIR\.re3_installed_files.txt" r
 
     ReadFileLoop:
+      ClearErrors
       FileRead $0 $1
       IfErrors DoneReading
       ; Trim whitespace and newlines from the path.
@@ -350,14 +351,13 @@ Section "Uninstall"
       ; Skip the uninstaller itself and inventory file.
       StrCmp $2 "$INSTDIR\uninstall.exe" ReadFileLoop
       StrCmp $2 "$INSTDIR\.re3_installed_files.txt" ReadFileLoop
-      ; Check if it's a directory or file and delete accordingly.
-      IfFileExists "$2\*.*" IsDirectory IsFile
-      IsDirectory:
-        RMDir "$2"
-        Goto ReadFileLoop
-      IsFile:
-        Delete "$2"
-        Goto ReadFileLoop
+      ; Log what we're processing.
+      DetailPrint "Processing: $2"
+      ; Delete file (works for both files and will fail silently for directories).
+      Delete "$2"
+      ; If it was a directory, try to remove it (will only succeed if empty).
+      RMDir "$2"
+      Goto ReadFileLoop
 
     DoneReading:
     FileClose $0
