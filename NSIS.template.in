@@ -12,6 +12,21 @@ OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 InstallDir "$APPDATA\re3"
 InstallDirRegKey HKCU "Software\re3" "Install_Dir"
 RequestExecutionLevel user
+
+; Version information
+!define APP_PUBLISHER "Tatsh"
+!define APP_VERSION "0.2.3"
+!define /date CURRENT_YEAR "%Y"
+!define APP_URL "https://github.com/Tatsh/re3-installer"
+VIProductVersion "${APP_VERSION}.0"
+VIAddVersionKey "ProductVersion" "${APP_VERSION}.0"
+VIAddVersionKey "ProductName" "${CPACK_NSIS_PACKAGE_NAME}"
+VIAddVersionKey "CompanyName" "${APP_PUBLISHER}"
+VIAddVersionKey "FileDescription" "${CPACK_NSIS_PACKAGE_NAME} installer."
+VIAddVersionKey "FileVersion" "${APP_VERSION}"
+VIAddVersionKey "LegalCopyright" "Copyright (c) ${CURRENT_YEAR} ${APP_PUBLISHER}."
+VIAddVersionKey "Comments" "${APP_URL}"
+
 @CPACK_NSIS_MANIFEST_DPI_AWARE_CODE@
 @CPACK_NSIS_BRANDING_TEXT_CODE@
 @CPACK_NSIS_CRC_CHECK_CODE@

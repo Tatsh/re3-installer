@@ -22,7 +22,7 @@ local utils = import 'utils.libjsonnet';
   },
   cz+: {
     commitizen+: {
-      version_files+: ['man/re3-installer.1'],
+      version_files+: ['NSIS.template.in', 'man/re3-installer.1'],
     },
   },
   package_json+: {
