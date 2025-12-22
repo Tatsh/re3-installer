@@ -108,7 +108,7 @@ jobs:
         run: |
           cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/prefix
+            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/AppDir/usr
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
       - name: Install
@@ -117,18 +117,48 @@ jobs:
         run: >-
           cpack -C ${{matrix.build-type}}
           --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
+      - name: Create AppImage
+        run: |
+          wget 'https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage'
+          chmod +x linuxdeploy-x86_64.AppImage
+          mkdir -p ${{github.workspace}}/build/AppDir/usr/share/icons/hicolor/scalable/apps
+          wget 'https://raw.githubusercontent.com/GNOME/adwaita-icon-theme/refs/heads/master/src/fullcolor/application-x-generic.source.svg' -O ${{github.workspace}}/build/AppDir/usr/share/icons/hicolor/scalable/apps/application-x-generic.svg
+          cat > ${{github.workspace}}/build/re3-installer.desktop <<EOF
+          [Desktop Entry]
+          Categories=Utility;
+          Exec=re3-installer %u
+          Icon=application-x-generic
+          Name=re3-installer
+          NoDisplay=true
+          Type=Application
+          Version=1.5
+          EOF
+          ./linuxdeploy-x86_64.AppImage --appdir ${{github.workspace}}/build/AppDir --output appimage --desktop-file ${{github.workspace}}/build/re3-installer.desktop
+          mv ${{github.workspace}}/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{matrix.build-type}}-x86_64.AppImage
+      - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
+        name: Rename with tag
+        run: mv ${{github.workspace}}/build/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{github.ref}}-x86_64.AppImage
       - name: 'Upload Artifacts'
         uses: 'actions/upload-artifact@v6'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-Linux
           path: |
+            ${{github.workspace}}/re3-installer-*.AppImage
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
+            ${{github.workspace}}/re3-installer-*.AppImage
             ${{github.workspace}}/re3-installer-*.zip
+      - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
+        name: Upload package
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ${{github.workspace}}/build/re3-installer-*.AppImage
     strategy:
       fail-fast: false
       matrix:

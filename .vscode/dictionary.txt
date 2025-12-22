@@ -1,5 +1,7 @@
 abortwarning
 anim
+appdir
+appimage
 argn
 asan
 autosort
@@ -77,6 +79,7 @@ libjsonnet
 libstdc
 libunshield
 libwinpthread
+linuxdeploy
 makensis
 mmnn
 mocka
@@ -88,8 +91,8 @@ noconfirmmkdir
 noerrorui
 nonfatal
 nsis
-nsisdir
 nsis's
+nsisdir
 nullptr
 pacboy
 pipx
