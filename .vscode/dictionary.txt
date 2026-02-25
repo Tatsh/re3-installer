@@ -26,6 +26,7 @@ customfunction
 datarootdir
 dbuild
 dcmake
+defenses
 denable
 dialog
 dialogs
@@ -35,6 +36,7 @@ endforeach
 endfunction
 esbenp
 exch
+favor
 fclose
 ferror
 fileflags
@@ -89,6 +91,7 @@ msystem
 noconfirmation
 noconfirmmkdir
 noerrorui
+noncommercially
 nonfatal
 nsis
 nsis's
