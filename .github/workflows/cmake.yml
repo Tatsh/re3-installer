@@ -74,7 +74,7 @@ jobs:
           cpack -C ${{matrix.build-type}}
           --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v6'
+        uses: 'actions/upload-artifact@v7'
         with:
           if-no-files-found: error
           name: re3-installer-cross-${{ matrix.build-type }}
@@ -139,7 +139,7 @@ jobs:
         name: Rename with tag
         run: mv ${{github.workspace}}/build/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{github.ref}}-x86_64.AppImage
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v6'
+        uses: 'actions/upload-artifact@v7'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-Linux
@@ -180,7 +180,7 @@ jobs:
           cpack -C ${{matrix.build-type}}
           --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v6'
+        uses: 'actions/upload-artifact@v7'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-${{ matrix.os }}
@@ -256,7 +256,7 @@ jobs:
           cpack -C ${{matrix.build-type}} --verbose
         shell: msys2 {0}
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v6'
+        uses: 'actions/upload-artifact@v7'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-${{ matrix.sys.name }}
