@@ -81,7 +81,7 @@ jobs:
           path: |
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.zip
@@ -147,7 +147,7 @@ jobs:
             ${{github.workspace}}/re3-installer-*.AppImage
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.AppImage
@@ -187,7 +187,7 @@ jobs:
           path: |
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.zip
@@ -264,7 +264,7 @@ jobs:
             ${{github.workspace}}/build/re3-installer-*.zip
             ${{github.workspace}}/build/re3-installer-*.exe
       - name: Attest
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ${{github.workspace}}/build/re3-installer-*.zip
