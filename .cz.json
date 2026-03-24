@@ -7,10 +7,10 @@
       ".wiswa.jsonnet",
       "CITATION.cff",
       "CMakeLists.txt",
-      "NSIS.template.in",
       "README.md",
       "package.json",
       "vcpkg.json",
+      "NSIS.template.in",
       "man/re3-installer.1"
     ],
     "version_provider": "npm",

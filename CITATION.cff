@@ -2,7 +2,7 @@ authors:
   - family-names: 'Udvare'
     given-names: 'Andrew'
 cff-version: '1.2.0'
-date-released: '2025-12-15'
+date-released: '2026-03-24'
 message: 'If you use this software, please cite it as below.'
 title: 're3-installer'
 version: '0.2.3'

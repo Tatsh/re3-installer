@@ -4,6 +4,7 @@ local utils = import 'utils.libjsonnet';
   project_type: 'c',
   project_name: 're3-installer',
   version: '0.2.3',
+  want_winget: false,
   security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   description: 'Install GTA III files from ISO or directories for use with re3.',
   keywords: ['gta iii', 'gta vice city', 're3'],
@@ -26,12 +27,7 @@ local utils = import 'utils.libjsonnet';
       version_files+: ['NSIS.template.in', 'man/re3-installer.1'],
     },
   },
-  package_json+: {
-    scripts+: {
-      'check-formatting': "cmake-format --check CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt; clang-format -n src/*.c src/*.h src/tests/*.c && prettier -c . && markdownlint-cli2 '**/*.md' '#node_modules'",
-      format: 'cmake-format -i CMakeLists.txt src/CMakeLists.txt src/tests/CMakeLists.txt && clang-format -i src/*.c src/*.h src/tests/*.c && yarn prettier -w .',
-    },
-  },
+  clang_format_args: 'src/*.c src/*.h src/tests/*.c',
   vscode+: {
     c_cpp+: {
       configurations: [
