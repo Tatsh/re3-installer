@@ -11,9 +11,9 @@ jobs:
           fetch-depth: 0
       - name: Build unshield
         run: |
-          curl -Lo 'zlib.tar.gz' 'https://zlib.net/zlib-1.3.1.tar.gz'
+          curl -Lo 'zlib.tar.gz' 'https://zlib.net/current/zlib.tar.gz'
           tar xf zlib.tar.gz
-          cd zlib-1.3.1
+          cd zlib-*
           mkdir build
           cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
             -DBUILD_SHARED_LIBS=OFF \
@@ -36,9 +36,9 @@ jobs:
           cmake --install ./build --config Debug --verbose
       - name: Build libcdio
         run: |
-          curl -Lo 'libcdio.tar.gz' 'https://github.com/libcdio/libcdio/releases/download/2.2.0/libcdio-2.2.0.tar.gz'
+          curl -Lo 'libcdio.tar.gz' 'https://github.com/libcdio/libcdio/releases/download/2.3.0/libcdio-2.3.0.tar.gz'
           tar xf libcdio.tar.gz
-          cd libcdio-2.2.0
+          cd libcdio-2.3.0
           mkdir build
           ./configure --prefix=${{github.workspace}}/build/prefix \
             --enable-static \
