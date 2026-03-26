@@ -126,7 +126,6 @@ udvare
 unicon
 unshield
 userprofile
-vedantmgoyal
 vendored
 venv
 versioninfo
