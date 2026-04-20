@@ -1,4 +1,5 @@
 abortwarning
+Ångström
 anim
 appdir
 appimage
@@ -13,6 +14,7 @@ cdio
 cmocka
 commitizen
 contrib
+cooldown
 copyfile
 coveragerc
 coverallsapp
@@ -30,7 +32,6 @@ denable
 dialog
 dialogs
 docstrings
-dorny
 egor
 endforeach
 endfunction
@@ -67,6 +68,7 @@ instdir
 instfiles
 interprocedural
 iwyu
+jinja
 jsonnet
 jsonschema
 libcdio
@@ -94,9 +96,10 @@ noconfirmmkdir
 noerrorui
 noncommercially
 nonfatal
+npmjs
 nsis
-nsis's
 nsisdir
+nsis's
 nullptr
 oneline
 pacboy
@@ -104,8 +107,10 @@ pipx
 pluginsdir
 productversion
 progs
+pylock
 reflow
 regen
+ripgreprc
 schemafile
 sendfile
 shellcheck
@@ -135,6 +140,7 @@ werror
 winget
 winpthread
 wiswa
+wiswa's
 wmissing
 wparentheses
 wpointer
@@ -147,4 +153,3 @@ wunreachable
 wunused
 wwrite
 yarnrc
-ångström

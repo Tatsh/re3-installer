@@ -1,6 +1,7 @@
 local utils = import 'utils.libjsonnet';
 
 {
+  uses_user_defaults: true,
   project_type: 'c',
   project_name: 're3-installer',
   version: '0.2.3',
@@ -12,9 +13,6 @@ local utils = import 'utils.libjsonnet';
   want_main: false,
   want_codeql: false,
   want_tests: false,
-  copilot+: {
-    intro: 're3-installer extracts GTA III game content from ISOs or directories for use with re3.',
-  },
   // C/C++ only
   vcpkg+: {
     dependencies: ['libarchive', {
