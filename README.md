@@ -8,7 +8,7 @@
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/re3-installer/v0.2.3/master)](https://github.com/Tatsh/re3-installer/compare/v0.2.3...master)
 [![QA](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml)
 [![Dependabot](https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot)](https://github.com/dependabot)
-[![GitHub Pages](https://github.com/Tatsh/re3-installer/actions/workflows/pages.yml/badge.svg)](https://tatsh.github.io/re3-installer/)
+[![pages-build-deployment](https://github.com/Tatsh/re3-installer/actions/workflows/pages/pages-build-deployment/badge.svg)](https://tatsh.github.io/re3-installer/)
 [![Stargazers](https://img.shields.io/github/stars/Tatsh/re3-installer?logo=github&style=flat)](https://github.com/Tatsh/re3-installer/stargazers)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![CMake](https://img.shields.io/badge/CMake-6E6E6E?logo=cmake)](https://cmake.org/)

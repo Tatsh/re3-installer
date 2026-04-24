@@ -37,12 +37,15 @@
   "description": "Install GTA III files from ISO or directories for use with re3.",
   "devDependencies": {
     "@prettier/plugin-xml": "^3.4.2",
-    "cspell": "^10.0.0",
+    "cspell": "^9.8.0",
     "markdownlint-cli2": "^0.22.0",
-    "prettier": "^3.8.2",
+    "prettier": "^3.8.3",
     "prettier-plugin-ini": "^1.3.0",
     "prettier-plugin-sort-json": "^4.2.0",
     "prettier-plugin-toml": "^2.0.6"
+  },
+  "engines": {
+    "node": ">=20.0"
   },
   "files": ["LICENSE.txt", "README.md"],
   "homepage": "https://tatsh.github.io/re3-installer/",
@@ -107,7 +110,7 @@
     "check-formatting": "clang-format --dry-run src/*.c src/*.h src/tests/*.c && prettier --check . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2",
     "check-spelling": "cspell --no-progress .",
     "dict:update": "rm -f .vscode/dictionary.txt && cspell lint --no-progress --no-summary --unique --words-only | tr '[:upper:]' '[:lower:]' | sort -u > .vscode/dictionary.txt",
-    "format": "clang-format --in-place src/*.c src/*.h src/tests/*.c && prettier --write . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2 --fix",
+    "format": "clang-format -i src/*.c src/*.h src/tests/*.c && prettier --write . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2 --fix",
     "qa": "yarn check-spelling && yarn check-formatting"
   },
   "version": "0.2.3"
