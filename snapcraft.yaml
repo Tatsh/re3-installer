@@ -22,6 +22,7 @@ parts:
       - 'libcdio-dev'
       - 'libiso9660-dev'
       - 'libunshield-dev'
+      - 'pkg-config'
       - 'zlib1g-dev'
     cmake-parameters:
       - '-DCMAKE_BUILD_TYPE=Release'
