@@ -229,6 +229,7 @@ jobs:
             cmake:p libcdio:p ninja:p
             ${{ matrix.sys.name == 'clangarm64' && ' ' || 'nsis:p' }}
             toolchain:p zlib:p
+          path-type: ${{ matrix.sys.name == 'clangarm64' && 'inherit' || 'minimal' }}
           update: true
       - uses: actions/checkout@v6
         with:
