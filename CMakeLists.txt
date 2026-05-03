@@ -3,7 +3,7 @@ include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.28)
 project(
   re3-installer
   DESCRIPTION "GTA III/VC file installer for re3."
