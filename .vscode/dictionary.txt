@@ -13,6 +13,8 @@ bsky
 buildsystems
 cdda
 cdio
+choco
+clangarm
 cmocka
 commitizen
 contrib
@@ -29,6 +31,7 @@ dashcam
 datarootdir
 dbuild
 dcmake
+dcpack
 defenses
 denable
 dialog
@@ -145,6 +148,7 @@ versioninfo
 wdeprecated
 wempty
 werror
+winarm
 winget
 winpthread
 wiswa
