@@ -42,5 +42,5 @@ platforms:
 source-code: 'https://github.com/Tatsh/re3-installer'
 summary: 'GTA III/VC file installer for re3'
 title: 're3-installer'
-version: '0.2.4'
+version: '0.2.5'
 website: 'https://tatsh.github.io/re3-installer/'

@@ -5,7 +5,7 @@
 [![C](https://img.shields.io/badge/C-00599C?logo=c)](<https://en.wikipedia.org/wiki/C_(programming_language)>)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/re3-installer)](https://github.com/Tatsh/re3-installer/tags)
 [![License](https://img.shields.io/github/license/Tatsh/re3-installer)](https://github.com/Tatsh/re3-installer/blob/master/LICENSE.txt)
-[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/re3-installer/v0.2.4/master)](https://github.com/Tatsh/re3-installer/compare/v0.2.4...master)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/re3-installer/v0.2.5/master)](https://github.com/Tatsh/re3-installer/compare/v0.2.5...master)
 [![QA](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/qa.yml)
 [![Dependabot](https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot)](https://github.com/dependabot)
 [![pages-build-deployment](https://github.com/Tatsh/re3-installer/actions/workflows/pages/pages-build-deployment/badge.svg)](https://tatsh.github.io/re3-installer/)
@@ -49,7 +49,7 @@ This project supports Linux, macOS, and Windows.
 ### Windows GUI
 
 A GUI-based installer for Windows is provided in the releases. Download an EXE file on the
-[releases](https://github.com/Tatsh/re3-installer/releases/tag/v0.2.4) page for this version of the
+[releases](https://github.com/Tatsh/re3-installer/releases/tag/v0.2.5) page for this version of the
 installer.
 
 ![Windows installer source selection page](/windows-installer.png)

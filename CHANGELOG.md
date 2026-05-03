@@ -9,6 +9,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+## [0.2.5] - 2026-05-03
+
+### Added
+
+- Windows ARM64 build artefacts produced by the CMake CI workflow.
+
+### Changed
+
+- Disambiguated CPack output filenames for Windows builds via explicit
+  `CPACK_SYSTEM_NAME` matrix values (`win32`, `win64`, `winarm64`).
+
+### Fixed
+
+- Draft-promote release pipeline could publish the GitHub release before all
+  Snap and Flatpak artefacts had been uploaded, leaving the ARM64 snap missing
+  from the v0.2.4 release. The dispatcher now waits for the Snap and Flatpak
+  workflows before flipping the release out of draft state.
+
 ## [0.2.4] - 2026-05-03
 
 ### Added
@@ -171,7 +189,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed some print statements.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.4...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/Tatsh/re3-installer/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/Tatsh/re3-installer/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Tatsh/re3-installer/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Tatsh/re3-installer/compare/v0.2.1...v0.2.2

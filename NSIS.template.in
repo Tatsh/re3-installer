@@ -15,7 +15,7 @@ RequestExecutionLevel user
 
 ; Version information
 !define APP_PUBLISHER "Tatsh"
-!define APP_VERSION "0.2.4"
+!define APP_VERSION "0.2.5"
 !define /date CURRENT_YEAR "%Y"
 !define APP_URL "https://github.com/Tatsh/re3-installer"
 VIProductVersion "${APP_VERSION}.0"
