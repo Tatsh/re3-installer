@@ -209,19 +209,26 @@ jobs:
         build-type: [Debug, Release]
         os: [macos-15-intel, macos-latest]
   build-msys:
-    runs-on: windows-latest
+    runs-on: ${{matrix.sys.runner}}
     steps:
       - id: fixed_workspace
         name: Fix path
         run: >-
           echo out=$("${{github.workspace}}" -Replace "\\","/") | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - if: matrix.sys.name == 'clangarm64'
+        name: Install NSIS via Chocolatey
+        run: |
+          choco install nsis -y --no-progress
+          'C:\Program Files (x86)\NSIS' | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_PATH
       - uses: msys2/setup-msys2@v2
         with:
           install: >-
             make
           msystem: ${{matrix.sys.name}}
           pacboy: >-
-            cmake:p libcdio:p ninja:p nsis:p toolchain:p zlib:p
+            cmake:p libcdio:p ninja:p
+            ${{ matrix.sys.name == 'clangarm64' && ' ' || 'nsis:p' }}
+            toolchain:p zlib:p
           update: true
       - uses: actions/checkout@v6
         with:
@@ -247,6 +254,7 @@ jobs:
           --install-prefix ${{steps.fixed_workspace.outputs.out}}/build/prefix
           -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
           -DCMAKE_PREFIX_PATH=${{steps.fixed_workspace.outputs.out}}/build/prefix
+          -DCPACK_SYSTEM_NAME=${{matrix.sys.cpack_system}}
         shell: msys2 {0}
       - name: Build
         run: cmake --build ${{steps.fixed_workspace.outputs.out}}/build --verbose
@@ -275,7 +283,7 @@ jobs:
           subject-path: |
             ${{github.workspace}}/build/re3-installer-*.zip
             ${{github.workspace}}/build/re3-installer-*.exe
-      - if: ${{ github.ref_type == 'tag' && matrix.sys.name == 'mingw32' }}
+      - if: ${{ github.ref_type == 'tag' && matrix.sys.release }}
         name: Upload package
         uses: softprops/action-gh-release@v3
         with:
@@ -289,15 +297,30 @@ jobs:
       matrix:
         build-type: [Debug, Release]
         sys:
-          - env: i686
+          - cpack_system: win32
+            env: i686
             lto: 'OFF'
             name: mingw32
-          - env: x86_64
+            release: true
+            runner: windows-latest
+          - cpack_system: win64
+            env: x86_64
             lto: 'TRUE'
             name: mingw64
-          - env: ucrt-x86_64
+            release: false
+            runner: windows-latest
+          - cpack_system: win64
+            env: ucrt-x86_64
             lto: 'TRUE'
             name: ucrt64
+            release: false
+            runner: windows-latest
+          - cpack_system: winarm64
+            env: clang-aarch64
+            lto: 'TRUE'
+            name: clangarm64
+            release: true
+            runner: windows-11-arm
 name: Build
 'on':
   pull_request:
