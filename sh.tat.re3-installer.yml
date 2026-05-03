@@ -1,0 +1,50 @@
+---
+id: sh.tat.re3-installer
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: re3-installer
+finish-args:
+  - --filesystem=home
+  - --device=all
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/aclocal
+  - /share/doc
+  - /share/man
+  - /share/pkgconfig
+  - '*.a'
+  - '*.la'
+modules:
+  - name: libcdio
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://ftp.gnu.org/gnu/libcdio/libcdio-2.2.0.tar.bz2
+        sha256: 21f5594da4c170f0a456d4f0deef26791b8ac2c7d0f5b65d7d76b71789c7c4dd
+  - name: libcdio-paranoia
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://ftp.gnu.org/gnu/libcdio/libcdio-paranoia-10.2+2.0.2.tar.bz2
+        sha256: 169c44607ed6e09db1ed8761b83cb1f82cdcd80d0aaccd76e0afe93dffeeb466
+  - name: libunshield
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/twogood/unshield.git
+        tag: 1.6.2
+  - name: re3-installer
+    builddir: true
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: git
+        url: https://github.com/Tatsh/re3-installer.git
+        tag: v0.2.3
+        x-checker-data:
+          type: git
+          tag-pattern: '^v([\d.]+)$'
