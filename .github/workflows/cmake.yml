@@ -27,6 +27,7 @@ jobs:
           curl -Lo 'unshield.tar.gz' 'https://github.com/twogood/unshield/archive/refs/tags/1.6.2.tar.gz'
           tar xf unshield.tar.gz
           cd unshield-1.6.2
+          sed -i 's/defined(UNSHIELD_EXPORTS)/defined(UNSHIELD_EXPORT)/' lib/libunshield.h
           mkdir build
           cmake -B ./build -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_STATIC=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE \
@@ -230,11 +231,12 @@ jobs:
           curl -Lo 'unshield.tar.gz' 'https://github.com/twogood/unshield/archive/refs/tags/1.6.2.tar.gz'
           tar xf unshield.tar.gz
           cd unshield-1.6.2
+          sed -i 's/defined(UNSHIELD_EXPORTS)/defined(UNSHIELD_EXPORT)/' lib/libunshield.h
           mkdir build
           cmake -B ./build -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_PREFIX=${{steps.fixed_workspace.outputs.out}}/build/prefix \
             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
+            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=${{matrix.sys.lto}} \
             -DCMAKE_SYSTEM_NAME=Windows -Wno-dev
           cmake --build ./build --config Debug --verbose
           cmake --install ./build --config Debug --verbose
@@ -288,10 +290,13 @@ jobs:
         build-type: [Debug, Release]
         sys:
           - env: i686
+            lto: 'OFF'
             name: mingw32
           - env: x86_64
+            lto: 'TRUE'
             name: mingw64
           - env: ucrt-x86_64
+            lto: 'TRUE'
             name: ucrt64
 name: Build
 'on':
