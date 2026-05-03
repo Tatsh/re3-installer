@@ -140,7 +140,7 @@ jobs:
           mv ${{github.workspace}}/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{matrix.build-type}}-x86_64.AppImage
       - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
         name: Rename with tag
-        run: mv ${{github.workspace}}/build/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{github.ref}}-x86_64.AppImage
+        run: mv ${{github.workspace}}/re3-installer-Release-x86_64.AppImage ${{github.workspace}}/re3-installer-${{github.ref_name}}-x86_64.AppImage
       - name: 'Upload Artifacts'
         uses: 'actions/upload-artifact@v7'
         with:
@@ -162,7 +162,7 @@ jobs:
           draft: true
           fail_on_unmatched_files: true
           files: |
-            ${{github.workspace}}/build/re3-installer-*.AppImage
+            ${{github.workspace}}/re3-installer-*.AppImage
     strategy:
       fail-fast: false
       matrix:
