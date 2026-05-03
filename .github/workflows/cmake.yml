@@ -89,6 +89,7 @@ jobs:
         name: Upload package
         uses: softprops/action-gh-release@v3
         with:
+          draft: true
           fail_on_unmatched_files: true
           files: |
             ${{github.workspace}}/re3-installer-*.zip
@@ -156,6 +157,7 @@ jobs:
         name: Upload package
         uses: softprops/action-gh-release@v3
         with:
+          draft: true
           fail_on_unmatched_files: true
           files: |
             ${{github.workspace}}/build/re3-installer-*.AppImage
@@ -195,6 +197,7 @@ jobs:
         name: Upload package
         uses: softprops/action-gh-release@v3
         with:
+          draft: true
           fail_on_unmatched_files: true
           files: |
             ${{github.workspace}}/re3-installer-*.zip
@@ -273,6 +276,7 @@ jobs:
         name: Upload package
         uses: softprops/action-gh-release@v3
         with:
+          draft: true
           fail_on_unmatched_files: true
           files: |
             ${{github.workspace}}/build/re3-installer-*.zip
@@ -288,7 +292,7 @@ jobs:
             name: mingw64
           - env: ucrt-x86_64
             name: ucrt64
-name: C/C++ CI
+name: Build
 'on':
   pull_request:
     branches: [master]
