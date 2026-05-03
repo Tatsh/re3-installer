@@ -35,6 +35,7 @@ docstrings
 egor
 endforeach
 endfunction
+esac
 esbenp
 exch
 favor
@@ -124,6 +125,7 @@ strncmp
 tatsh
 tensin
 toplevel
+tostring
 typelib
 ubsan
 ucrt
