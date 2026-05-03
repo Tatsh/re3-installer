@@ -9,6 +9,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+## [0.2.4] - 2026-05-03
+
+### Added
+
+- AppImage build artefacts produced by the CMake CI workflow.
+- macOS build artefacts uploaded by the CMake CI workflow.
+- Snap and Flatpak packaging configurations.
+- Draft-promote release pipeline in the GitHub Actions workflows.
+- Version metadata in the NSIS Windows installer template.
+- Windows usage information in `README.md`.
+
+### Changed
+
+- Lowered the minimum required CMake version to 3.28.
+- Switched the Flatpak `libcdio-paranoia` source to the GitHub release tarball.
+- Updated `zlib` and `libcdio` source URLs in the CMake workflow.
+- Bumped CI action dependencies: `actions/upload-artifact`,
+  `actions/attest-build-provenance`, `softprops/action-gh-release`, and
+  `egor-tensin/setup-mingw`.
+- Bumped development dependencies: `cspell`, `prettier`,
+  `prettier-plugin-sort-json`, and `markdownlint-cli2`.
+- Corrected the licence reference to GPL-3.
+
+### Fixed
+
+- Patched the Unshield `dllimport` bug and restored LTO on 64-bit MSYS2 builds.
+- Fixed CI build failures across the workflows and packaging.
+
 ## [0.2.3] - 2025-12-15
 
 ### Added
@@ -143,7 +171,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed some print statements.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/Tatsh/re3-installer/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Tatsh/re3-installer/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Tatsh/re3-installer/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Tatsh/re3-installer/compare/v0.2.0...v0.2.1

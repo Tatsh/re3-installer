@@ -33,6 +33,7 @@ defenses
 denable
 dialog
 dialogs
+dllimport
 docstrings
 egor
 endforeach
@@ -93,6 +94,7 @@ mktemp
 mmnn
 mocka
 msvc
+msys
 msystem
 mypy
 noconfirmation

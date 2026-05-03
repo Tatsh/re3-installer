@@ -4,7 +4,7 @@ local utils = import 'utils.libjsonnet';
   uses_user_defaults: true,
   project_type: 'c',
   project_name: 're3-installer',
-  version: '0.2.3',
+  version: '0.2.4',
   want_winget: false,
   security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   description: 'Install GTA III files from ISO or directories for use with re3.',
@@ -22,7 +22,12 @@ local utils = import 'utils.libjsonnet';
   },
   cz+: {
     commitizen+: {
-      version_files+: ['NSIS.template.in', 'man/re3-installer.1'],
+      version_files+: [
+        'NSIS.template.in',
+        'man/re3-installer.1',
+        'sh.tat.re3-installer.yml',
+        'snapcraft.yaml',
+      ],
     },
   },
   clang_format_args: 'src/*.c src/*.h src/tests/*.c',

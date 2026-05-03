@@ -11,7 +11,9 @@
       "package.json",
       "vcpkg.json",
       "NSIS.template.in",
-      "man/re3-installer.1"
+      "man/re3-installer.1",
+      "sh.tat.re3-installer.yml",
+      "snapcraft.yaml"
     ],
     "version_provider": "npm",
     "version_scheme": "semver"

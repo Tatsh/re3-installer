@@ -44,7 +44,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/Tatsh/re3-installer.git
-        tag: v0.2.3
+        tag: v0.2.4
         x-checker-data:
           type: git
           tag-pattern: '^v([\d.]+)$'
