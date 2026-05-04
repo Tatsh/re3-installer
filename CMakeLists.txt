@@ -18,12 +18,14 @@ option(ENABLE_ASAN "Enable address sanitiser." OFF)
 option(ENABLE_COVERAGE "Link tests with gcov." OFF)
 option(ENABLE_UBSAN "Enable undefined behaviour sanitiser." OFF)
 if(MSVC)
-  set(TARGET_VERSION
-      0x600
-      CACHE STRING "Target Windows version in 0xMMNN format.")
+  set(_re3i_default_target_version 0x600)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(_re3i_default_target_version 0x500)
 else()
-  set(TARGET_VERSION 0x501)
+  set(_re3i_default_target_version 0x501)
 endif()
+set(TARGET_VERSION ${_re3i_default_target_version}
+    CACHE STRING "Target Windows version in 0xMMNN format.")
 
 include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED)
