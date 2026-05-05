@@ -8,6 +8,12 @@ local utils = import 'utils.libjsonnet';
   want_winget: false,
   security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   description: 'Install GTA III files from ISO or directories for use with re3.',
+  social+: {
+    custom_badges: [
+      '[![Tests](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/re3-installer/actions/workflows/tests.yml)',
+      '[![Coverage Status](https://coveralls.io/repos/github/Tatsh/re3-installer/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/re3-installer?branch=master)',
+    ],
+  },
   keywords: ['gta iii', 'gta vice city', 're3'],
   license: 'GPL-3',
   want_main: false,
