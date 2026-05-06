@@ -9,6 +9,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+### Fixed
+
+- Windows packages now bundle a broader set of runtime DLLs (excluding system
+  DLLs such as `api-ms-*`, `ext-ms-*`, and anything under `system32`), making
+  the shipped installer more self-contained on machines without the MinGW
+  runtime libraries on `PATH`.
+
 ## [0.2.5] - 2026-05-03
 
 ### Added

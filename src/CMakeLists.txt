@@ -159,21 +159,32 @@ if(NOT LINUX)
   install(FILES ../LICENSE.txt ../README.md ../CHANGELOG.md ../SECURITY.md TYPE DOC)
   install(FILES ../CITATION.cff DESTINATION ${CMAKE_INSTALL_DATADIR}/re3-installer)
   if(NOT BUILD_STATIC)
-    if(MINGW)
-      get_filename_component(_mingw_bin_dir ${CMAKE_C_COMPILER} DIRECTORY)
-      set(_mingw_lib_dir ${_mingw_bin_dir})
+    if(WIN32)
+      get_filename_component(_compiler_bin_dir ${CMAKE_C_COMPILER} DIRECTORY)
+      install(
+        RUNTIME_DEPENDENCY_SET
+        re3-installer
+        PRE_EXCLUDE_REGEXES
+        [=[api-ms-]=]
+        [=[ext-ms-]=]
+        [[kernel32\.dll]]
+        POST_EXCLUDE_REGEXES
+        [=[.*system32\/.*\.dll]=]
+        DIRECTORIES
+        ${CMAKE_INSTALL_PREFIX}/bin
+        ${_compiler_bin_dir}
+        $<TARGET_FILE_DIR:re3-installer>)
+    elseif(APPLE)
+      install(
+        RUNTIME_DEPENDENCY_SET
+        re3-installer
+        PRE_EXCLUDE_REGEXES
+        "."
+        PRE_INCLUDE_REGEXES
+        "iso9660|cdio|unshield|iconv|zlib|crypto"
+        DIRECTORIES
+        ${CMAKE_INSTALL_PREFIX}/bin)
     endif()
-    message(STATUS "Directories: ${CMAKE_INSTALL_PREFIX}/lib ${_mingw_lib_dir}")
-    install(
-      RUNTIME_DEPENDENCY_SET
-      re3-installer
-      PRE_EXCLUDE_REGEXES
-      "."
-      PRE_INCLUDE_REGEXES
-      "gcc|iso9660|cdio|unshield|iconv|zlib|crypto|winpthread"
-      DIRECTORIES
-      ${CMAKE_INSTALL_PREFIX}/bin
-      ${_mingw_bin_dir})
   endif()
 endif()
 find_program(NSIS makensis)
