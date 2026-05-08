@@ -114,6 +114,7 @@ oneline
 pacboy
 pipx
 pluginsdir
+preapproved
 productversion
 progs
 pylock
@@ -150,7 +151,6 @@ wempty
 werror
 winarm
 winget
-winpthread
 wiswa
 wiswa's
 wmissing
