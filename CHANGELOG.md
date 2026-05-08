@@ -9,12 +9,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+## [0.2.6] - 2026-05-08
+
+### Changed
+
+- Windows installers now bundle a broader set of runtime DLLs, excluding system
+  DLLs such as `api-ms-*`, `ext-ms-*`, and anything under `system32`. The
+  shipped installer is therefore more self-contained on machines that do not
+  carry the MinGW runtime libraries on `PATH`.
+- 32-bit MinGW Windows builds now default to a Windows 2000 (`0x500`) target
+  version rather than Windows XP (`0x501`), which better matches the legacy
+  hardware where these binaries are most likely to be run; the 64-bit MinGW
+  legs and the MSVC build are unaffected.
+- Windows ARM64 packages now carry the correct `winarm64` filename suffix
+  produced by CPack rather than colliding with the x86_64 `win64` archives.
+- Snap and Flatpak packaging now build from the released Git tag rather than
+  the local working tree, so the published artefacts match the tagged
+  release exactly.
+
 ### Fixed
 
-- Windows packages now bundle a broader set of runtime DLLs (excluding system
-  DLLs such as `api-ms-*`, `ext-ms-*`, and anything under `system32`), making
-  the shipped installer more self-contained on machines without the MinGW
-  runtime libraries on `PATH`.
+- The draft-promote release pipeline now resolves the release tag from the
+  GitHub git refs API rather than the workflow run's `head_branch`, so it no
+  longer skips promotion when the upstream workflow was triggered by a tag
+  push that did not populate that field.
 
 ## [0.2.5] - 2026-05-03
 
@@ -196,7 +214,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed some print statements.
 
-[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.5...HEAD
+[unreleased]: https://github.com/Tatsh/re3-installer/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/Tatsh/re3-installer/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/Tatsh/re3-installer/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/Tatsh/re3-installer/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Tatsh/re3-installer/compare/v0.2.2...v0.2.3

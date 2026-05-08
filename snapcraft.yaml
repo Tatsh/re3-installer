@@ -28,7 +28,9 @@ parts:
       - '-DCMAKE_BUILD_TYPE=Release'
       - '-DCMAKE_INSTALL_PREFIX=/usr'
     plugin: 'cmake'
-    source: '.'
+    source: 'https://github.com/Tatsh/re3-installer.git'
+    source-tag: 'v0.2.6'
+    source-type: 'git'
     stage-packages:
       - 'libcdio19t64'
       - 'libiso9660-11t64'
@@ -42,5 +44,5 @@ platforms:
 source-code: 'https://github.com/Tatsh/re3-installer'
 summary: 'GTA III/VC file installer for re3'
 title: 're3-installer'
-version: '0.2.5'
+version: '0.2.6'
 website: 'https://tatsh.github.io/re3-installer/'

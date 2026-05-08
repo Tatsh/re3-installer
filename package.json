@@ -115,5 +115,5 @@
     "format": "clang-format -i src/*.c src/*.h src/tests/*.c && prettier --write . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2 --fix",
     "qa": "yarn check-spelling && yarn check-formatting"
   },
-  "version": "0.2.5"
+  "version": "0.2.6"
 }
