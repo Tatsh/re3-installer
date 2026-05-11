@@ -7,14 +7,11 @@ apps:
 base: 'core24'
 confinement: 'strict'
 contact: 'https://github.com/Tatsh/re3-installer/issues'
-description: |
-  Command-line installer that extracts the GTA III and Vice City data files
-  required by the re3 reimplementation from original retail discs or ISO
-  images.
+description: 'Install GTA III files from ISO or directories for use with re3.'
 donation: 'https://buymeacoffee.com/Tatsh'
 grade: 'stable'
 issues: 'https://github.com/Tatsh/re3-installer/issues'
-license: 'GPL-3.0-or-later'
+license: 'GPL-3'
 name: 're3-installer'
 parts:
   re3-installer:
@@ -42,7 +39,7 @@ platforms:
   arm64:
     build-on: 'arm64'
 source-code: 'https://github.com/Tatsh/re3-installer'
-summary: 'GTA III/VC file installer for re3'
+summary: 'Install GTA III files from ISO or directories for use with re3.'
 title: 're3-installer'
 version: '0.2.6'
 website: 'https://tatsh.github.io/re3-installer/'

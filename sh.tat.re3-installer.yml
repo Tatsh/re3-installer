@@ -1,50 +1,49 @@
----
-id: sh.tat.re3-installer
-runtime: org.freedesktop.Platform
-runtime-version: '24.08'
-sdk: org.freedesktop.Sdk
-command: re3-installer
-finish-args:
-  - --filesystem=home
-  - --device=all
+app-id: 'sh.tat.re3-installer'
 cleanup:
-  - /include
-  - /lib/cmake
-  - /lib/pkgconfig
-  - /share/aclocal
-  - /share/doc
-  - /share/man
-  - /share/pkgconfig
+  - '/include'
+  - '/lib/cmake'
+  - '/lib/pkgconfig'
+  - '/share/aclocal'
+  - '/share/doc'
+  - '/share/man'
+  - '/share/pkgconfig'
   - '*.a'
   - '*.la'
+command: 're3-installer'
+finish-args:
+  - '--device=all'
+  - '--filesystem=home'
 modules:
-  - name: libcdio
-    buildsystem: autotools
+  - buildsystem: 'autotools'
+    name: 'libcdio'
     sources:
-      - type: archive
-        url: https://github.com/libcdio/libcdio/releases/download/2.3.0/libcdio-2.3.0.tar.gz
-        sha256: 37bcb13296febbcff9dc4485834bac09212cb463c31fcea52f70ee1dd3a5a5de
-  - name: libcdio-paranoia
-    buildsystem: autotools
+      - sha256: '37bcb13296febbcff9dc4485834bac09212cb463c31fcea52f70ee1dd3a5a5de'
+        type: 'archive'
+        url: 'https://github.com/libcdio/libcdio/releases/download/2.3.0/libcdio-2.3.0.tar.gz'
+  - buildsystem: 'autotools'
+    name: 'libcdio-paranoia'
     sources:
-      - type: archive
-        url: https://github.com/libcdio/libcdio-paranoia/releases/download/release-10.2%2B2.0.2/libcdio-paranoia-10.2%2B2.0.2.tar.gz
-        sha256: 99488b8b678f497cb2e2f4a1a9ab4a6329c7e2537a366d5e4fef47df52907ff6
-  - name: libunshield
-    buildsystem: cmake-ninja
+      - sha256: '99488b8b678f497cb2e2f4a1a9ab4a6329c7e2537a366d5e4fef47df52907ff6'
+        type: 'archive'
+        url: 'https://github.com/libcdio/libcdio-paranoia/releases/download/release-10.2%2B2.0.2/libcdio-paranoia-10.2%2B2.0.2.tar.gz'
+  - buildsystem: 'cmake-ninja'
+    name: 'libunshield'
     sources:
-      - type: git
-        url: https://github.com/twogood/unshield.git
-        tag: 1.6.2
-  - name: re3-installer
-    builddir: true
-    buildsystem: cmake-ninja
+      - tag: '1.6.2'
+        type: 'git'
+        url: 'https://github.com/twogood/unshield.git'
+  - builddir: true
+    buildsystem: 'cmake-ninja'
     config-opts:
-      - -DCMAKE_BUILD_TYPE=Release
+      - '-DCMAKE_BUILD_TYPE=Release'
+    name: 're3-installer'
     sources:
-      - type: git
-        url: https://github.com/Tatsh/re3-installer.git
-        tag: v0.2.6
+      - tag: 'v0.2.6'
+        type: 'git'
+        url: 'https://github.com/Tatsh/re3-installer.git'
         x-checker-data:
-          type: git
-          tag-pattern: '^v([\d.]+)$'
+          tag-pattern: "^v([\\d.]+)$"
+          type: 'git'
+runtime: 'org.freedesktop.Platform'
+runtime-version: '24.08'
+sdk: 'org.freedesktop.Sdk'

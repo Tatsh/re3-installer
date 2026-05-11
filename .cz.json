@@ -9,6 +9,8 @@
       "CMakeLists.txt",
       "README.md",
       "package.json",
+      "sh.tat.re3-installer.yml",
+      "snapcraft.yaml",
       "vcpkg.json",
       "NSIS.template.in",
       "man/re3-installer.1",

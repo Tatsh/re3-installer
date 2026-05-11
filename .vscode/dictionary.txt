@@ -6,7 +6,6 @@ appdir
 appimage
 argn
 asan
-autosort
 autotools
 bindir
 bsky
@@ -105,7 +104,6 @@ noconfirmmkdir
 noerrorui
 noncommercially
 nonfatal
-npmjs
 nsis
 nsisdir
 nsis's
@@ -118,6 +116,7 @@ preapproved
 productversion
 progs
 pylock
+pyproject
 reflow
 regen
 ripgreprc
@@ -140,6 +139,8 @@ typelib
 ubsan
 ucrt
 udvare
+undraft
+undrafted
 unicon
 unshield
 userprofile
@@ -154,6 +155,7 @@ winget
 wiswa
 wiswa's
 wmissing
+worktree
 wparentheses
 wpointer
 wshadow
