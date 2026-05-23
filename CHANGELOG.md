@@ -9,6 +9,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+### Fixed
+
+- Snap and vcpkg/npm package metadata now declare the licence as the canonical
+  SPDX identifier `GPL-3.0-or-later` rather than the legacy short string
+  `GPL-3`, so `snapcraft pack` no longer rejects the manifest with
+  `unknown license: GPL-3`.
+
 ## [0.2.6] - 2026-05-08
 
 ### Changed

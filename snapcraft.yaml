@@ -11,7 +11,7 @@ description: 'Install GTA III files from ISO or directories for use with re3.'
 donation: 'https://buymeacoffee.com/Tatsh'
 grade: 'stable'
 issues: 'https://github.com/Tatsh/re3-installer/issues'
-license: 'GPL-3'
+license: 'GPL-3.0-or-later'
 name: 're3-installer'
 parts:
   re3-installer:

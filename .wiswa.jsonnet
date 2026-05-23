@@ -19,7 +19,7 @@ local utils = import 'utils.libjsonnet';
     },
   ],
   keywords: ['gta iii', 'gta vice city', 're3'],
-  license: 'GPL-3',
+  license: 'GPL-3.0-or-later',
   want_main: false,
   want_codeql: false,
   want_tests: false,

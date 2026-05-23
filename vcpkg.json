@@ -9,7 +9,7 @@
   "description": "Install GTA III files from ISO or directories for use with re3.",
   "documentation": "https://re3-installer.readthedocs.org",
   "homepage": "https://tatsh.github.io/re3-installer/",
-  "license": "GPL-3",
+  "license": "GPL-3.0-or-later",
   "maintainers": [
     "Andrew Udvare <audvare@gmail.com>"
   ],

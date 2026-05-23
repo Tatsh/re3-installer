@@ -52,7 +52,7 @@
   "files": ["LICENSE.txt", "README.md"],
   "homepage": "https://tatsh.github.io/re3-installer/",
   "keywords": ["gta iii", "gta vice city", "re3"],
-  "license": "GPL-3",
+  "license": "GPL-3.0-or-later",
   "markdownlint-cli2": {
     "config": {
       "MD024": {
