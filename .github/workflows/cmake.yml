@@ -89,7 +89,7 @@ jobs:
             ${{github.workspace}}/re3-installer-*.zip
       - if: ${{ github.ref_type == 'tag' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           draft: true
           fail_on_unmatched_files: true
@@ -157,7 +157,7 @@ jobs:
             ${{github.workspace}}/re3-installer-*.zip
       - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           draft: true
           fail_on_unmatched_files: true
@@ -197,7 +197,7 @@ jobs:
             ${{github.workspace}}/re3-installer-*.zip
       - if: ${{ github.ref_type == 'tag' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           draft: true
           fail_on_unmatched_files: true
@@ -286,7 +286,7 @@ jobs:
             ${{github.workspace}}/build/re3-installer-*.exe
       - if: ${{ github.ref_type == 'tag' && matrix.sys.release }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           draft: true
           fail_on_unmatched_files: true
