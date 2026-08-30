@@ -1,14 +1,19 @@
 jobs:
   build-cross:
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v3
+        uses: egor-tensin/setup-mingw@41b837e47d7f85214629d255b9c4bc3fcbe9fd63
         with:
           platform: x64
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Build unshield
         run: |
           curl -Lo 'zlib.tar.gz' \
@@ -76,33 +81,47 @@ jobs:
           cpack -C ${{matrix.build-type}}
           --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v7'
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
           if-no-files-found: error
           name: re3-installer-cross-${{ matrix.build-type }}
           path: |
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.zip
-      - if: ${{ github.ref_type == 'tag' }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        if: ${{ github.ref_type == 'tag' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          draft: true
-          fail_on_unmatched_files: true
-          files: |
-            ${{github.workspace}}/re3-installer-*.zip
+        run: |
+          shopt -s nullglob
+          files=(${{github.workspace}}/re3-installer-*.zip)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo '::error::No package files were found to upload.'
+            exit 1
+          fi
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --draft --generate-notes \
+              --title "$GITHUB_REF_NAME" || true
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
     strategy:
       fail-fast: false
       matrix:
         build-type: [Debug, Release]
   build-linux:
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
       - name: install deps
         run: |
           sudo apt-get update -y -qq
@@ -138,11 +157,15 @@ jobs:
           EOF
           ./linuxdeploy-x86_64.AppImage --appdir ${{github.workspace}}/build/AppDir --output appimage --desktop-file ${{github.workspace}}/build/re3-installer.desktop
           mv ${{github.workspace}}/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{matrix.build-type}}-x86_64.AppImage
-      - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
+      - env:
+          TAG: ${{ github.ref_name }}
+        if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
         name: Rename with tag
-        run: mv ${{github.workspace}}/re3-installer-Release-x86_64.AppImage ${{github.workspace}}/re3-installer-${{github.ref_name}}-x86_64.AppImage
+        run: >-
+          mv ${{github.workspace}}/re3-installer-Release-x86_64.AppImage
+          "${{github.workspace}}/re3-installer-${TAG}-x86_64.AppImage"
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v7'
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-Linux
@@ -150,27 +173,41 @@ jobs:
             ${{github.workspace}}/re3-installer-*.AppImage
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.AppImage
             ${{github.workspace}}/re3-installer-*.zip
-      - if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          draft: true
-          fail_on_unmatched_files: true
-          files: |
-            ${{github.workspace}}/re3-installer-*.AppImage
+        run: |
+          shopt -s nullglob
+          files=(${{github.workspace}}/re3-installer-*.AppImage)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo '::error::No package files were found to upload.'
+            exit 1
+          fi
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --draft --generate-notes \
+              --title "$GITHUB_REF_NAME" || true
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
     strategy:
       fail-fast: false
       matrix:
         build-type: [Debug, Release]
   build-macos:
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
       - name: install deps
         run: brew install unshield libcdio
       - run: |
@@ -184,31 +221,43 @@ jobs:
           cpack -C ${{matrix.build-type}}
           --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v7'
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-${{ matrix.os }}
           path: |
             ${{github.workspace}}/re3-installer-*.zip
       - name: Attest
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             ${{github.workspace}}/re3-installer-*.zip
-      - if: ${{ github.ref_type == 'tag' }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        if: ${{ github.ref_type == 'tag' }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          draft: true
-          fail_on_unmatched_files: true
-          files: |
-            ${{github.workspace}}/re3-installer-*.zip
+        run: |
+          shopt -s nullglob
+          files=(${{github.workspace}}/re3-installer-*.zip)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo '::error::No package files were found to upload.'
+            exit 1
+          fi
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --draft --generate-notes \
+              --title "$GITHUB_REF_NAME" || true
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
     strategy:
       fail-fast: false
       matrix:
         build-type: [Debug, Release]
         os: [macos-15-intel, macos-latest]
   build-msys:
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     runs-on: ${{matrix.sys.runner}}
     steps:
       - id: fixed_workspace
@@ -220,7 +269,7 @@ jobs:
         run: |
           choco install nsis -y --no-progress
           'C:\Program Files (x86)\NSIS' | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_PATH
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884
         with:
           install: >-
             make
@@ -231,10 +280,13 @@ jobs:
             toolchain:p zlib:p
           path-type: ${{ matrix.sys.name == 'clangarm64' && 'inherit' || 'minimal' }}
           update: true
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - name: Build unshield
+          persist-credentials: false
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        name: Build unshield
         run: |
           curl -Lo 'unshield.tar.gz' 'https://github.com/twogood/unshield/archive/refs/tags/1.6.2.tar.gz'
           tar xf unshield.tar.gz
@@ -242,36 +294,44 @@ jobs:
           sed -i 's/defined(UNSHIELD_EXPORTS)/defined(UNSHIELD_EXPORT)/' lib/libunshield.h
           mkdir build
           cmake -B ./build -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_INSTALL_PREFIX=${{steps.fixed_workspace.outputs.out}}/build/prefix \
+            -DCMAKE_INSTALL_PREFIX="$WORKSPACE"/build/prefix \
             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
             -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=${{matrix.sys.lto}} \
             -DCMAKE_SYSTEM_NAME=Windows -Wno-dev
           cmake --build ./build --config Debug --verbose
           cmake --install ./build --config Debug --verbose
         shell: msys2 {0}
-      - name: Configure
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        name: Configure
         run: >-
-          cmake -G Ninja -B ${{steps.fixed_workspace.outputs.out}}/build
-          --install-prefix ${{steps.fixed_workspace.outputs.out}}/build/prefix
+          cmake -G Ninja -B "$WORKSPACE"/build
+          --install-prefix "$WORKSPACE"/build/prefix
           -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
-          -DCMAKE_PREFIX_PATH=${{steps.fixed_workspace.outputs.out}}/build/prefix
+          -DCMAKE_PREFIX_PATH="$WORKSPACE"/build/prefix
           -DCPACK_SYSTEM_NAME=${{matrix.sys.cpack_system}}
         shell: msys2 {0}
-      - name: Build
-        run: cmake --build ${{steps.fixed_workspace.outputs.out}}/build --verbose
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        name: Build
+        run: cmake --build "$WORKSPACE"/build --verbose
         shell: msys2 {0}
-      - name: Install
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        name: Install
         run: >-
-          cmake --install ${{steps.fixed_workspace.outputs.out}}/build
+          cmake --install "$WORKSPACE"/build
           --config ${{matrix.build-type}} --verbose
         shell: msys2 {0}
-      - name: Package
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        name: Package
         run: >-
-          cd ${{steps.fixed_workspace.outputs.out}}/build &&
+          cd "$WORKSPACE"/build &&
           cpack -C ${{matrix.build-type}} --verbose
         shell: msys2 {0}
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v7'
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
           if-no-files-found: error
           name: re3-installer-${{ matrix.build-type }}-${{ matrix.sys.name }}
@@ -279,20 +339,32 @@ jobs:
             ${{github.workspace}}/build/re3-installer-*.zip
             ${{github.workspace}}/build/re3-installer-*.exe
       - name: Attest
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             ${{github.workspace}}/build/re3-installer-*.zip
             ${{github.workspace}}/build/re3-installer-*.exe
-      - if: ${{ github.ref_type == 'tag' && matrix.sys.release }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        if: ${{ github.ref_type == 'tag' && matrix.sys.release }}
         name: Upload package
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          draft: true
-          fail_on_unmatched_files: true
-          files: |
-            ${{github.workspace}}/build/re3-installer-*.zip
-            ${{github.workspace}}/build/re3-installer-*.exe
+        run: |
+          shopt -s nullglob
+          files=(
+            "$WORKSPACE"/build/re3-installer-*.zip
+            "$WORKSPACE"/build/re3-installer-*.exe
+          )
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo '::error::No package files were found to upload.'
+            exit 1
+          fi
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --draft --generate-notes \
+              --title "$GITHUB_REF_NAME" || true
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -325,6 +397,4 @@ name: Build
     tags:
       - 'v*.*.*'
 permissions:
-  attestations: write
-  contents: write
-  id-token: write
+  contents: read
