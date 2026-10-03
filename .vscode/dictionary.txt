@@ -15,6 +15,7 @@ choco
 clangarm
 cmocka
 commitizen
+concrt
 contrib
 copyfile
 coveragerc
@@ -29,6 +30,7 @@ datarootdir
 dbuild
 dcmake
 dcpack
+debugcheck
 defenses
 denable
 dialog
@@ -95,6 +97,9 @@ mktemp
 mmnn
 mocka
 msvc
+msvcp
+msvcprtd
+msvcrtd
 msys
 msystem
 mypy
@@ -143,12 +148,16 @@ tostring
 typelib
 ubsan
 ucrt
+ucrtbased
 udvare
 undraft
 undrafted
 unicon
 unshield
 userprofile
+vccorlib
+vcomp
+vcruntime
 vendored
 venv
 versioninfo
