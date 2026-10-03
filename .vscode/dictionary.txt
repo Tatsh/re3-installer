@@ -1,6 +1,5 @@
 abortwarning
 aclocal
-Ångström
 anim
 appdir
 appimage
@@ -104,11 +103,13 @@ noconfirmmkdir
 noerrorui
 noncommercially
 nonfatal
+noone
 nsis
-nsisdir
 nsis's
+nsisdir
 nullglob
 nullptr
+numpydoc
 oneline
 pacboy
 pipx
@@ -159,7 +160,6 @@ winget
 wiswa
 wiswa's
 wmissing
-worktree
 wparentheses
 wpointer
 wshadow
@@ -172,3 +172,4 @@ wunused
 wwrite
 yarnrc
 zizmor
+Ångström
