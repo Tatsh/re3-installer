@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   SPDX identifier `GPL-3.0-or-later` rather than the legacy short string
   `GPL-3`, so `snapcraft pack` no longer rejects the manifest with
   `unknown license: GPL-3`.
+- macOS release archives include the architecture in the file name
+  (`Darwin-arm64` and `Darwin-x86_64`). The Apple silicon and Intel builds
+  previously both produced `Darwin-Release.zip`, and one replaced the other on
+  the release.
 
 ## [0.2.6] - 2026-05-08
 
