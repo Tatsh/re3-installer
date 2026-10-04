@@ -1,6 +1,10 @@
 ---
+concurrency:
+  cancel-in-progress: true
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}'
 jobs:
   tests:
+    name: 'Tests'
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -11,17 +15,23 @@ jobs:
           persist-credentials: false
       - name: Install dependencies
         run: pipx install cpp-coveralls && sudo apt-get install -y lcov libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
-      - name: Configure
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Configure
         run: >-
-          cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build
-          --install-prefix ${{github.workspace}}/build/prefix
+          cmake -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -B "${GITHUB_WORKSPACE}"/build
+          --install-prefix "${GITHUB_WORKSPACE}"/build/prefix
           -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --verbose --config ${{matrix.build-type}}
-      - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Build
+        run: cmake --build "${GITHUB_WORKSPACE}"/build --verbose --config "${BUILD_TYPE}"
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Install
+        run: cmake --install "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
       - name: Run tests
-        run: ctest -VV --test-dir ${{github.workspace}}/build/src/tests --output-on-failure
+        run: ctest -VV --test-dir "${GITHUB_WORKSPACE}"/build/src/tests --output-on-failure
       - if: ${{ matrix.build-type == 'Debug' }}
         name: Generate coverage information
         run: >-
@@ -31,9 +41,9 @@ jobs:
           --follow
           --keep-going
           '--include=src/*'
-          -b ${{github.workspace}}
+          -b "${GITHUB_WORKSPACE}"
           -o coverage1.lcov
-          ${{github.workspace}}/build
+          "${GITHUB_WORKSPACE}"/build
       # - if: ${{ matrix.build-type == 'Debug' }}
       #   name: 'Coveralls'
       #   uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329
@@ -61,6 +71,7 @@ jobs:
       matrix:
         build-type: [Debug, Release]
   asan-test:
+    name: 'Tests (sanitizers)'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -69,14 +80,16 @@ jobs:
           persist-credentials: false
       - name: Install tools
         run: sudo apt-get update -y && sudo apt-get install -y libcmocka-dev libunshield-dev libcdio-dev libiso9660-dev
-      - name: Configure
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Configure
         run: >-
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+          cmake -B "${GITHUB_WORKSPACE}"/build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
           -DBUILD_TESTS=ON -DENABLE_ASAN=ON -DENABLE_UBSAN=ON
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --verbose
+        run: cmake --build "${GITHUB_WORKSPACE}"/build --verbose
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/src/tests --verbose
+        run: ctest --test-dir "${GITHUB_WORKSPACE}"/build/src/tests --verbose
     strategy:
       fail-fast: false
       matrix:

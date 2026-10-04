@@ -1,3 +1,6 @@
+concurrency:
+  cancel-in-progress: true
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}'
 jobs:
   analyze:
     name: 'Analyze'
@@ -17,10 +20,12 @@ jobs:
           languages: '${{ matrix.language }}'
       - name: Install dependencies
         run: sudo apt-get install -y lcov libunshield-dev libcdio-dev libiso9660-dev libcmocka-dev
-      - name: Build
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Build
         run: |
-          cmake -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -B ${{github.workspace}}/build -DBUILD_TESTS=ON
-          cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
+          cmake -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -B "${GITHUB_WORKSPACE}"/build -DBUILD_TESTS=ON
+          cmake --build "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
       - name: 'Perform CodeQL Analysis'
         uses: 'github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd'
         with:
@@ -41,3 +46,4 @@ name: 'CodeQL'
       - 'master'
   schedule:
     - cron: '15 4 * * 3'
+permissions: {}

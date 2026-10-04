@@ -1,5 +1,10 @@
+concurrency:
+  cancel-in-progress: false
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  queue: 'max'
 jobs:
   build-cross:
+    name: 'Build (MinGW cross)'
     permissions:
       attestations: write
       contents: write
@@ -14,40 +19,42 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Build unshield
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Build unshield
         run: |
           curl -Lo 'zlib.tar.gz' \
             'https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz'
           tar xf zlib.tar.gz
-          cd zlib-1.3.1
+          cd zlib-1.3.1 || exit 1
           mkdir build
-          cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
+          cmake -B ./build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/prefix \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}"/build/prefix \
             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
             -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_SYSTEM_NAME=Windows -Wno-dev
-          cmake --build ./build --config ${{matrix.build-type}} --verbose
-          cmake --install ./build --config ${{matrix.build-type}} --verbose
-          cd ..
+          cmake --build ./build --config "${BUILD_TYPE}" --verbose
+          cmake --install ./build --config "${BUILD_TYPE}" --verbose
+          cd .. || exit 1
           curl -Lo 'unshield.tar.gz' 'https://github.com/twogood/unshield/archive/refs/tags/1.6.2.tar.gz'
           tar xf unshield.tar.gz
-          cd unshield-1.6.2
+          cd unshield-1.6.2 || exit 1
           sed -i 's/defined(UNSHIELD_EXPORTS)/defined(UNSHIELD_EXPORT)/' lib/libunshield.h
           mkdir build
-          cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
+          cmake -B ./build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DBUILD_STATIC=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/prefix \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}"/build/prefix \
             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
             -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_SYSTEM_NAME=Windows -Wno-dev
-          cmake --build ./build --config ${{matrix.build-type}} --verbose
-          cmake --install ./build --config ${{matrix.build-type}} --verbose
+          cmake --build ./build --config "${BUILD_TYPE}" --verbose
+          cmake --install ./build --config "${BUILD_TYPE}" --verbose
       - name: Build libcdio
         run: |
           curl -Lo 'libcdio.tar.gz' 'https://github.com/libcdio/libcdio/releases/download/2.3.0/libcdio-2.3.0.tar.gz'
           tar xf libcdio.tar.gz
-          cd libcdio-2.3.0
+          cd libcdio-2.3.0 || exit 1
           mkdir build
-          ./configure --prefix=${{github.workspace}}/build/prefix \
+          ./configure --prefix="${GITHUB_WORKSPACE}"/build/prefix \
             --enable-static \
             --disable-shared \
             --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu \
@@ -60,26 +67,34 @@ jobs:
             --disable-cxx \
             --disable-cpp-progs \
             --disable-example-progs
-          make -j$(nproc)
+          make -j"$(nproc)"
           make install
-          cd ..
-      - name: Configure
+          cd .. || exit 1
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Configure
         run: >-
-          cmake -B ${{github.workspace}}/build
+          cmake -B "${GITHUB_WORKSPACE}"/build
           -DBUILD_STATIC=ON
-          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/prefix
-          -DCMAKE_PREFIX_PATH=${{github.workspace}}/build/prefix
-          -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+          -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}"/build/prefix
+          -DCMAKE_PREFIX_PATH="${GITHUB_WORKSPACE}"/build/prefix
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
           -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_SYSTEM_NAME=Windows
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
-      - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
-      - name: Package
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Build
+        run: cmake --build "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Install
+        run: cmake --install "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Package
         run: >-
-          cpack -C ${{matrix.build-type}}
-          --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
+          cpack -C "${BUILD_TYPE}"
+          --config "${GITHUB_WORKSPACE}"/build/CPackConfig.cmake --verbose
       - if: "matrix.build-type == 'Release'"
         name: 'Check for debug runtime linkage'
         run: |
@@ -133,7 +148,7 @@ jobs:
         name: Upload package
         run: |
           shopt -s nullglob
-          files=(${{github.workspace}}/re3-installer-*.zip)
+          files=("${GITHUB_WORKSPACE}"/re3-installer-*.zip)
           if [[ ${#files[@]} -eq 0 ]]; then
             echo '::error::No package files were found to upload.'
             exit 1
@@ -148,6 +163,7 @@ jobs:
       matrix:
         build-type: [Debug, Release]
   build-linux:
+    name: 'Build (Linux)'
     permissions:
       attestations: write
       contents: write
@@ -161,26 +177,36 @@ jobs:
         run: |
           sudo apt-get update -y -qq
           sudo apt-get install -y libunshield-dev libcdio-dev libiso9660-dev
-      - name: Configure
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Configure
         run: |
           cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON \
-            -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/AppDir/usr
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
-      - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
-      - name: Package
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}"/build/AppDir/usr
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Build
+        run: cmake --build "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Install
+        run: cmake --install "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Package
         run: >-
-          cpack -C ${{matrix.build-type}}
-          --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
-      - name: Create AppImage
+          cpack -C "${BUILD_TYPE}"
+          --config "${GITHUB_WORKSPACE}"/build/CPackConfig.cmake --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Create AppImage
         run: |
           wget 'https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage'
           chmod +x linuxdeploy-x86_64.AppImage
-          mkdir -p ${{github.workspace}}/build/AppDir/usr/share/icons/hicolor/scalable/apps
-          wget 'https://raw.githubusercontent.com/GNOME/adwaita-icon-theme/refs/heads/master/src/fullcolor/application-x-generic.source.svg' -O ${{github.workspace}}/build/AppDir/usr/share/icons/hicolor/scalable/apps/application-x-generic.svg
-          cat > ${{github.workspace}}/build/re3-installer.desktop <<EOF
+          mkdir -p "${GITHUB_WORKSPACE}"/build/AppDir/usr/share/icons/hicolor/scalable/apps
+          wget 'https://raw.githubusercontent.com/GNOME/adwaita-icon-theme/refs/heads/master/src/fullcolor/application-x-generic.source.svg' -O "${GITHUB_WORKSPACE}"/build/AppDir/usr/share/icons/hicolor/scalable/apps/application-x-generic.svg
+          cat > "${GITHUB_WORKSPACE}"/build/re3-installer.desktop <<EOF
           [Desktop Entry]
           Categories=Utility;
           Exec=re3-installer %u
@@ -190,15 +216,15 @@ jobs:
           Type=Application
           Version=1.5
           EOF
-          ./linuxdeploy-x86_64.AppImage --appdir ${{github.workspace}}/build/AppDir --output appimage --desktop-file ${{github.workspace}}/build/re3-installer.desktop
-          mv ${{github.workspace}}/re3-installer-*.AppImage ${{github.workspace}}/re3-installer-${{matrix.build-type}}-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --appdir "${GITHUB_WORKSPACE}"/build/AppDir --output appimage --desktop-file "${GITHUB_WORKSPACE}"/build/re3-installer.desktop
+          mv "${GITHUB_WORKSPACE}"/re3-installer-*.AppImage "${GITHUB_WORKSPACE}"/re3-installer-"${BUILD_TYPE}"-x86_64.AppImage
       - env:
           TAG: ${{ github.ref_name }}
         if: ${{ github.ref_type == 'tag' && matrix.build-type == 'Release' }}
         name: Rename with tag
         run: >-
-          mv ${{github.workspace}}/re3-installer-Release-x86_64.AppImage
-          "${{github.workspace}}/re3-installer-${TAG}-x86_64.AppImage"
+          mv "${GITHUB_WORKSPACE}"/re3-installer-Release-x86_64.AppImage
+          "${GITHUB_WORKSPACE}/re3-installer-${TAG}-x86_64.AppImage"
       - name: 'Upload Artifacts'
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
@@ -219,7 +245,7 @@ jobs:
         name: Upload package
         run: |
           shopt -s nullglob
-          files=(${{github.workspace}}/re3-installer-*.AppImage)
+          files=("${GITHUB_WORKSPACE}"/re3-installer-*.AppImage)
           if [[ ${#files[@]} -eq 0 ]]; then
             echo '::error::No package files were found to upload.'
             exit 1
@@ -234,6 +260,7 @@ jobs:
       matrix:
         build-type: [Debug, Release]
   build-macos:
+    name: 'Build (macOS)'
     permissions:
       attestations: write
       contents: write
@@ -245,16 +272,20 @@ jobs:
           persist-credentials: false
       - name: install deps
         run: brew install unshield libcdio
-      - run: |
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        run: |
           cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON \
-            -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
-            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/prefix
-          cmake --build build --config ${{matrix.build-type}} --verbose
-          cmake --install ${{github.workspace}}/build --config ${{matrix.build-type}} --verbose
-      - name: Package
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}"/build/prefix
+          cmake --build build --config "${BUILD_TYPE}" --verbose
+          cmake --install "${GITHUB_WORKSPACE}"/build --config "${BUILD_TYPE}" --verbose
+      - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+        name: Package
         run: >-
-          cpack -C ${{matrix.build-type}}
-          --config ${{github.workspace}}/build/CPackConfig.cmake --verbose
+          cpack -C "${BUILD_TYPE}"
+          --config "${GITHUB_WORKSPACE}"/build/CPackConfig.cmake --verbose
       - name: 'Upload Artifacts'
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
@@ -273,7 +304,7 @@ jobs:
         name: Upload package
         run: |
           shopt -s nullglob
-          files=(${{github.workspace}}/re3-installer-*.zip)
+          files=("${GITHUB_WORKSPACE}"/re3-installer-*.zip)
           if [[ ${#files[@]} -eq 0 ]]; then
             echo '::error::No package files were found to upload.'
             exit 1
@@ -289,6 +320,7 @@ jobs:
         build-type: [Debug, Release]
         os: [macos-15-intel, macos-latest]
   build-msys:
+    name: 'Build (MSYS2)'
     permissions:
       attestations: write
       contents: write
@@ -298,12 +330,14 @@ jobs:
       - id: fixed_workspace
         name: Fix path
         run: >-
-          echo out=$("${{github.workspace}}" -Replace "\\","/") | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          echo out=$("$env:GITHUB_WORKSPACE" -Replace "\\","/") | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        shell: 'pwsh'
       - if: matrix.sys.name == 'clangarm64'
         name: Install NSIS via Chocolatey
         run: |
           choco install nsis -y --no-progress
           'C:\Program Files (x86)\NSIS' | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_PATH
+        shell: 'pwsh'
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884
         with:
           install: >-
@@ -320,6 +354,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+          LTO: '${{ matrix.sys.lto }}'
           WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
         name: Build unshield
         run: |
@@ -328,23 +364,25 @@ jobs:
           cd unshield-1.6.2
           sed -i 's/defined(UNSHIELD_EXPORTS)/defined(UNSHIELD_EXPORT)/' lib/libunshield.h
           mkdir build
-          cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build-type}} \
+          cmake -B ./build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_INSTALL_PREFIX="$WORKSPACE"/build/prefix \
             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=${{matrix.sys.lto}} \
+            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION="${LTO}" \
             -DCMAKE_SYSTEM_NAME=Windows -Wno-dev
-          cmake --build ./build --config ${{matrix.build-type}} --verbose
-          cmake --install ./build --config ${{matrix.build-type}} --verbose
+          cmake --build ./build --config "${BUILD_TYPE}" --verbose
+          cmake --install ./build --config "${BUILD_TYPE}" --verbose
         shell: msys2 {0}
       - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
+          CPACK_SYSTEM: '${{ matrix.sys.cpack_system }}'
           WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
         name: Configure
         run: >-
           cmake -G Ninja -B "$WORKSPACE"/build
           --install-prefix "$WORKSPACE"/build/prefix
-          -DCMAKE_BUILD_TYPE=${{matrix.build-type}}
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
           -DCMAKE_PREFIX_PATH="$WORKSPACE"/build/prefix
-          -DCPACK_SYSTEM_NAME=${{matrix.sys.cpack_system}}
+          -DCPACK_SYSTEM_NAME="${CPACK_SYSTEM}"
         shell: msys2 {0}
       - env:
           WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
@@ -352,18 +390,20 @@ jobs:
         run: cmake --build "$WORKSPACE"/build --verbose
         shell: msys2 {0}
       - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
           WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
         name: Install
         run: >-
           cmake --install "$WORKSPACE"/build
-          --config ${{matrix.build-type}} --verbose
+          --config "${BUILD_TYPE}" --verbose
         shell: msys2 {0}
       - env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
           WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
         name: Package
         run: >-
           cd "$WORKSPACE"/build &&
-          cpack -C ${{matrix.build-type}} --verbose
+          cpack -C "${BUILD_TYPE}" --verbose
         shell: msys2 {0}
       - if: "matrix.build-type == 'Release'"
         name: 'Check for debug runtime linkage'
