@@ -128,6 +128,7 @@ pyproject
 reflow
 regen
 ripgreprc
+sbclaude
 schemafile
 sendfile
 shellcheck
