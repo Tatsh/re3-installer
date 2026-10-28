@@ -16,6 +16,9 @@
 
 #include "extractor.h"
 
+#define expect_ptr_value(function, parameter, value)                                               \
+    expect_uint_value(function, parameter, cast_ptr_to_uintmax_type(value))
+
 bool ends_with_ext_gcda(const char *s) {
     return strlen(s) > 5 && !strcmp(s + strlen(s) - 5, ".gcda");
 }
@@ -45,8 +48,8 @@ FILE *__wrap_fopen(const char *restrict path, const char *restrict mode) {
     if (ends_with_ext_gcda(path)) {
         return __real_fopen(path, mode);
     }
-    check_expected(path);
-    check_expected(mode);
+    check_expected_ptr(path);
+    check_expected_ptr(mode);
     return mock_type(FILE *);
 }
 
@@ -56,9 +59,9 @@ int __wrap_fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {
         return __real_fwrite(ptr, size, count, stream);
     }
     check_expected_ptr(ptr);
-    check_expected(size);
-    check_expected(count);
-    check_expected(stream);
+    check_expected_uint(size);
+    check_expected_uint(count);
+    check_expected_ptr(stream);
     return mock_type(int);
 }
 
@@ -67,7 +70,7 @@ int __wrap_fclose(FILE *stream) {
     if (is_gcda(stream)) {
         return __real_fclose(stream);
     }
-    check_expected(stream);
+    check_expected_ptr(stream);
     return mock();
 }
 
@@ -76,7 +79,7 @@ int __wrap_ferror(FILE *stream) {
     if (is_gcda(stream)) {
         return __real_ferror(stream);
     }
-    check_expected(stream);
+    check_expected_ptr(stream);
     return mock_type(int);
 }
 
@@ -93,25 +96,25 @@ void *__wrap_unshield_file_group_find(void *unshield, const char *group_name) {
 
 bool __wrap_unshield_file_is_valid(void *unshield, int index) {
     check_expected_ptr(unshield);
-    check_expected(index);
+    check_expected_int(index);
     return mock_type(bool);
 }
 
 const char *__wrap_unshield_file_name(void *unshield, int index) {
     check_expected_ptr(unshield);
-    check_expected(index);
+    check_expected_int(index);
     return mock_ptr_type(const char *);
 }
 
 const char *__wrap_unshield_directory_name(void *unshield, int index) {
     check_expected_ptr(unshield);
-    check_expected(index);
+    check_expected_int(index);
     return mock_ptr_type(const char *);
 }
 
 bool __wrap_unshield_file_save(void *unshield, int index, const char *output_dir) {
     check_expected_ptr(unshield);
-    check_expected(index);
+    check_expected_int(index);
     check_expected_ptr(output_dir);
     return mock_type(bool);
 }
@@ -133,7 +136,7 @@ char *__wrap_mkdtemp(char *template) {
 
 void *__wrap_iso9660_open_ext(const char *filename, int options) {
     check_expected_ptr(filename);
-    check_expected(options);
+    check_expected_int(options);
     return mock_ptr_type(void *);
 }
 
@@ -163,7 +166,7 @@ void __wrap_unshield_close(void *unshield) {
 
 const char *__wrap_unshield_file_directory(void *unshield, int index) {
     check_expected_ptr(unshield);
-    check_expected(index);
+    check_expected_int(index);
     return mock_ptr_type(const char *);
 }
 
@@ -179,15 +182,15 @@ void *__wrap__cdio_list_node_data(void *node) {
 
 const char *__wrap_iso9660_name_translate_ext(const char *name, int joliet_level) {
     check_expected_ptr(name);
-    check_expected(joliet_level);
+    check_expected_int(joliet_level);
     return mock_ptr_type(const char *);
 }
 
 ssize_t __wrap_iso9660_iso_seek_read(void *iso, void *ptr, size_t size, off_t offset) {
     check_expected_ptr(iso);
     check_expected_ptr(ptr);
-    check_expected(size);
-    check_expected(offset);
+    check_expected_uint(size);
+    check_expected_int(offset);
     return mock_type(ssize_t);
 }
 
@@ -207,7 +210,7 @@ void __wrap_iso9660_close(void *iso) {
 }
 
 void __wrap_unshield_set_log_level(int level) {
-    check_expected(level);
+    check_expected_int(level);
 }
 
 static bool should_extract_true(const char *filename) {
@@ -224,11 +227,11 @@ static void test_unshield_extract_failure_group_find(void **state) {
     (void)state;
     expect_string(__wrap_unshield_open, filename, "test.cab");
     will_return(__wrap_unshield_open, (void *)0x1);
-    expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
     expect_string(__wrap_unshield_file_group_find, group_name, "App Executables");
     will_return(__wrap_unshield_file_group_find, NULL);
     expect_any(__wrap_unshield_set_log_level, level);
-    expect_value(__wrap_unshield_close, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_close, unshield, (void *)0x1);
     bool result = unshield_extract("test.cab", "/installation");
     assert_false(result);
 }
@@ -239,7 +242,7 @@ static void test_unshield_extract_failure_mkdir(void **state) {
     expect_string(__wrap_unshield_open, filename, "test.cab");
     will_return(__wrap_unshield_open, (void *)0x1);
 
-    expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
     expect_string(__wrap_unshield_file_group_find, group_name, "App Executables");
     UnshieldFileGroup *group = calloc(1, sizeof(UnshieldFileGroup));
     group->name = "App Executables";
@@ -247,12 +250,12 @@ static void test_unshield_extract_failure_mkdir(void **state) {
     group->last_file = 1;
     will_return(__wrap_unshield_file_group_find, group);
 
-    expect_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_is_valid, index, 0);
+    expect_ptr_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_is_valid, index, 0);
     will_return(__wrap_unshield_file_is_valid, true);
 
-    expect_value(__wrap_unshield_file_name, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_name, index, 0);
+    expect_ptr_value(__wrap_unshield_file_name, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_name, index, 0);
     will_return(__wrap_unshield_file_name, "test_file.txt");
 
     expect_string(__wrap_ends_with_dll, filename, "test_file.txt");
@@ -262,19 +265,19 @@ static void test_unshield_extract_failure_mkdir(void **state) {
     expect_string(__wrap_ends_with_url, filename, "test_file.txt");
     will_return(__wrap_ends_with_url, false);
 
-    expect_value(__wrap_unshield_file_directory, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_directory, index, 0);
+    expect_ptr_value(__wrap_unshield_file_directory, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_directory, index, 0);
     will_return(__wrap_unshield_file_directory, 1);
 
-    expect_value(__wrap_unshield_directory_name, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_directory_name, index, 1);
+    expect_ptr_value(__wrap_unshield_directory_name, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_directory_name, index, 1);
     will_return(__wrap_unshield_directory_name, "audio");
 
     expect_string(__wrap_mkdir_p, path, "/installation/Audio");
     will_return(__wrap_mkdir_p, -1);
 
     expect_any(__wrap_unshield_set_log_level, level);
-    expect_value(__wrap_unshield_close, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_close, unshield, (void *)0x1);
     bool result = unshield_extract("test.cab", "/installation");
     assert_false(result);
 
@@ -287,7 +290,7 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     expect_string(__wrap_unshield_open, filename, "test.cab");
     will_return(__wrap_unshield_open, (void *)0x1);
 
-    expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
     expect_string(__wrap_unshield_file_group_find, group_name, "App Executables");
     UnshieldFileGroup *group = calloc(1, sizeof(UnshieldFileGroup));
     group->name = "App Executables";
@@ -295,24 +298,24 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     group->last_file = 1;
     will_return(__wrap_unshield_file_group_find, group);
 
-    expect_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_file_group_find, unshield, (void *)0x1);
     expect_string(__wrap_unshield_file_group_find, group_name, "Don't Delete");
     will_return(__wrap_unshield_file_group_find, NULL);
 
-    expect_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_is_valid, index, 0);
+    expect_ptr_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_is_valid, index, 0);
     will_return(__wrap_unshield_file_is_valid, true);
 
-    expect_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_is_valid, index, 1);
+    expect_ptr_value(__wrap_unshield_file_is_valid, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_is_valid, index, 1);
     will_return(__wrap_unshield_file_is_valid, true);
 
-    expect_value(__wrap_unshield_file_name, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_name, index, 0);
+    expect_ptr_value(__wrap_unshield_file_name, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_name, index, 0);
     will_return(__wrap_unshield_file_name, "test_file.txt");
 
-    expect_value(__wrap_unshield_file_name, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_name, index, 1);
+    expect_ptr_value(__wrap_unshield_file_name, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_name, index, 1);
     will_return(__wrap_unshield_file_name, "test_file.exe");
 
     expect_string(__wrap_ends_with_dll, filename, "test_file.txt");
@@ -325,24 +328,24 @@ static void test_unshield_extract_failure_file_save_ignored(void **state) {
     expect_string(__wrap_ends_with_exe, filename, "test_file.exe");
     will_return(__wrap_ends_with_exe, true);
 
-    expect_value(__wrap_unshield_file_directory, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_directory, index, 0);
+    expect_ptr_value(__wrap_unshield_file_directory, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_directory, index, 0);
     will_return(__wrap_unshield_file_directory, 1);
 
-    expect_value(__wrap_unshield_directory_name, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_directory_name, index, 1);
+    expect_ptr_value(__wrap_unshield_directory_name, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_directory_name, index, 1);
     will_return(__wrap_unshield_directory_name, "aud\\io");
 
     expect_string(__wrap_mkdir_p, path, "/installation/aud/io");
     will_return(__wrap_mkdir_p, 0);
 
-    expect_value(__wrap_unshield_file_save, unshield, (void *)0x1);
-    expect_value(__wrap_unshield_file_save, index, 0);
+    expect_ptr_value(__wrap_unshield_file_save, unshield, (void *)0x1);
+    expect_int_value(__wrap_unshield_file_save, index, 0);
     expect_string(__wrap_unshield_file_save, output_dir, "/installation/aud/io/test_file.txt");
     will_return(__wrap_unshield_file_save, false);
 
     expect_any(__wrap_unshield_set_log_level, level);
-    expect_value(__wrap_unshield_close, unshield, (void *)0x1);
+    expect_ptr_value(__wrap_unshield_close, unshield, (void *)0x1);
     bool result = unshield_extract("test.cab", "/installation");
     assert_true(result);
 
@@ -362,19 +365,19 @@ static void test_extract_iso_to_temp_cdio_list_node_data_returns_dot_and_dot_dot
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
 
     will_return(__wrap_iso9660_open_ext, iso);
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     will_return(__wrap__cdio_list_begin, (void *)0x2);
 
     iso9660_stat_t statbuf_dot = {0};
@@ -418,19 +421,19 @@ static void test_extract_iso_to_temp_iso_seek_read_not_blocksize(void **state) {
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, iso);
 
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     void *node = (void *)0x2;
     will_return(__wrap__cdio_list_begin, node);
 
@@ -455,7 +458,7 @@ static void test_extract_iso_to_temp_iso_seek_read_not_blocksize(void **state) {
     expect_string(__wrap_fopen, mode, "wb");
     will_return(__wrap_fopen, (FILE *)0x3);
 
-    expect_value(__wrap_fclose, stream, (FILE *)0x3);
+    expect_ptr_value(__wrap_fclose, stream, (FILE *)0x3);
     will_return(__wrap_fclose, 0);
 
     expect_any(__wrap_iso9660_iso_seek_read, iso);
@@ -487,19 +490,19 @@ static void test_extract_iso_to_temp_fopen_returns_null(void **state) {
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, iso);
 
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     void *node = (void *)0x2;
     will_return(__wrap__cdio_list_begin, node);
 
@@ -546,19 +549,19 @@ static void test_extract_iso_to_temp_ferror_nonzero(void **state) {
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, iso);
 
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     void *node = (void *)0x2;
     will_return(__wrap__cdio_list_begin, node);
 
@@ -589,15 +592,15 @@ static void test_extract_iso_to_temp_ferror_nonzero(void **state) {
     will_return(__wrap_iso9660_iso_seek_read, ISO_BLOCKSIZE);
 
     expect_any(__wrap_fwrite, ptr);
-    expect_value(__wrap_fwrite, size, ISO_BLOCKSIZE);
-    expect_value(__wrap_fwrite, count, 1);
-    expect_value(__wrap_fwrite, stream, mock_file);
+    expect_uint_value(__wrap_fwrite, size, ISO_BLOCKSIZE);
+    expect_uint_value(__wrap_fwrite, count, 1);
+    expect_ptr_value(__wrap_fwrite, stream, mock_file);
     will_return(__wrap_fwrite, ISO_BLOCKSIZE);
 
-    expect_value(__wrap_ferror, stream, mock_file);
+    expect_ptr_value(__wrap_ferror, stream, mock_file);
     will_return(__wrap_ferror, 1);
 
-    expect_value(__wrap_fclose, stream, mock_file);
+    expect_ptr_value(__wrap_fclose, stream, mock_file);
     will_return(__wrap_fclose, 0);
 
     expect_any(__wrap_iso9660_close, iso);
@@ -624,19 +627,19 @@ static void test_extract_iso_to_temp_ok(void **state) {
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, iso);
 
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     void *node = (void *)0x2;
     will_return(__wrap__cdio_list_begin, node);
 
@@ -667,18 +670,18 @@ static void test_extract_iso_to_temp_ok(void **state) {
     will_return(__wrap_iso9660_iso_seek_read, ISO_BLOCKSIZE);
 
     expect_any(__wrap_fwrite, ptr);
-    expect_value(__wrap_fwrite, size, ISO_BLOCKSIZE);
-    expect_value(__wrap_fwrite, count, 1);
-    expect_value(__wrap_fwrite, stream, mock_file);
+    expect_uint_value(__wrap_fwrite, size, ISO_BLOCKSIZE);
+    expect_uint_value(__wrap_fwrite, count, 1);
+    expect_ptr_value(__wrap_fwrite, stream, mock_file);
     will_return(__wrap_fwrite, ISO_BLOCKSIZE);
 
-    expect_value(__wrap_ferror, stream, mock_file);
+    expect_ptr_value(__wrap_ferror, stream, mock_file);
     will_return(__wrap_ferror, 0);
 
-    expect_value(__wrap_fclose, stream, mock_file);
+    expect_ptr_value(__wrap_fclose, stream, mock_file);
     will_return(__wrap_fclose, 0);
 
-    expect_value(__wrap__cdio_list_node_next, node, node);
+    expect_ptr_value(__wrap__cdio_list_node_next, node, node);
     will_return(__wrap__cdio_list_node_next, NULL);
 
     expect_any(__wrap_iso9660_close, iso);
@@ -705,19 +708,19 @@ static void test_extract_iso_to_temp_should_extract_always_false(void **state) {
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
 
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, iso);
 
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, iso);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
 
     CdioISO9660FileList_t *entlist = iso9660_filelist_new();
 
-    expect_value(__wrap_iso9660_ifs_readdir, iso, iso);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, iso);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, entlist);
 
-    expect_value(__wrap__cdio_list_begin, list, entlist);
+    expect_ptr_value(__wrap__cdio_list_begin, list, entlist);
     void *node = (void *)0x2;
     will_return(__wrap__cdio_list_begin, node);
 
@@ -736,7 +739,7 @@ static void test_extract_iso_to_temp_should_extract_always_false(void **state) {
     expect_any(__wrap_iso9660_name_translate_ext, joliet_level);
     will_return(__wrap_iso9660_name_translate_ext, "ff");
 
-    expect_value(__wrap__cdio_list_node_next, node, node);
+    expect_ptr_value(__wrap__cdio_list_node_next, node, node);
     will_return(__wrap__cdio_list_node_next, NULL);
 
     expect_any(__wrap_iso9660_close, iso);
@@ -789,7 +792,7 @@ static void test_extract_iso_to_temp_failure_iso_open(void **state) {
     expect_string(__wrap_mkdtemp, template, "/tmp/re3.XXXXXX");
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, NULL);
     char *output_dir = nullptr;
     bool result = extract_iso_to_temp("test.iso", &output_dir, should_extract_true);
@@ -807,14 +810,14 @@ static void test_extract_iso_to_temp_ifs_readdir_fail(void **state) {
     expect_string(__wrap_mkdtemp, template, "/tmp/re3.XXXXXX");
     will_return(__wrap_mkdtemp, "/tmp/re3.XXXXXX");
     expect_string(__wrap_iso9660_open_ext, filename, "test.iso");
-    expect_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
+    expect_int_value(__wrap_iso9660_open_ext, options, ISO_EXTENSION_ALL);
     will_return(__wrap_iso9660_open_ext, (void *)0x1);
-    expect_value(__wrap_iso9660_ifs_get_joliet_level, iso, (void *)0x1);
+    expect_ptr_value(__wrap_iso9660_ifs_get_joliet_level, iso, (void *)0x1);
     will_return(__wrap_iso9660_ifs_get_joliet_level, 1);
-    expect_value(__wrap_iso9660_ifs_readdir, iso, (void *)0x1);
+    expect_ptr_value(__wrap_iso9660_ifs_readdir, iso, (void *)0x1);
     expect_string(__wrap_iso9660_ifs_readdir, dir, "");
     will_return(__wrap_iso9660_ifs_readdir, NULL);
-    expect_value(__wrap_iso9660_close, iso, (void *)0x1);
+    expect_ptr_value(__wrap_iso9660_close, iso, (void *)0x1);
     char *output_dir = nullptr;
     bool result = extract_iso_to_temp("test.iso", &output_dir, should_extract_true);
     assert_false(result);
@@ -826,7 +829,7 @@ static void test_unshield_open_failure(void **state) {
     (void)state;
     expect_string(__wrap_unshield_open, filename, "test.cab");
     expect_any(__wrap_unshield_set_log_level, level);
-    expect_value(__wrap_unshield_close, unshield, NULL);
+    expect_ptr_value(__wrap_unshield_close, unshield, NULL);
     will_return(__wrap_unshield_open, NULL);
     bool result = unshield_extract("test.cab", "/installation");
     assert_false(result);

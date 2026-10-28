@@ -42,7 +42,7 @@ int __wrap_open(const char *path, int flags, mode_t mode) {
         return __real_open(path, flags, mode);
     }
     check_expected_ptr(path);
-    check_expected(flags);
+    check_expected_int(flags);
     return mock_type(int);
 }
 
@@ -51,7 +51,7 @@ int __wrap_close(int fd) {
     if (is_gcda(fd)) {
         return __real_close(fd);
     }
-    check_expected(fd);
+    check_expected_int(fd);
     return mock_type(int);
 }
 
@@ -64,7 +64,7 @@ void *
 __wrap_fts_open(char *const *path_argv, int options, int (*compar)(const void *, const void *)) {
     (void)compar;
     check_expected_ptr(path_argv);
-    check_expected(options);
+    check_expected_int(options);
     return mock_ptr_type(void *);
 }
 
@@ -94,10 +94,10 @@ int __wrap_unlink(const char *path) {
 }
 
 ssize_t __wrap_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
-    check_expected(out_fd);
-    check_expected(in_fd);
+    check_expected_int(out_fd);
+    check_expected_int(in_fd);
     check_expected_ptr(offset);
-    check_expected(count);
+    check_expected_uint(count);
     return mock_type(ssize_t);
 }
 
@@ -191,7 +191,7 @@ static void test_copy_tree_open_src_returns_negative(void **state) {
     will_return(__wrap_fts_read, &dummy_ftsent);
 
     expect_any(__wrap_open, path);
-    expect_value(__wrap_open, flags, O_RDONLY);
+    expect_int_value(__wrap_open, flags, O_RDONLY);
     will_return(__wrap_open, -1);
 
     expect_any(__wrap_fts_close, fts);
@@ -222,7 +222,7 @@ static void test_copy_tree_open_dest_returns_negative(void **state) {
 
     // First open succeeds
     expect_any(__wrap_open, path);
-    expect_value(__wrap_open, flags, O_RDONLY);
+    expect_int_value(__wrap_open, flags, O_RDONLY);
     will_return(__wrap_open, 3);
 
     // Second open fails
@@ -260,7 +260,7 @@ static void test_copy_tree_sendfile_returns_negative(void **state) {
     will_return(__wrap_fts_read, &dummy_ftsent);
 
     expect_any(__wrap_open, path);
-    expect_value(__wrap_open, flags, O_RDONLY);
+    expect_int_value(__wrap_open, flags, O_RDONLY);
     will_return(__wrap_open, 3);
 
     expect_any(__wrap_open, path);

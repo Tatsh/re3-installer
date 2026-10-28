@@ -17,7 +17,7 @@
 int __wrap_mkdir(const char *path, mode_t mode) {
     errno = mock_type(int);
     check_expected_ptr(path);
-    check_expected(mode);
+    check_expected_uint(mode);
     return mock_type(int);
 }
 
@@ -26,7 +26,7 @@ static void test_mkdir_p_simple(void **state) {
     const char *path = "test_dir_simple";
 
     expect_string(__wrap_mkdir, path, path);
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
@@ -38,22 +38,22 @@ static void test_mkdir_p_nested(void **state) {
     const char *path = "test_dir_nested/a/b/c";
 
     expect_string(__wrap_mkdir, path, "test_dir_nested");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
     expect_string(__wrap_mkdir, path, "test_dir_nested/a");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
     expect_string(__wrap_mkdir, path, "test_dir_nested/a/b");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
     expect_string(__wrap_mkdir, path, "test_dir_nested/a/b/c");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
@@ -65,12 +65,12 @@ static void test_mkdir_p_existing(void **state) {
     const char *path = "test_dir_existing";
 
     expect_string(__wrap_mkdir, path, path);
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
     expect_string(__wrap_mkdir, path, path);
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
@@ -95,7 +95,7 @@ static void test_mkdir_p_other_error(void **state) {
     const char *path = "test_dir_other_error";
 
     expect_string(__wrap_mkdir, path, path);
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, EACCES);
     will_return(__wrap_mkdir, -1);
 
@@ -109,12 +109,12 @@ static void test_mkdir_p_nested_error(void **state) {
     const char *path = "test_dir_nested_error/a/b/c";
 
     expect_string(__wrap_mkdir, path, "test_dir_nested_error");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, 0);
     will_return(__wrap_mkdir, 0);
 
     expect_string(__wrap_mkdir, path, "test_dir_nested_error/a");
-    expect_value(__wrap_mkdir, mode, S_IRWXU);
+    expect_uint_value(__wrap_mkdir, mode, S_IRWXU);
     will_return(__wrap_mkdir, EACCES);
     will_return(__wrap_mkdir, -1);
 
