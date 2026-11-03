@@ -122,6 +122,7 @@ numpydoc
 oneline
 pacboy
 pathlib
+pipefail
 pipx
 pluginsdir
 preapproved
