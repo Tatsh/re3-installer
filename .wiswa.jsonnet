@@ -21,7 +21,14 @@ local utils = import 'utils.libjsonnet';
   keywords: ['gta iii', 'gta vice city', 're3'],
   license: 'GPL-3.0-or-later',
   want_main: false,
-  want_codeql: false,
+  want_codeql: true,
+  github+: {
+    codeql+: {
+      languages: ['actions'],
+      runs_on: 'ubuntu-latest',
+      workflow_file: 'codeql-actions.yml',
+    },
+  },
   want_tests: false,
   want_snap: true,
   want_flatpak: true,
