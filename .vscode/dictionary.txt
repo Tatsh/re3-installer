@@ -1,5 +1,6 @@
 abortwarning
 aclocal
+analyzer
 anim
 appdir
 appimage
@@ -38,6 +39,7 @@ dialogs
 dllimport
 docstrings
 egor
+elif
 endforeach
 endfunction
 esac
@@ -75,6 +77,7 @@ insertmacro
 instdir
 instfiles
 interprocedural
+iterdir
 iwyu
 jinja
 jsonnet
@@ -106,6 +109,7 @@ mypy
 noconfirmation
 noconfirmmkdir
 noerrorui
+nojekyll
 noncommercially
 nonfatal
 noone
@@ -117,6 +121,7 @@ nullptr
 numpydoc
 oneline
 pacboy
+pathlib
 pipx
 pluginsdir
 preapproved

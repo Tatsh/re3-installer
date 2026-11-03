@@ -32,6 +32,13 @@ workflows:
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/release.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+    '.github/workflows/scan-build.yml':
+        - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        - 'actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d'
+        - 'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346'
+        - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
+        - 'actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697'
+        - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
     '.github/workflows/snap.yml':
         - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -70,6 +77,26 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
+    'actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d':
+        ref: 'v6.0.0'
+        commit: 'sha1-45bfe0192ca1faeb007ade9deae92b16b8254a0d'
+        owner_id: 44036562
+        repo_id: 513659658
+    'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346':
+        ref: 'v5.0.1'
+        commit: 'sha1-368f82528645a54fb793d4d04e342629a3f51346'
+        owner_id: 44036562
+        repo_id: 438112499
+    'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333':
+        ref: 'v8.0.2'
+        commit: 'sha1-9000827ccba6bdab643e8b6fd33ac0654aef8333'
+        owner_id: 44036562
+        repo_id: 192626254
+    'actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697':
+        ref: 'v1.0.13'
+        commit: 'sha1-44a6e6beabd48582f863aeeb6cb2151cc1716697'
+        owner_id: 44036562
+        repo_id: 438323626
     'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9':
         ref: 'v7.0.2'
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
