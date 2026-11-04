@@ -131,10 +131,12 @@ progs
 pyinstaller
 pylock
 pyproject
+rdparty
 reflow
 regen
 ripgreprc
 rmtree
+sarif
 sbclaude
 schemafile
 sendfile
