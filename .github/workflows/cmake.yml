@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@a7b8fccd4af723a2de8bb0d2578431b0e7e529be
+        uses: egor-tensin/setup-mingw@5ddc68398c7715a730cf08f8e63b1f27f15d4861
         with:
           platform: x64
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
