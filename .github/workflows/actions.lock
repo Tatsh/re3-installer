@@ -9,14 +9,14 @@ workflows:
         - 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'egor-tensin/setup-mingw@a7b8fccd4af723a2de8bb0d2578431b0e7e529be'
+        - 'egor-tensin/setup-mingw@5ddc68398c7715a730cf08f8e63b1f27f15d4861'
         - 'msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e'
     '.github/workflows/codeql-actions.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
     '.github/workflows/flatpak.yml':
         - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -105,9 +105,9 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'egor-tensin/setup-mingw@a7b8fccd4af723a2de8bb0d2578431b0e7e529be':
+    'egor-tensin/setup-mingw@5ddc68398c7715a730cf08f8e63b1f27f15d4861':
         ref: 'master'
-        commit: 'sha1-a7b8fccd4af723a2de8bb0d2578431b0e7e529be'
+        commit: 'sha1-5ddc68398c7715a730cf08f8e63b1f27f15d4861'
         owner_id: 355889
         repo_id: 314089953
     'flatpak/flatpak-github-actions@79327416609af08178ad73b352877e51450790b3':
@@ -115,9 +115,9 @@ dependencies:
         commit: 'sha1-79327416609af08178ad73b352877e51450790b3'
         owner_id: 19473042
         repo_id: 211923252
-    'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
-        ref: 'v4.39.1'
-        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+    'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
     'msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e':
