@@ -91,6 +91,7 @@ libsonnet
 libstdc
 libunshield
 libwinpthread
+libz
 linuxdeploy
 makensis
 mktemp

@@ -232,7 +232,7 @@ set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
   File /nonfatal ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libgcc*.dll
   File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libunshield*.dll
   File /nonfatal ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libwinpthread*.dll
-  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\zlib*.dll")
+  File ${CMAKE_INSTALL_PREFIX_BS}\\\\bin\\\\libz*.dll")
 include(CPack)
 
 if(BUILD_TESTS)
