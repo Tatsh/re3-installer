@@ -405,6 +405,12 @@ jobs:
           cd "$WORKSPACE"/build &&
           cpack -C "${BUILD_TYPE}" --verbose
         shell: msys2 {0}
+      - env:
+          WORKSPACE: ${{steps.fixed_workspace.outputs.out}}
+        if: failure()
+        name: 'Show the NSIS log'
+        run: cat "$WORKSPACE"/build/_CPack_Packages/*/NSIS/NSISOutput.log
+        shell: msys2 {0}
       - if: "matrix.build-type == 'Release'"
         name: 'Check for debug runtime linkage'
         run: |
