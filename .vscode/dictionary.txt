@@ -1,6 +1,5 @@
 abortwarning
 aclocal
-analyzer
 anim
 appdir
 appimage
@@ -19,7 +18,6 @@ commitizen
 concrt
 contrib
 copyfile
-copytree
 coveragerc
 coverallsapp
 coverallsapps
@@ -40,7 +38,6 @@ dialogs
 dllimport
 docstrings
 egor
-elif
 endforeach
 endfunction
 esac
@@ -121,8 +118,6 @@ nullptr
 numpydoc
 oneline
 pacboy
-pathlib
-pipefail
 pipx
 pluginsdir
 preapproved
@@ -135,7 +130,6 @@ rdparty
 reflow
 regen
 ripgreprc
-rmtree
 sarif
 sbclaude
 schemafile
@@ -144,7 +138,6 @@ shellcheck
 shellformat
 shfileopstruct
 shopt
-shutil
 snapcore
 snapcraft
 softprops
